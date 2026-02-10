@@ -20,6 +20,7 @@
 		86DC9EEE2890D555F1872492 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDE2616856A9C16AFE06F08 /* HomeView.swift */; };
 		91C1CA34D873C093AF9E0E27 /* SignupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F737B2CE66B6F7CD4C9805 /* SignupFlowView.swift */; };
 		9D70227C6010885126F94D47 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3EAF1C3CCE3764843F3C1894 /* GoogleService-Info.plist */; };
+		9D8029507479A845C92F1639 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEC983BA3C91520977BD07C /* Theme.swift */; };
 		C90BA042872923D1228CA513 /* GuideContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */; };
 		CC4C9D02F715FE5A1AAF7125 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96782318C050A3ADD573D9F2 /* AuthService.swift */; };
 		FA52B53D47E948A0DF846F34 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CE80129396A00FC3FD8A9C /* GuideView.swift */; };
@@ -44,6 +45,7 @@
 		B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideContent.swift; sourceTree = "<group>"; };
 		D1F737B2CE66B6F7CD4C9805 /* SignupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupFlowView.swift; sourceTree = "<group>"; };
 		DEC4632DD693B1291BAA1FBE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		ECEC983BA3C91520977BD07C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -91,6 +93,7 @@
 				84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */,
 				4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */,
 				D1F737B2CE66B6F7CD4C9805 /* SignupFlowView.swift */,
+				ECEC983BA3C91520977BD07C /* Theme.swift */,
 				02033E1152CB0D86C11C4694 /* User.swift */,
 				1DCC88BF27CEC48AA2D10A96 /* UserService.swift */,
 				2D1226045A0B4C5D64889718 /* YouView.swift */,
@@ -99,7 +102,7 @@
 			path = .;
 			sourceTree = "<group>";
 		};
-		E39DE1852F3AE4A300E83160 /* Products */ = {
+		E39DE18B2F3AEAF400E83160 /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -161,7 +164,7 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = E39DE1852F3AE4A300E83160 /* Products */;
+					ProductGroup = E39DE18B2F3AEAF400E83160 /* Products */;
 					ProjectRef = 84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */;
 				},
 			);
@@ -199,6 +202,7 @@
 				86DC9EEE2890D555F1872492 /* HomeView.swift in Sources */,
 				5862313F8DBB422507E290C6 /* InyonApp.swift in Sources */,
 				91C1CA34D873C093AF9E0E27 /* SignupFlowView.swift in Sources */,
+				9D8029507479A845C92F1639 /* Theme.swift in Sources */,
 				381D953F7B10D92527D80DB7 /* User.swift in Sources */,
 				31186B0476A42ACCEE8A90AA /* UserService.swift in Sources */,
 				52BFC7444BC4631BEED7686B /* YouView.swift in Sources */,

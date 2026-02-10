@@ -24,21 +24,23 @@ struct RootTabView: View {
     @State private var selectedTab: Tab = .home
 
     var body: some View {
-        VStack(spacing: 0) {
-            ZStack {
-                switch selectedTab {
-                case .home: HomeView()
-                case .guide: GuideView()
-                case .you: YouView()
-                }
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(AppTheme.earth)
+        ZStack {
+            AppTheme.earth
+                .ignoresSafeArea()
 
-            CustomBottomNav(selectedTab: $selectedTab)
+            VStack(spacing: 0) {
+                ZStack {
+                    switch selectedTab {
+                    case .home: HomeView()
+                    case .guide: GuideView()
+                    case .you: YouView()
+                    }
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                CustomBottomNav(selectedTab: $selectedTab)
+            }
         }
-        .background(AppTheme.earth)
-        .ignoresSafeArea(edges: .bottom)
     }
 }
 
@@ -86,6 +88,7 @@ struct CustomBottomNav: View {
         .background(
             AppTheme.earth
                 .overlay(AppTheme.surface)
+                .ignoresSafeArea(edges: .bottom)
         )
         .overlay(
             Rectangle()
