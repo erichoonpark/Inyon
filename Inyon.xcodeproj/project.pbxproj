@@ -1,0 +1,339 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		52BFC7444BC4631BEED7686B /* YouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1226045A0B4C5D64889718 /* YouView.swift */; };
+		5862313F8DBB422507E290C6 /* InyonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */; };
+		6771EBDBB03E95B70F214D95 /* settings.local.json in Resources */ = {isa = PBXBuildFile; fileRef = 8C019A3F1945EA7BC4B35D44 /* settings.local.json */; };
+		68DA9571BE1DF128AFF9DE35 /* Inyon.xcodeproj in Resources */ = {isa = PBXBuildFile; fileRef = 84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */; };
+		6D33CB1C9A7E1C947C51EBF3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEC4632DD693B1291BAA1FBE /* ContentView.swift */; };
+		829820553530517717383009 /* LensView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBA4374B4DE4C2601B6B505 /* LensView.swift */; };
+		86DC9EEE2890D555F1872492 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DDE2616856A9C16AFE06F08 /* HomeView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1DDE2616856A9C16AFE06F08 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		2A257A4E3B2835355E89FAAF /* Inyon.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Inyon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2D1226045A0B4C5D64889718 /* YouView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouView.swift; sourceTree = "<group>"; };
+		4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InyonApp.swift; sourceTree = "<group>"; };
+		84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Inyon.xcodeproj; sourceTree = "<group>"; };
+		8C019A3F1945EA7BC4B35D44 /* settings.local.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.local.json; sourceTree = "<group>"; };
+		DDBA4374B4DE4C2601B6B505 /* LensView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LensView.swift; sourceTree = "<group>"; };
+		DEC4632DD693B1291BAA1FBE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		18CE5C7005EFCF39F0867A2A /* .claude */ = {
+			isa = PBXGroup;
+			children = (
+				8C019A3F1945EA7BC4B35D44 /* settings.local.json */,
+			);
+			path = .claude;
+			sourceTree = "<group>";
+		};
+		32DE4E5C0262C0B5FCE08BB5 = {
+			isa = PBXGroup;
+			children = (
+				18CE5C7005EFCF39F0867A2A /* .claude */,
+				A3973E33E465BB614C9B4BA1 /* Inyon */,
+				F238D42994EA3FB81A4C225D /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A3973E33E465BB614C9B4BA1 /* Inyon */ = {
+			isa = PBXGroup;
+			children = (
+				DEC4632DD693B1291BAA1FBE /* ContentView.swift */,
+				1DDE2616856A9C16AFE06F08 /* HomeView.swift */,
+				84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */,
+				4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */,
+				DDBA4374B4DE4C2601B6B505 /* LensView.swift */,
+				2D1226045A0B4C5D64889718 /* YouView.swift */,
+				18CE5C7005EFCF39F0867A2A /* .claude */,
+			);
+			name = Inyon;
+			path = .;
+			sourceTree = "<group>";
+		};
+		F238D42994EA3FB81A4C225D /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				2A257A4E3B2835355E89FAAF /* Inyon.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		15D00086A5FB822A2977E121 /* Inyon */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2FE7637DCA0C7D4920E837B1 /* Build configuration list for PBXNativeTarget "Inyon" */;
+			buildPhases = (
+				AC8E3955A7EC05FC2E069B5B /* Sources */,
+				4B30D94F18E64EDF468B2A08 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Inyon;
+			packageProductDependencies = (
+			);
+			productName = Inyon;
+			productReference = 2A257A4E3B2835355E89FAAF /* Inyon.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A36EF142260588C4B3ADCF34 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = 522627100C94D2A73D630D98 /* Build configuration list for PBXProject "Inyon" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 32DE4E5C0262C0B5FCE08BB5;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				15D00086A5FB822A2977E121 /* Inyon */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4B30D94F18E64EDF468B2A08 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				68DA9571BE1DF128AFF9DE35 /* Inyon.xcodeproj in Resources */,
+				6771EBDBB03E95B70F214D95 /* settings.local.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AC8E3955A7EC05FC2E069B5B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6D33CB1C9A7E1C947C51EBF3 /* ContentView.swift in Sources */,
+				86DC9EEE2890D555F1872492 /* HomeView.swift in Sources */,
+				5862313F8DBB422507E290C6 /* InyonApp.swift in Sources */,
+				829820553530517717383009 /* LensView.swift in Sources */,
+				52BFC7444BC4631BEED7686B /* YouView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B2068D837AF0025CBB400C74 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		B72841A3089B0E6670B2C3AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C3B9AE64555ED1791950D870 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		E4202A1E1C03A6F82D190FCD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_GENERATION_MODE = GeneratedFile;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app;
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2FE7637DCA0C7D4920E837B1 /* Build configuration list for PBXNativeTarget "Inyon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B72841A3089B0E6670B2C3AC /* Debug */,
+				E4202A1E1C03A6F82D190FCD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		522627100C94D2A73D630D98 /* Build configuration list for PBXProject "Inyon" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2068D837AF0025CBB400C74 /* Debug */,
+				C3B9AE64555ED1791950D870 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A36EF142260588C4B3ADCF34 /* Project object */;
+}
