@@ -9,15 +9,15 @@ enum GuideStyle {
     static let horizontalPadding: CGFloat = 20
 
     static var accentGreen: Color {
-        Color(red: 0.4, green: 0.6, blue: 0.5)
+        AppTheme.textPrimary
     }
 
     static var cardBackground: Color {
-        Color(uiColor: .secondarySystemBackground)
+        AppTheme.surface
     }
 
     static var cardBorder: Color {
-        Color(uiColor: .separator).opacity(0.3)
+        AppTheme.divider
     }
 }
 
@@ -56,6 +56,7 @@ struct SectionCardView<Content: View>: View {
                 Text(title)
                     .font(.headline)
                     .fontWeight(.semibold)
+                    .foregroundStyle(AppTheme.textPrimary)
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel(title)
@@ -63,7 +64,7 @@ struct SectionCardView<Content: View>: View {
             // Summary
             Text(summary)
                 .font(.body)
-                .foregroundStyle(.primary)
+                .foregroundStyle(AppTheme.textSecondary)
                 .lineSpacing(4)
                 .fixedSize(horizontal: false, vertical: true)
 
@@ -107,7 +108,7 @@ struct LearnMoreDisclosure: View {
 
                         Text(bullet)
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(AppTheme.textSecondary)
                             .lineSpacing(3)
                             .fixedSize(horizontal: false, vertical: true)
                     }
@@ -171,17 +172,18 @@ struct ElementChip: View {
                 Text(element.name)
                     .font(.subheadline)
                     .fontWeight(.semibold)
+                    .foregroundStyle(AppTheme.textPrimary)
             }
 
             Text(element.shortDesc)
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppTheme.textSecondary)
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(uiColor: .tertiarySystemBackground))
+        .background(AppTheme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -276,6 +278,7 @@ struct IsIsNotCard: View {
                 Text("What Saju Is / Is Not")
                     .font(.headline)
                     .fontWeight(.semibold)
+                    .foregroundStyle(AppTheme.textPrimary)
             }
 
             // Two columns
@@ -296,7 +299,7 @@ struct IsIsNotCard: View {
 
                             Text(item.text)
                                 .font(.caption)
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(AppTheme.textPrimary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }
@@ -313,18 +316,18 @@ struct IsIsNotCard: View {
                     Text("Saju Is Not")
                         .font(.subheadline)
                         .fontWeight(.semibold)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(AppTheme.textSecondary)
 
                     ForEach(isNotItems, id: \.text) { item in
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "xmark")
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(AppTheme.textSecondary)
                                 .padding(.top, 2)
 
                             Text(item.text)
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(AppTheme.textSecondary)
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                     }

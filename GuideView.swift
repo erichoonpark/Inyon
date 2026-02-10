@@ -57,7 +57,7 @@ struct GuideView: View {
                 .padding(.horizontal, GuideStyle.horizontalPadding)
                 .padding(.vertical, 24)
             }
-            .background(Color(uiColor: .systemBackground))
+            .background(AppTheme.earth)
             .navigationTitle("Guide")
             .navigationBarTitleDisplayMode(.large)
         }
