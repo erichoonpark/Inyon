@@ -5,6 +5,11 @@ options:
     iOS: "17.0"
   xcodeVersion: "15.0"
 
+packages:
+  Firebase:
+    url: https://github.com/firebase/firebase-ios-sdk
+    version: 11.0.0
+
 targets:
   Inyon:
     type: application
@@ -15,6 +20,11 @@ targets:
           - "*.md"
           - "*.yml"
           - ".git/**"
+    dependencies:
+      - package: Firebase
+        product: FirebaseAuth
+      - package: Firebase
+        product: FirebaseFirestore
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.inyon.app
       INFOPLIST_GENERATION_MODE: GeneratedFile
