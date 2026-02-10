@@ -8,9 +8,9 @@ struct ContentView: View {
                     Label("Home", systemImage: "house")
                 }
 
-            LensView()
+            GuideView()
                 .tabItem {
-                    Label("Lens", systemImage: "circle.hexagongrid")
+                    Label("Guide", systemImage: "book")
                 }
 
             YouView()
