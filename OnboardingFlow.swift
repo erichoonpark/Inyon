@@ -50,6 +50,7 @@ struct OnboardingFlow: View {
     @State private var currentStep: OnboardingStep = .arrival
     @State private var data = OnboardingData()
     @State private var isVisible = false
+    @State private var isReturningUser: Bool = false
 
     var onComplete: () -> Void
 
@@ -61,22 +62,46 @@ struct OnboardingFlow: View {
             Group {
                 switch currentStep {
                 case .arrival:
-                    ArrivalView(onContinue: advanceToNext)
+                    ArrivalView(onGetStarted: advanceToNext, onLogin: {
+                        isReturningUser = true
+                        navigateTo(.accountCreation)
+                    })
                 case .birthContext:
                     BirthContextView(data: $data, onBack: goBack, onContinue: advanceToNext)
                 case .personalAnchor:
                     PersonalAnchorView(data: $data, onBack: goBack, onContinue: advanceToNext, onSkip: advanceToNext)
                 case .accountCreation:
-                    AccountCreationView(data: data, onBack: goBack, onComplete: {
-                        saveOnboardingData()
-                        onComplete()
-                    })
+                    if isReturningUser {
+                        LoginView(onBack: {
+                            isReturningUser = false
+                            navigateTo(.arrival)
+                        }, onComplete: onComplete)
+                    } else {
+                        AccountCreationView(data: data, onBack: goBack, onComplete: {
+                            saveOnboardingData()
+                            onComplete()
+                        })
+                    }
                 }
             }
             .opacity(isVisible ? 1 : 0)
         }
         .onAppear {
             withAnimation(.easeIn(duration: 0.25)) {
+                isVisible = true
+            }
+        }
+    }
+
+    private func navigateTo(_ step: OnboardingStep) {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isVisible = false
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            currentStep = step
+
+            withAnimation(.easeInOut(duration: 0.25)) {
                 isVisible = true
             }
         }
@@ -138,7 +163,8 @@ struct OnboardingFlow: View {
 // MARK: - Screen 1: Arrival / Orientation
 
 struct ArrivalView: View {
-    var onContinue: () -> Void
+    var onGetStarted: () -> Void
+    var onLogin: () -> Void
     @State private var isVisible = false
 
     var body: some View {
@@ -153,7 +179,7 @@ struct ArrivalView: View {
                     .lineSpacing(6)
                     .fixedSize(horizontal: false, vertical: true)
 
-                Text("You’ll get a short daily view of timing and context.")
+                Text("You'll get a short daily view of timing and context.")
                     .font(.system(size: 17, weight: .regular))
                     .foregroundColor(AppTheme.textSecondary)
                     .multilineTextAlignment(.center)
@@ -163,16 +189,26 @@ struct ArrivalView: View {
 
             Spacer()
 
-            Button {
-                onContinue()
-            } label: {
-                Text("Begin")
-                    .font(.system(size: 17, weight: .medium))
-                    .foregroundColor(AppTheme.earth)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(AppTheme.textPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            VStack(spacing: 16) {
+                Button {
+                    onGetStarted()
+                } label: {
+                    Text("Get Started")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(AppTheme.earth)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(AppTheme.textPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+
+                Button {
+                    onLogin()
+                } label: {
+                    Text("Already have an account? Log in")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+                }
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 48)
@@ -501,6 +537,96 @@ struct AccountCreationView: View {
 
             VStack(spacing: 16) {
                 Text("Keep your timing context over time.")
+                    .font(.system(size: 26, weight: .medium))
+                    .foregroundColor(AppTheme.textPrimary)
+                    .multilineTextAlignment(.center)
+            }
+            .padding(.horizontal, 40)
+            .opacity(isVisible ? 1 : 0)
+
+            Spacer()
+
+            VStack(spacing: 12) {
+                // Apple Sign In
+                Button {
+                    // TODO: Implement Apple Sign In
+                    onComplete()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "apple.logo")
+                            .font(.system(size: 18))
+                        Text("Continue with Apple")
+                            .font(.system(size: 17, weight: .medium))
+                    }
+                    .foregroundColor(AppTheme.earth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(AppTheme.textPrimary)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+
+                // Email Sign In
+                Button {
+                    // TODO: Implement Email Sign In
+                    onComplete()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "envelope")
+                            .font(.system(size: 16))
+                        Text("Continue with Email")
+                            .font(.system(size: 17, weight: .medium))
+                    }
+                    .foregroundColor(AppTheme.textPrimary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(Color.clear)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                    )
+                }
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 48)
+            .opacity(isVisible ? 1 : 0)
+        }
+        .onAppear {
+            withAnimation(.easeIn(duration: 0.3).delay(0.1)) {
+                isVisible = true
+            }
+        }
+    }
+}
+
+// MARK: - Login View
+
+struct LoginView: View {
+    var onBack: () -> Void
+    var onComplete: () -> Void
+
+    @State private var isVisible = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack {
+                Button {
+                    onBack()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Back")
+                Spacer()
+            }
+            .padding(.horizontal, 8)
+
+            Spacer()
+
+            VStack(spacing: 16) {
+                Text("Welcome back.")
                     .font(.system(size: 26, weight: .medium))
                     .foregroundColor(AppTheme.textPrimary)
                     .multilineTextAlignment(.center)
