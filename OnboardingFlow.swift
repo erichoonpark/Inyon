@@ -1,4 +1,6 @@
 import SwiftUI
+import FirebaseFirestore
+import FirebaseAuth
 
 // MARK: - Onboarding Data Model
 
@@ -6,6 +8,23 @@ struct OnboardingData {
     var birthDate: Date?
     var birthTime: Date?
     var personalAnchors: Set<PersonalAnchor> = []
+
+    func toFirestoreData() -> [String: Any] {
+        var dict: [String: Any] = [
+            "createdAt": FieldValue.serverTimestamp(),
+            "personalAnchors": personalAnchors.map { $0.rawValue }
+        ]
+
+        if let birthDate = birthDate {
+            dict["birthDate"] = Timestamp(date: birthDate)
+        }
+
+        if let birthTime = birthTime {
+            dict["birthTime"] = Timestamp(date: birthTime)
+        }
+
+        return dict
+    }
 }
 
 enum PersonalAnchor: String, CaseIterable, Identifiable {
@@ -48,7 +67,10 @@ struct OnboardingFlow: View {
                 case .personalAnchor:
                     PersonalAnchorView(data: $data, onBack: goBack, onContinue: advanceToNext, onSkip: advanceToNext)
                 case .accountCreation:
-                    AccountCreationView(data: data, onBack: goBack, onComplete: onComplete)
+                    AccountCreationView(data: data, onBack: goBack, onComplete: {
+                        saveOnboardingData()
+                        onComplete()
+                    })
                 }
             }
             .opacity(isVisible ? 1 : 0)
@@ -92,6 +114,24 @@ struct OnboardingFlow: View {
                 isVisible = true
             }
         }
+    }
+
+    private func saveOnboardingData() {
+        let db = Firestore.firestore()
+        let firestoreData = data.toFirestoreData()
+
+        let documentRef: DocumentReference
+
+        if let uid = Auth.auth().currentUser?.uid {
+            documentRef = db.collection("users").document(uid)
+                .collection("onboarding").document("context")
+        } else {
+            let anonymousId = UUID().uuidString
+            documentRef = db.collection("onboarding").document("anonymous")
+                .collection("users").document(anonymousId)
+        }
+
+        documentRef.setData(firestoreData) { _ in }
     }
 }
 
@@ -292,8 +332,8 @@ struct BirthContextView: View {
             Spacer()
 
             Button {
-                data.birthDate = selectedDate
-                data.birthTime = knowsBirthTime ? selectedTime : nil
+                data.birthDate = hasSelectedDate ? selectedDate : nil
+                data.birthTime = (knowsBirthTime && hasSelectedTime) ? selectedTime : nil
                 onContinue()
             } label: {
                 Text("Continue")
