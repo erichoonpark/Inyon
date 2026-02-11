@@ -23,4 +23,26 @@ enum AppTheme {
 
     /// Surface overlay for subtle layering
     static let surface = Color.white.opacity(0.03)
+
+    // MARK: - Korean Red Mountain (Joseon Vermilion)
+
+    /// Nav bar background - mineral, earth-based red
+    static let earthRed = Color(
+        red: 200/255,
+        green: 58/255,
+        blue: 50/255
+    ) // Hex: #C83A32
+
+    /// Primary text on red - warm off-white
+    static let textOnRedPrimary = Color(
+        red: 0.98,
+        green: 0.96,
+        blue: 0.93
+    )
+
+    /// Muted text on red
+    static let textOnRedMuted = Color.white.opacity(0.55)
+
+    /// Divider on red background
+    static let dividerOnRed = Color.white.opacity(0.18)
 }

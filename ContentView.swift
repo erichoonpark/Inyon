@@ -64,13 +64,16 @@ struct CustomBottomNav: View {
                         Text(tab.rawValue)
                             .font(.system(size: 13, weight: .medium, design: .monospaced))
                             .tracking(1.2)
-                            .foregroundColor(AppTheme.textPrimary)
-                            .opacity(selectedTab == tab ? 1.0 : 0.45)
+                            .foregroundColor(
+                                selectedTab == tab
+                                ? AppTheme.textOnRedPrimary
+                                : AppTheme.textOnRedMuted
+                            )
 
                         ZStack {
                             if selectedTab == tab {
                                 Rectangle()
-                                    .fill(AppTheme.underline.opacity(0.95))
+                                    .fill(AppTheme.textOnRedPrimary.opacity(0.95))
                                     .frame(width: 18, height: 1)
                                     .matchedGeometryEffect(id: "underline", in: underlineNamespace)
                             } else {
@@ -86,14 +89,13 @@ struct CustomBottomNav: View {
         }
         .frame(height: 60)
         .background(
-            AppTheme.earth
-                .overlay(AppTheme.surface)
+            AppTheme.earthRed
                 .ignoresSafeArea(edges: .bottom)
         )
         .overlay(
             Rectangle()
                 .frame(height: 0.5)
-                .foregroundColor(AppTheme.divider),
+                .foregroundColor(AppTheme.dividerOnRed),
             alignment: .top
         )
     }
