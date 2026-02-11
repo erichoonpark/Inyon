@@ -24,23 +24,19 @@ struct RootTabView: View {
     @State private var selectedTab: Tab = .home
 
     var body: some View {
-        ZStack {
-            AppTheme.earth
-                .ignoresSafeArea()
-
-            VStack(spacing: 0) {
-                ZStack {
-                    switch selectedTab {
-                    case .home: HomeView()
-                    case .guide: GuideView()
-                    case .you: YouView()
-                    }
+        VStack(spacing: 0) {
+            Group {
+                switch selectedTab {
+                case .home: HomeView()
+                case .guide: GuideView()
+                case .you: YouView()
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-                CustomBottomNav(selectedTab: $selectedTab)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+            CustomBottomNav(selectedTab: $selectedTab)
         }
+        .background(AppTheme.earth.ignoresSafeArea())
     }
 }
 
@@ -51,53 +47,57 @@ struct CustomBottomNav: View {
     @Namespace private var underlineNamespace
 
     var body: some View {
-        HStack {
-            ForEach(Tab.allCases) { tab in
-                Spacer()
+        GeometryReader { geo in
+            let itemWidth = geo.size.width / CGFloat(Tab.allCases.count)
 
-                Button {
-                    withAnimation(.easeInOut(duration: 0.25)) {
-                        selectedTab = tab
-                    }
-                } label: {
-                    VStack(spacing: 6) {
-                        Text(tab.rawValue)
-                            .font(.system(size: 13, weight: .medium, design: .monospaced))
-                            .tracking(1.2)
-                            .foregroundColor(
-                                selectedTab == tab
-                                ? AppTheme.textOnRedPrimary
-                                : AppTheme.textOnRedMuted
-                            )
+            HStack(spacing: 0) {
+                ForEach(Tab.allCases) { tab in
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            selectedTab = tab
+                        }
+                    } label: {
+                        VStack(spacing: 6) {
+                            Text(tab.rawValue)
+                                .font(.system(size: 13, weight: .medium, design: .monospaced))
+                                .tracking(1.2)
+                                .foregroundColor(AppTheme.textOnRedPrimary)
+                                .opacity(selectedTab == tab ? 1.0 : 0.55)
 
-                        ZStack {
-                            if selectedTab == tab {
+                            ZStack {
+                                // Reserve underline space ALWAYS
                                 Rectangle()
-                                    .fill(AppTheme.textOnRedPrimary.opacity(0.95))
+                                    .fill(Color.clear)
                                     .frame(width: 18, height: 1)
-                                    .matchedGeometryEffect(id: "underline", in: underlineNamespace)
-                            } else {
-                                Color.clear.frame(height: 1)
+
+                                if selectedTab == tab {
+                                    Rectangle()
+                                        .fill(AppTheme.textOnRedPrimary)
+                                        .frame(width: 18, height: 1)
+                                        .matchedGeometryEffect(
+                                            id: "underline",
+                                            in: underlineNamespace
+                                        )
+                                }
                             }
                         }
+                        .frame(width: itemWidth, height: 60)
+                        .contentShape(Rectangle())
                     }
-                    .padding(.vertical, 6)
                 }
-
-                Spacer()
             }
+            .background(
+                AppTheme.earthRed
+                    .ignoresSafeArea(edges: .bottom)
+            )
+            .overlay(
+                Rectangle()
+                    .frame(height: 0.5)
+                    .foregroundColor(AppTheme.dividerOnRed),
+                alignment: .top
+            )
         }
         .frame(height: 60)
-        .background(
-            AppTheme.earthRed
-                .ignoresSafeArea(edges: .bottom)
-        )
-        .overlay(
-            Rectangle()
-                .frame(height: 0.5)
-                .foregroundColor(AppTheme.dividerOnRed),
-            alignment: .top
-        )
     }
 }
 
