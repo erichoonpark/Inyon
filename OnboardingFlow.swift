@@ -44,11 +44,11 @@ struct OnboardingFlow: View {
                 case .arrival:
                     ArrivalView(onContinue: advanceToNext)
                 case .birthContext:
-                    BirthContextView(data: $data, onContinue: advanceToNext)
+                    BirthContextView(data: $data, onBack: goBack, onContinue: advanceToNext)
                 case .personalAnchor:
-                    PersonalAnchorView(data: $data, onContinue: advanceToNext, onSkip: advanceToNext)
+                    PersonalAnchorView(data: $data, onBack: goBack, onContinue: advanceToNext, onSkip: advanceToNext)
                 case .accountCreation:
-                    AccountCreationView(data: data, onComplete: onComplete)
+                    AccountCreationView(data: data, onBack: goBack, onComplete: onComplete)
                 }
             }
             .opacity(isVisible ? 1 : 0)
@@ -69,6 +69,23 @@ struct OnboardingFlow: View {
             if let nextIndex = OnboardingStep.allCases.firstIndex(of: currentStep),
                nextIndex + 1 < OnboardingStep.allCases.count {
                 currentStep = OnboardingStep.allCases[nextIndex + 1]
+            }
+
+            withAnimation(.easeInOut(duration: 0.25)) {
+                isVisible = true
+            }
+        }
+    }
+
+    private func goBack() {
+        withAnimation(.easeInOut(duration: 0.25)) {
+            isVisible = false
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+            if let currentIndex = OnboardingStep.allCases.firstIndex(of: currentStep),
+               currentIndex > 0 {
+                currentStep = OnboardingStep.allCases[currentIndex - 1]
             }
 
             withAnimation(.easeInOut(duration: 0.25)) {
@@ -133,17 +150,35 @@ struct ArrivalView: View {
 
 struct BirthContextView: View {
     @Binding var data: OnboardingData
+    var onBack: () -> Void
     var onContinue: () -> Void
 
     @State private var selectedDate = Date()
     @State private var selectedTime = Date()
+    @State private var hasSelectedDate = false
+    @State private var hasSelectedTime = false
     @State private var knowsBirthTime = true
     @State private var isVisible = false
 
     var body: some View {
         VStack(spacing: 0) {
+            HStack {
+                Button {
+                    onBack()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Back")
+                Spacer()
+            }
+            .padding(.horizontal, 8)
+
             Spacer()
-                .frame(height: 80)
+                .frame(height: 36)
 
             VStack(alignment: .leading, spacing: 32) {
                 VStack(alignment: .leading, spacing: 12) {
@@ -166,16 +201,27 @@ struct BirthContextView: View {
                             .tracking(1.2)
                             .foregroundColor(AppTheme.textSecondary)
 
-                        DatePicker(
-                            "",
-                            selection: $selectedDate,
-                            in: ...Date(),
-                            displayedComponents: .date
-                        )
-                        .datePickerStyle(.compact)
-                        .labelsHidden()
-                        .tint(AppTheme.textPrimary)
-                        .colorScheme(.dark)
+                        ZStack(alignment: .leading) {
+                            if !hasSelectedDate {
+                                Text("Select date")
+                                    .font(.system(size: 17, weight: .regular))
+                                    .foregroundColor(AppTheme.textSecondary)
+                            }
+                            DatePicker(
+                                "",
+                                selection: $selectedDate,
+                                in: ...Date(),
+                                displayedComponents: .date
+                            )
+                            .datePickerStyle(.compact)
+                            .labelsHidden()
+                            .tint(AppTheme.textPrimary)
+                            .colorScheme(.dark)
+                            .opacity(hasSelectedDate ? 1 : 0.011)
+                            .onChange(of: selectedDate) { _, _ in
+                                hasSelectedDate = true
+                            }
+                        }
                     }
 
                     // Birth Time
@@ -187,15 +233,26 @@ struct BirthContextView: View {
 
                         if knowsBirthTime {
                             HStack(spacing: 16) {
-                                DatePicker(
-                                    "",
-                                    selection: $selectedTime,
-                                    displayedComponents: .hourAndMinute
-                                )
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
-                                .tint(AppTheme.textPrimary)
-                                .colorScheme(.dark)
+                                ZStack(alignment: .leading) {
+                                    if !hasSelectedTime {
+                                        Text("Select time")
+                                            .font(.system(size: 17, weight: .regular))
+                                            .foregroundColor(AppTheme.textSecondary)
+                                    }
+                                    DatePicker(
+                                        "",
+                                        selection: $selectedTime,
+                                        displayedComponents: .hourAndMinute
+                                    )
+                                    .datePickerStyle(.compact)
+                                    .labelsHidden()
+                                    .tint(AppTheme.textPrimary)
+                                    .colorScheme(.dark)
+                                    .opacity(hasSelectedTime ? 1 : 0.011)
+                                    .onChange(of: selectedTime) { _, _ in
+                                        hasSelectedTime = true
+                                    }
+                                }
 
                                 Button {
                                     knowsBirthTime = false
@@ -222,6 +279,10 @@ struct BirthContextView: View {
                                 }
                             }
                         }
+
+                        Text("Approximate time is okay.")
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
                     }
                 }
             }
@@ -259,6 +320,7 @@ struct BirthContextView: View {
 
 struct PersonalAnchorView: View {
     @Binding var data: OnboardingData
+    var onBack: () -> Void
     var onContinue: () -> Void
     var onSkip: () -> Void
 
@@ -267,8 +329,23 @@ struct PersonalAnchorView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            HStack {
+                Button {
+                    onBack()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Back")
+                Spacer()
+            }
+            .padding(.horizontal, 8)
+
             Spacer()
-                .frame(height: 80)
+                .frame(height: 36)
 
             VStack(alignment: .leading, spacing: 40) {
                 Text("What feels most present in your life right now?")
@@ -358,12 +435,28 @@ struct PersonalAnchorView: View {
 
 struct AccountCreationView: View {
     var data: OnboardingData
+    var onBack: () -> Void
     var onComplete: () -> Void
 
     @State private var isVisible = false
 
     var body: some View {
         VStack(spacing: 0) {
+            HStack {
+                Button {
+                    onBack()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 17, weight: .medium))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Rectangle())
+                }
+                .accessibilityLabel("Back")
+                Spacer()
+            }
+            .padding(.horizontal, 8)
+
             Spacer()
 
             VStack(spacing: 16) {
