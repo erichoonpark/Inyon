@@ -22,8 +22,11 @@ struct InyonApp: App {
                             await appState.loadUser(id: authService.currentUserId!)
                         }
                 } else {
-                    SignupFlowView()
-                        .environmentObject(authService)
+                    OnboardingFlow(onComplete: {
+                        // TODO: Handle auth completion
+                        // For now, this will be handled by AuthService state changes
+                    })
+                    .environmentObject(authService)
                 }
             }
             .environmentObject(authService)

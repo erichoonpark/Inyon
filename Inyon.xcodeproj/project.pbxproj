@@ -21,6 +21,7 @@
 		91C1CA34D873C093AF9E0E27 /* SignupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F737B2CE66B6F7CD4C9805 /* SignupFlowView.swift */; };
 		9D70227C6010885126F94D47 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3EAF1C3CCE3764843F3C1894 /* GoogleService-Info.plist */; };
 		9D8029507479A845C92F1639 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEC983BA3C91520977BD07C /* Theme.swift */; };
+		C3695D3C0A2B1D029DB1DCD4 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DCABA9CC9830799F06027A /* OnboardingFlow.swift */; };
 		C90BA042872923D1228CA513 /* GuideContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */; };
 		CC4C9D02F715FE5A1AAF7125 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96782318C050A3ADD573D9F2 /* AuthService.swift */; };
 		FA52B53D47E948A0DF846F34 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CE80129396A00FC3FD8A9C /* GuideView.swift */; };
@@ -41,6 +42,7 @@
 		84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Inyon.xcodeproj; sourceTree = "<group>"; };
 		8C019A3F1945EA7BC4B35D44 /* settings.local.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.local.json; sourceTree = "<group>"; };
 		96782318C050A3ADD573D9F2 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		A0DCABA9CC9830799F06027A /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
 		B2CE80129396A00FC3FD8A9C /* GuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideView.swift; sourceTree = "<group>"; };
 		B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideContent.swift; sourceTree = "<group>"; };
 		D1F737B2CE66B6F7CD4C9805 /* SignupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupFlowView.swift; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 				1DDE2616856A9C16AFE06F08 /* HomeView.swift */,
 				84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */,
 				4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */,
+				A0DCABA9CC9830799F06027A /* OnboardingFlow.swift */,
 				D1F737B2CE66B6F7CD4C9805 /* SignupFlowView.swift */,
 				ECEC983BA3C91520977BD07C /* Theme.swift */,
 				02033E1152CB0D86C11C4694 /* User.swift */,
@@ -102,7 +105,7 @@
 			path = .;
 			sourceTree = "<group>";
 		};
-		E39DE18B2F3AEAF400E83160 /* Products */ = {
+		E39DE1932F3C0A4600E83160 /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -164,7 +167,7 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = E39DE18B2F3AEAF400E83160 /* Products */;
+					ProductGroup = E39DE1932F3C0A4600E83160 /* Products */;
 					ProjectRef = 84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */;
 				},
 			);
@@ -201,6 +204,7 @@
 				FA52B53D47E948A0DF846F34 /* GuideView.swift in Sources */,
 				86DC9EEE2890D555F1872492 /* HomeView.swift in Sources */,
 				5862313F8DBB422507E290C6 /* InyonApp.swift in Sources */,
+				C3695D3C0A2B1D029DB1DCD4 /* OnboardingFlow.swift in Sources */,
 				91C1CA34D873C093AF9E0E27 /* SignupFlowView.swift in Sources */,
 				9D8029507479A845C92F1639 /* Theme.swift in Sources */,
 				381D953F7B10D92527D80DB7 /* User.swift in Sources */,
