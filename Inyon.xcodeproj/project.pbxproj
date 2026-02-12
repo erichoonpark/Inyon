@@ -11,6 +11,7 @@
 		18A20232963B45FC2C33A84F /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4D67605F6DAD5AD8C7949397 /* FirebaseAuth */; };
 		31186B0476A42ACCEE8A90AA /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DCC88BF27CEC48AA2D10A96 /* UserService.swift */; };
 		381D953F7B10D92527D80DB7 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02033E1152CB0D86C11C4694 /* User.swift */; };
+		3FF858B340AC14A8EC9D10B3 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 7B3E8B1D7B49680439F5851F /* FirebaseFirestore */; };
 		52BFC7444BC4631BEED7686B /* YouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1226045A0B4C5D64889718 /* YouView.swift */; };
 		5862313F8DBB422507E290C6 /* InyonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */; };
 		6771EBDBB03E95B70F214D95 /* settings.local.json in Resources */ = {isa = PBXBuildFile; fileRef = 8C019A3F1945EA7BC4B35D44 /* settings.local.json */; };
@@ -21,12 +22,25 @@
 		91C1CA34D873C093AF9E0E27 /* SignupFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F737B2CE66B6F7CD4C9805 /* SignupFlowView.swift */; };
 		9D70227C6010885126F94D47 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3EAF1C3CCE3764843F3C1894 /* GoogleService-Info.plist */; };
 		9D8029507479A845C92F1639 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEC983BA3C91520977BD07C /* Theme.swift */; };
+		A1B2C3D4E5F6A7B8C9D0E1F2 /* AppIconConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2E1D0C9B8A7F6E5D4C3B2A1 /* AppIconConfigurationTests.swift */; };
+		ADE75E54B2114EBF058008A2 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A31F674DDA8160E16BC5B49 /* OnboardingTests.swift */; };
 		C3695D3C0A2B1D029DB1DCD4 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DCABA9CC9830799F06027A /* OnboardingFlow.swift */; };
 		C90BA042872923D1228CA513 /* GuideContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */; };
 		CC4C9D02F715FE5A1AAF7125 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96782318C050A3ADD573D9F2 /* AuthService.swift */; };
+		E30417432F3D5752009322D3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E30417422F3D5752009322D3 /* Assets.xcassets */; };
 		FA52B53D47E948A0DF846F34 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CE80129396A00FC3FD8A9C /* GuideView.swift */; };
 		FA60D68CA522B47449A52286 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BD8A7AA986B81866AE9A92CC /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C417E49AEB3187CC3680684F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A36EF142260588C4B3ADCF34 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 15D00086A5FB822A2977E121;
+			remoteInfo = Inyon;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		02033E1152CB0D86C11C4694 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -37,6 +51,8 @@
 		3EAF1C3CCE3764843F3C1894 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InyonApp.swift; sourceTree = "<group>"; };
 		5A2DF07FCD1FC8666D3DF7DF /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		6A31F674DDA8160E16BC5B49 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
+		F2E1D0C9B8A7F6E5D4C3B2A1 /* AppIconConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconConfigurationTests.swift; sourceTree = "<group>"; };
 		6DB96CBA1C1BE4072E3AA2AC /* GuideComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideComponents.swift; sourceTree = "<group>"; };
 		80848B29DAD76A58FEFD777C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Inyon.xcodeproj; sourceTree = "<group>"; };
@@ -47,10 +63,20 @@
 		B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideContent.swift; sourceTree = "<group>"; };
 		D1F737B2CE66B6F7CD4C9805 /* SignupFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignupFlowView.swift; sourceTree = "<group>"; };
 		DEC4632DD693B1291BAA1FBE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E30417422F3D5752009322D3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E49721D5B99804F6203E5621 /* InyonTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InyonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		ECEC983BA3C91520977BD07C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		7AFF97E146E7B0EAC059AA95 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3FF858B340AC14A8EC9D10B3 /* FirebaseFirestore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F7BAD507F5646DE62E45A755 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -71,11 +97,21 @@
 			path = .claude;
 			sourceTree = "<group>";
 		};
+		2880F76B38E06C9938650E03 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				F2E1D0C9B8A7F6E5D4C3B2A1 /* AppIconConfigurationTests.swift */,
+				6A31F674DDA8160E16BC5B49 /* OnboardingTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 		32DE4E5C0262C0B5FCE08BB5 = {
 			isa = PBXGroup;
 			children = (
 				18CE5C7005EFCF39F0867A2A /* .claude */,
 				A3973E33E465BB614C9B4BA1 /* Inyon */,
+				2880F76B38E06C9938650E03 /* Tests */,
 				F238D42994EA3FB81A4C225D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -100,12 +136,13 @@
 				02033E1152CB0D86C11C4694 /* User.swift */,
 				1DCC88BF27CEC48AA2D10A96 /* UserService.swift */,
 				2D1226045A0B4C5D64889718 /* YouView.swift */,
+				E30417422F3D5752009322D3 /* Assets.xcassets */,
 			);
 			name = Inyon;
 			path = .;
 			sourceTree = "<group>";
 		};
-		E39DE1932F3C0A4600E83160 /* Products */ = {
+		E39DE1952F3C15BC00E83160 /* Products */ = {
 			isa = PBXGroup;
 			name = Products;
 			sourceTree = "<group>";
@@ -114,6 +151,7 @@
 			isa = PBXGroup;
 			children = (
 				2A257A4E3B2835355E89FAAF /* Inyon.app */,
+				E49721D5B99804F6203E5621 /* InyonTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -142,6 +180,26 @@
 			productReference = 2A257A4E3B2835355E89FAAF /* Inyon.app */;
 			productType = "com.apple.product-type.application";
 		};
+		D1652A08E88E57B35F2F30CD /* InyonTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B22FB44950E7FE48B528F3F9 /* Build configuration list for PBXNativeTarget "InyonTests" */;
+			buildPhases = (
+				AF34242417AA9379CC2D1867 /* Sources */,
+				7AFF97E146E7B0EAC059AA95 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				873A9AFFE3AEB2108E6BE1A1 /* PBXTargetDependency */,
+			);
+			name = InyonTests;
+			packageProductDependencies = (
+				7B3E8B1D7B49680439F5851F /* FirebaseFirestore */,
+			);
+			productName = InyonTests;
+			productReference = E49721D5B99804F6203E5621 /* InyonTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -167,13 +225,14 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = E39DE1932F3C0A4600E83160 /* Products */;
+					ProductGroup = E39DE1952F3C15BC00E83160 /* Products */;
 					ProjectRef = 84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */;
 				},
 			);
 			projectRoot = "";
 			targets = (
 				15D00086A5FB822A2977E121 /* Inyon */,
+				D1652A08E88E57B35F2F30CD /* InyonTests */,
 			);
 		};
 /* End PBXProject section */
@@ -185,6 +244,7 @@
 			files = (
 				9D70227C6010885126F94D47 /* GoogleService-Info.plist in Resources */,
 				68DA9571BE1DF128AFF9DE35 /* Inyon.xcodeproj in Resources */,
+				E30417432F3D5752009322D3 /* Assets.xcassets in Resources */,
 				6771EBDBB03E95B70F214D95 /* settings.local.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -213,9 +273,43 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AF34242417AA9379CC2D1867 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1B2C3D4E5F6A7B8C9D0E1F2 /* AppIconConfigurationTests.swift in Sources */,
+				ADE75E54B2114EBF058008A2 /* OnboardingTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		873A9AFFE3AEB2108E6BE1A1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 15D00086A5FB822A2977E121 /* Inyon */;
+			targetProxy = C417E49AEB3187CC3680684F /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		3176F4566B3177D8144CA5B6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Inyon.app/Inyon";
+			};
+			name = Release;
+		};
 		B2068D837AF0025CBB400C74 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -383,6 +477,23 @@
 			};
 			name = Release;
 		};
+		EA2148138DD5071DFF2940B9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Inyon.app/Inyon";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -400,6 +511,15 @@
 			buildConfigurations = (
 				B2068D837AF0025CBB400C74 /* Debug */,
 				C3B9AE64555ED1791950D870 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B22FB44950E7FE48B528F3F9 /* Build configuration list for PBXNativeTarget "InyonTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EA2148138DD5071DFF2940B9 /* Debug */,
+				3176F4566B3177D8144CA5B6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -422,6 +542,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D568EF165C4CDC45BB833261 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseAuth;
+		};
+		7B3E8B1D7B49680439F5851F /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D568EF165C4CDC45BB833261 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
 		};
 		BD8A7AA986B81866AE9A92CC /* FirebaseFirestore */ = {
 			isa = XCSwiftPackageProductDependency;
