@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 import FirebaseFirestore
 import FirebaseAuth
 
@@ -7,6 +8,8 @@ import FirebaseAuth
 struct OnboardingData {
     var birthDate: Date?
     var birthTime: Date?
+    var isBirthTimeUnknown: Bool = false
+    var birthCity: String = ""
     var personalAnchors: Set<PersonalAnchor> = []
 
     func toFirestoreData() -> [String: Any] {
@@ -21,6 +24,12 @@ struct OnboardingData {
 
         if let birthTime = birthTime {
             dict["birthTime"] = Timestamp(date: birthTime)
+        }
+
+        dict["isBirthTimeUnknown"] = isBirthTimeUnknown
+
+        if !birthCity.isEmpty {
+            dict["birthCity"] = birthCity
         }
 
         return dict
@@ -222,6 +231,35 @@ struct ArrivalView: View {
     }
 }
 
+// MARK: - City Search Completer
+
+class CitySearchCompleter: NSObject, ObservableObject, MKLocalSearchCompleterDelegate {
+    @Published var results: [MKLocalSearchCompletion] = []
+    private let completer = MKLocalSearchCompleter()
+
+    override init() {
+        super.init()
+        completer.resultTypes = .address
+        completer.delegate = self
+    }
+
+    func search(_ query: String) {
+        guard !query.isEmpty else {
+            results = []
+            return
+        }
+        completer.queryFragment = query
+    }
+
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        results = completer.results.filter { !$0.subtitle.isEmpty }
+    }
+
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: Error) {
+        results = []
+    }
+}
+
 // MARK: - Screen 2: Birth Context
 
 struct BirthContextView: View {
@@ -234,7 +272,23 @@ struct BirthContextView: View {
     @State private var hasSelectedDate = false
     @State private var hasSelectedTime = false
     @State private var knowsBirthTime = true
+    @State private var showingDatePicker = false
+    @State private var showingTimePicker = false
+    @State private var cityQuery = ""
+    @StateObject private var cityCompleter = CitySearchCompleter()
     @State private var isVisible = false
+
+    private var formattedDate: String {
+        selectedDate.formatted(date: .long, time: .omitted)
+    }
+
+    private var formattedTime: String {
+        selectedTime.formatted(date: .omitted, time: .shortened)
+    }
+
+    private var canContinue: Bool {
+        hasSelectedDate && !data.birthCity.isEmpty
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -277,23 +331,27 @@ struct BirthContextView: View {
                             .tracking(1.2)
                             .foregroundColor(AppTheme.textSecondary)
 
-                        ZStack(alignment: .leading) {
-                            if !hasSelectedDate {
-                                Text("Select date")
-                                    .font(.system(size: 17, weight: .regular))
-                                    .foregroundColor(AppTheme.textSecondary)
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                showingDatePicker.toggle()
+                                showingTimePicker = false
                             }
+                        } label: {
+                            Text(hasSelectedDate ? formattedDate : "Select date")
+                                .font(.system(size: 17, weight: .regular))
+                                .foregroundColor(hasSelectedDate ? AppTheme.textPrimary : AppTheme.textSecondary)
+                        }
+
+                        if showingDatePicker {
                             DatePicker(
                                 "",
                                 selection: $selectedDate,
                                 in: ...Date(),
                                 displayedComponents: .date
                             )
-                            .datePickerStyle(.compact)
+                            .datePickerStyle(.wheel)
                             .labelsHidden()
-                            .tint(AppTheme.textPrimary)
                             .colorScheme(.dark)
-                            .opacity(hasSelectedDate ? 1 : 0.011)
                             .onChange(of: selectedDate) { _, _ in
                                 hasSelectedDate = true
                             }
@@ -309,29 +367,22 @@ struct BirthContextView: View {
 
                         if knowsBirthTime {
                             HStack(spacing: 16) {
-                                ZStack(alignment: .leading) {
-                                    if !hasSelectedTime {
-                                        Text("Select time")
-                                            .font(.system(size: 17, weight: .regular))
-                                            .foregroundColor(AppTheme.textSecondary)
+                                Button {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        showingTimePicker.toggle()
+                                        showingDatePicker = false
                                     }
-                                    DatePicker(
-                                        "",
-                                        selection: $selectedTime,
-                                        displayedComponents: .hourAndMinute
-                                    )
-                                    .datePickerStyle(.compact)
-                                    .labelsHidden()
-                                    .tint(AppTheme.textPrimary)
-                                    .colorScheme(.dark)
-                                    .opacity(hasSelectedTime ? 1 : 0.011)
-                                    .onChange(of: selectedTime) { _, _ in
-                                        hasSelectedTime = true
-                                    }
+                                } label: {
+                                    Text(hasSelectedTime ? formattedTime : "Select time")
+                                        .font(.system(size: 17, weight: .regular))
+                                        .foregroundColor(hasSelectedTime ? AppTheme.textPrimary : AppTheme.textSecondary)
                                 }
 
                                 Button {
-                                    knowsBirthTime = false
+                                    withAnimation(.easeInOut(duration: 0.2)) {
+                                        knowsBirthTime = false
+                                        showingTimePicker = false
+                                    }
                                 } label: {
                                     Text("Not sure")
                                         .font(.system(size: 15, weight: .regular))
@@ -339,26 +390,110 @@ struct BirthContextView: View {
                                         .underline()
                                 }
                             }
-                        } else {
-                            HStack(spacing: 16) {
-                                Text("Unknown")
-                                    .font(.system(size: 17, weight: .regular))
-                                    .foregroundColor(AppTheme.textSecondary)
 
-                                Button {
-                                    knowsBirthTime = true
-                                } label: {
-                                    Text("Add time")
-                                        .font(.system(size: 15, weight: .regular))
-                                        .foregroundColor(AppTheme.textSecondary)
-                                        .underline()
+                            if showingTimePicker {
+                                DatePicker(
+                                    "",
+                                    selection: $selectedTime,
+                                    displayedComponents: .hourAndMinute
+                                )
+                                .datePickerStyle(.wheel)
+                                .labelsHidden()
+                                .colorScheme(.dark)
+                                .onChange(of: selectedTime) { _, _ in
+                                    hasSelectedTime = true
                                 }
+                            }
+                        } else {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 16) {
+                                    Text("Skipped")
+                                        .font(.system(size: 17, weight: .regular))
+                                        .foregroundColor(AppTheme.textSecondary)
+
+                                    Button {
+                                        knowsBirthTime = true
+                                    } label: {
+                                        Text("Add later")
+                                            .font(.system(size: 15, weight: .regular))
+                                            .foregroundColor(AppTheme.textSecondary)
+                                            .underline()
+                                    }
+                                }
+
+                                Text("You can add this in settings.")
+                                    .font(.system(size: 13, weight: .regular))
+                                    .foregroundColor(AppTheme.textSecondary)
                             }
                         }
 
-                        Text("Approximate time is okay.")
-                            .font(.system(size: 13, weight: .regular))
+                        if knowsBirthTime {
+                            Text("Approximate time is okay.")
+                                .font(.system(size: 13, weight: .regular))
+                                .foregroundColor(AppTheme.textSecondary)
+                        }
+                    }
+
+                    // Birth City
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("BIRTH CITY")
+                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .tracking(1.2)
                             .foregroundColor(AppTheme.textSecondary)
+
+                        VStack(alignment: .leading, spacing: 0) {
+                            if data.birthCity.isEmpty {
+                                TextField("Enter city", text: $cityQuery)
+                                    .font(.system(size: 17, weight: .regular))
+                                    .foregroundColor(AppTheme.textPrimary)
+                                    .tint(AppTheme.textPrimary)
+                                    .autocorrectionDisabled()
+                                    .onChange(of: cityQuery) { _, newValue in
+                                        cityCompleter.search(newValue)
+                                    }
+                            } else {
+                                HStack(spacing: 16) {
+                                    Text(data.birthCity)
+                                        .font(.system(size: 17, weight: .regular))
+                                        .foregroundColor(AppTheme.textPrimary)
+
+                                    Button {
+                                        data.birthCity = ""
+                                        cityQuery = ""
+                                    } label: {
+                                        Text("Change")
+                                            .font(.system(size: 15, weight: .regular))
+                                            .foregroundColor(AppTheme.textSecondary)
+                                            .underline()
+                                    }
+                                }
+                            }
+
+                            Rectangle()
+                                .fill(AppTheme.textPrimary.opacity(0.3))
+                                .frame(height: 1)
+                                .padding(.top, 8)
+                        }
+
+                        if data.birthCity.isEmpty {
+                            ForEach(cityCompleter.results.prefix(3), id: \.self) { result in
+                                let city = [result.title, result.subtitle]
+                                    .filter { !$0.isEmpty }
+                                    .joined(separator: ", ")
+
+                                Button {
+                                    data.birthCity = city
+                                    cityQuery = city
+                                    cityCompleter.results = []
+                                } label: {
+                                    Text(city)
+                                        .font(.system(size: 15, weight: .regular))
+                                        .foregroundColor(AppTheme.textSecondary)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.vertical, 6)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -370,6 +505,7 @@ struct BirthContextView: View {
             Button {
                 data.birthDate = hasSelectedDate ? selectedDate : nil
                 data.birthTime = (knowsBirthTime && hasSelectedTime) ? selectedTime : nil
+                data.isBirthTimeUnknown = !knowsBirthTime
                 onContinue()
             } label: {
                 Text("Continue")
@@ -377,9 +513,10 @@ struct BirthContextView: View {
                     .foregroundColor(AppTheme.earth)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
-                    .background(AppTheme.textPrimary)
+                    .background(canContinue ? AppTheme.textPrimary : AppTheme.textPrimary.opacity(0.3))
                     .clipShape(RoundedRectangle(cornerRadius: 14))
             }
+            .disabled(!canContinue)
             .padding(.horizontal, 24)
             .padding(.bottom, 48)
             .opacity(isVisible ? 1 : 0)
