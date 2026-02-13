@@ -20,6 +20,7 @@ targets:
           - "*.md"
           - "*.yml"
           - ".git/**"
+          - "Tests/**"
     dependencies:
       - package: Firebase
         product: FirebaseAuth
@@ -36,3 +37,14 @@ targets:
       INFOPLIST_KEY_UILaunchScreen_Generation: YES
       INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
       SWIFT_EMIT_LOC_STRINGS: YES
+
+  InyonTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: Tests
+    dependencies:
+      - target: Inyon
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.inyon.app.tests
+      GENERATE_INFOPLIST_FILE: YES

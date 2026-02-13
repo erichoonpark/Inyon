@@ -1,7 +1,6 @@
 import SwiftUI
 import MapKit
 import FirebaseFirestore
-import FirebaseAuth
 
 // MARK: - Onboarding Data Model
 
@@ -60,7 +59,9 @@ struct OnboardingFlow: View {
     @State private var data = OnboardingData()
     @State private var isVisible = false
     @State private var isReturningUser: Bool = false
+    @EnvironmentObject private var authService: AuthService
 
+    let onboardingService: OnboardingServiceProtocol
     var onComplete: () -> Void
 
     var body: some View {
@@ -151,21 +152,9 @@ struct OnboardingFlow: View {
     }
 
     private func saveOnboardingData() {
-        let db = Firestore.firestore()
-        let firestoreData = data.toFirestoreData()
-
-        let documentRef: DocumentReference
-
-        if let uid = Auth.auth().currentUser?.uid {
-            documentRef = db.collection("users").document(uid)
-                .collection("onboarding").document("context")
-        } else {
-            let anonymousId = UUID().uuidString
-            documentRef = db.collection("onboarding").document("anonymous")
-                .collection("users").document(anonymousId)
+        Task {
+            try? await onboardingService.saveOnboardingData(data, userId: authService.currentUserId)
         }
-
-        documentRef.setData(firestoreData) { _ in }
     }
 }
 
@@ -828,5 +817,5 @@ struct LoginView: View {
 // MARK: - Preview
 
 #Preview {
-    OnboardingFlow(onComplete: {})
+    OnboardingFlow(onboardingService: OnboardingService(), onComplete: {})
 }

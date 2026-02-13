@@ -2,7 +2,7 @@ import Foundation
 import FirebaseAuth
 
 @MainActor
-final class AuthService: ObservableObject {
+final class AuthService: ObservableObject, AuthServiceProtocol {
     @Published var currentUserId: String?
     @Published var isLoading = true
 

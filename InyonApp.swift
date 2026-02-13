@@ -5,6 +5,7 @@ import FirebaseCore
 struct InyonApp: App {
     @StateObject private var authService = AuthService()
     @StateObject private var appState = AppState()
+    private let onboardingService: OnboardingServiceProtocol = OnboardingService()
 
     init() {
         FirebaseApp.configure()
@@ -16,13 +17,13 @@ struct InyonApp: App {
                 if authService.isLoading {
                     ProgressView()
                 } else if authService.isAuthenticated {
-                    ContentView()
+                    ContentView(onboardingService: onboardingService)
                         .environmentObject(appState)
                         .task {
                             await appState.loadUser(id: authService.currentUserId!)
                         }
                 } else {
-                    OnboardingFlow(onComplete: {
+                    OnboardingFlow(onboardingService: onboardingService, onComplete: {
                         // TODO: Handle auth completion
                         // For now, this will be handled by AuthService state changes
                     })

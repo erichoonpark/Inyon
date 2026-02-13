@@ -13,14 +13,17 @@ enum Tab: String, CaseIterable, Identifiable {
 // MARK: - Content View (Root)
 
 struct ContentView: View {
+    let onboardingService: OnboardingServiceProtocol
+
     var body: some View {
-        RootTabView()
+        RootTabView(onboardingService: onboardingService)
     }
 }
 
 // MARK: - Root Tab View
 
 struct RootTabView: View {
+    let onboardingService: OnboardingServiceProtocol
     @State private var selectedTab: Tab = .home
 
     var body: some View {
@@ -29,7 +32,7 @@ struct RootTabView: View {
                 switch selectedTab {
                 case .home: HomeView()
                 case .guide: GuideView()
-                case .you: YouView()
+                case .you: YouView(onboardingService: onboardingService)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -102,5 +105,5 @@ struct CustomBottomNav: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(onboardingService: OnboardingService())
 }

@@ -1,24 +1,477 @@
 import SwiftUI
+import FirebaseFirestore
 
 struct YouView: View {
+    let onboardingService: OnboardingServiceProtocol
+    @EnvironmentObject private var authService: AuthService
+
+    @State private var birthDate: Date?
+    @State private var birthTime: Date?
+    @State private var personalAnchors: Set<PersonalAnchor> = []
+    @State private var notificationsEnabled = false
+    @State private var preferredNotificationTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+
+    @State private var hasSelectedDate = false
+    @State private var hasSelectedTime = false
+    @State private var isLoading = true
+    @State private var hasUnsavedChanges = false
+
+    // Temporary state for date pickers
+    @State private var selectedDate = Date()
+    @State private var selectedTime = Date()
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 32) {
+                // Header
                 Text("You")
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(AppTheme.textPrimary)
 
-                Text("Your profile and preferences.")
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(AppTheme.textSecondary)
+                if isLoading {
+                    ProgressView()
+                        .tint(AppTheme.textSecondary)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .padding(.top, 40)
+                } else {
+                    // Editable Section
+                    editableSection
+
+                    // Notification Preferences
+                    notificationSection
+
+                    // Derived Context (read-only)
+                    derivedContextSection
+
+                    // Save Button
+                    if hasUnsavedChanges {
+                        saveButton
+                    }
+                }
             }
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .background(AppTheme.earth)
+        .onAppear {
+            loadData()
+        }
+    }
+
+    // MARK: - Editable Section
+
+    private var editableSection: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            Text("BIRTH CONTEXT")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .tracking(1.2)
+                .foregroundColor(AppTheme.textSecondary)
+
+            // Birth Date
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Birth Date")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(AppTheme.textSecondary)
+
+                ZStack(alignment: .leading) {
+                    if !hasSelectedDate {
+                        Text("Not set")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                    }
+                    DatePicker(
+                        "",
+                        selection: $selectedDate,
+                        in: ...Date(),
+                        displayedComponents: .date
+                    )
+                    .datePickerStyle(.compact)
+                    .labelsHidden()
+                    .tint(AppTheme.textPrimary)
+                    .colorScheme(.dark)
+                    .opacity(hasSelectedDate ? 1 : 0.011)
+                    .onChange(of: selectedDate) { _, _ in
+                        hasSelectedDate = true
+                        birthDate = selectedDate
+                        hasUnsavedChanges = true
+                    }
+                }
+            }
+
+            Rectangle()
+                .fill(AppTheme.divider)
+                .frame(height: 1)
+
+            // Birth Time
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Birth Time")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(AppTheme.textSecondary)
+
+                HStack(spacing: 16) {
+                    ZStack(alignment: .leading) {
+                        if !hasSelectedTime {
+                            Text("Not set")
+                                .font(.system(size: 17, weight: .regular))
+                                .foregroundColor(AppTheme.textSecondary)
+                        }
+                        DatePicker(
+                            "",
+                            selection: $selectedTime,
+                            displayedComponents: .hourAndMinute
+                        )
+                        .datePickerStyle(.compact)
+                        .labelsHidden()
+                        .tint(AppTheme.textPrimary)
+                        .colorScheme(.dark)
+                        .opacity(hasSelectedTime ? 1 : 0.011)
+                        .onChange(of: selectedTime) { _, _ in
+                            hasSelectedTime = true
+                            birthTime = selectedTime
+                            hasUnsavedChanges = true
+                        }
+                    }
+
+                    if hasSelectedTime {
+                        Button {
+                            hasSelectedTime = false
+                            birthTime = nil
+                            hasUnsavedChanges = true
+                        } label: {
+                            Text("Clear")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(AppTheme.textSecondary)
+                                .underline()
+                        }
+                    }
+                }
+            }
+
+            Rectangle()
+                .fill(AppTheme.divider)
+                .frame(height: 1)
+
+            // Personal Anchors
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Personal Anchors")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(AppTheme.textSecondary)
+
+                FlowLayout(spacing: 10) {
+                    ForEach(PersonalAnchor.allCases) { anchor in
+                        Button {
+                            if personalAnchors.contains(anchor) {
+                                personalAnchors.remove(anchor)
+                            } else {
+                                personalAnchors.insert(anchor)
+                            }
+                            hasUnsavedChanges = true
+                        } label: {
+                            Text(anchor.rawValue)
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(
+                                    personalAnchors.contains(anchor)
+                                        ? AppTheme.textPrimary
+                                        : AppTheme.textSecondary
+                                )
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 10)
+                                .background(
+                                    personalAnchors.contains(anchor)
+                                        ? AppTheme.surface
+                                        : Color.clear
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(
+                                            personalAnchors.contains(anchor)
+                                                ? AppTheme.textPrimary.opacity(0.3)
+                                                : AppTheme.divider,
+                                            lineWidth: 1
+                                        )
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(AppTheme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    // MARK: - Notification Section
+
+    private var notificationSection: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            Text("NOTIFICATIONS")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .tracking(1.2)
+                .foregroundColor(AppTheme.textSecondary)
+
+            VStack(alignment: .leading, spacing: 16) {
+                Toggle(isOn: $notificationsEnabled) {
+                    Text("Daily reflection")
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                }
+                .tint(AppTheme.earthRed)
+                .onChange(of: notificationsEnabled) { _, _ in
+                    hasUnsavedChanges = true
+                }
+
+                if notificationsEnabled {
+                    Rectangle()
+                        .fill(AppTheme.divider)
+                        .frame(height: 1)
+
+                    HStack {
+                        Text("Preferred time")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+
+                        Spacer()
+
+                        DatePicker(
+                            "",
+                            selection: $preferredNotificationTime,
+                            displayedComponents: .hourAndMinute
+                        )
+                        .datePickerStyle(.compact)
+                        .labelsHidden()
+                        .tint(AppTheme.textPrimary)
+                        .colorScheme(.dark)
+                        .onChange(of: preferredNotificationTime) { _, _ in
+                            hasUnsavedChanges = true
+                        }
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .background(AppTheme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    // MARK: - Derived Context Section
+
+    private var derivedContextSection: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("CULTURAL CONTEXT")
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .tracking(1.2)
+                    .foregroundColor(AppTheme.textSecondary)
+
+                Text("Informational, not predictive")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(AppTheme.textSecondary.opacity(0.7))
+            }
+
+            VStack(alignment: .leading, spacing: 16) {
+                // Lunar Birthday
+                HStack {
+                    Text("Lunar birthday")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+
+                    Spacer()
+
+                    Text(derivedLunarBirthday)
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                }
+
+                Rectangle()
+                    .fill(AppTheme.divider)
+                    .frame(height: 1)
+
+                // Chinese Zodiac
+                HStack {
+                    Text("Zodiac year")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+
+                    Spacer()
+
+                    Text(derivedZodiac)
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                }
+            }
+        }
+        .padding(16)
+        .background(AppTheme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
+    // MARK: - Save Button
+
+    private var saveButton: some View {
+        Button {
+            saveData()
+        } label: {
+            Text("Save Changes")
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(AppTheme.earth)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .background(AppTheme.textPrimary)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
+        }
+        .padding(.top, 8)
+    }
+
+    // MARK: - Derived Data (Placeholder Logic)
+
+    private var derivedLunarBirthday: String {
+        guard let date = birthDate else {
+            return "—"
+        }
+        // Placeholder: In production, use proper lunar calendar conversion
+        // For now, show a formatted version indicating this is derived
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter.string(from: date) + " (approx.)"
+    }
+
+    private var derivedZodiac: String {
+        guard let date = birthDate else {
+            return "—"
+        }
+        // Placeholder: Chinese zodiac based on birth year
+        // Simplified cycle starting from 1924 (Rat year)
+        let year = Calendar.current.component(.year, from: date)
+        let zodiacAnimals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
+                            "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"]
+        let index = (year - 1924) % 12
+        let safeIndex = index < 0 ? index + 12 : index
+        return zodiacAnimals[safeIndex]
+    }
+
+    // MARK: - Data Operations
+
+    /// Loads onboarding data from Firestore: users/{uid}/onboarding/context
+    private func loadData() {
+        guard let uid = authService.currentUserId else {
+            isLoading = false
+            return
+        }
+
+        Task {
+            do {
+                guard let data = try await onboardingService.loadOnboardingData(userId: uid) else {
+                    isLoading = false
+                    return
+                }
+
+                // Load birth date
+                if let timestamp = data["birthDate"] as? Timestamp {
+                    birthDate = timestamp.dateValue()
+                    selectedDate = timestamp.dateValue()
+                    hasSelectedDate = true
+                }
+
+                // Load birth time
+                if let timestamp = data["birthTime"] as? Timestamp {
+                    birthTime = timestamp.dateValue()
+                    selectedTime = timestamp.dateValue()
+                    hasSelectedTime = true
+                }
+
+                // Load personal anchors
+                if let anchorsArray = data["personalAnchors"] as? [String] {
+                    personalAnchors = Set(anchorsArray.compactMap { PersonalAnchor(rawValue: $0) })
+                }
+
+                // Load notification preferences
+                if let notifEnabled = data["notificationsEnabled"] as? Bool {
+                    notificationsEnabled = notifEnabled
+                }
+                if let notifTimestamp = data["preferredNotificationTime"] as? Timestamp {
+                    preferredNotificationTime = notifTimestamp.dateValue()
+                }
+
+                isLoading = false
+            } catch {
+                isLoading = false
+            }
+        }
+    }
+
+    /// Saves changes to Firestore: users/{uid}/onboarding/context
+    private func saveData() {
+        guard let uid = authService.currentUserId else { return }
+
+        var updateData: [String: Any] = [
+            "personalAnchors": personalAnchors.map { $0.rawValue },
+            "notificationsEnabled": notificationsEnabled,
+            "preferredNotificationTime": Timestamp(date: preferredNotificationTime),
+            "updatedAt": FieldValue.serverTimestamp()
+        ]
+
+        if let date = birthDate {
+            updateData["birthDate"] = Timestamp(date: date)
+        } else {
+            updateData["birthDate"] = FieldValue.delete()
+        }
+
+        if let time = birthTime {
+            updateData["birthTime"] = Timestamp(date: time)
+        } else {
+            updateData["birthTime"] = FieldValue.delete()
+        }
+
+        Task {
+            try? await onboardingService.updateOnboardingData(userId: uid, data: updateData)
+            hasUnsavedChanges = false
+        }
+    }
+}
+
+// MARK: - Flow Layout (for anchor chips)
+
+struct FlowLayout: Layout {
+    var spacing: CGFloat = 8
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = arrangeSubviews(proposal: proposal, subviews: subviews)
+        return result.size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = arrangeSubviews(proposal: proposal, subviews: subviews)
+        for (index, position) in result.positions.enumerated() {
+            subviews[index].place(at: CGPoint(x: bounds.minX + position.x, y: bounds.minY + position.y), proposal: .unspecified)
+        }
+    }
+
+    private func arrangeSubviews(proposal: ProposedViewSize, subviews: Subviews) -> (size: CGSize, positions: [CGPoint]) {
+        let maxWidth = proposal.width ?? .infinity
+        var positions: [CGPoint] = []
+        var currentX: CGFloat = 0
+        var currentY: CGFloat = 0
+        var lineHeight: CGFloat = 0
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+
+            if currentX + size.width > maxWidth && currentX > 0 {
+                currentX = 0
+                currentY += lineHeight + spacing
+                lineHeight = 0
+            }
+
+            positions.append(CGPoint(x: currentX, y: currentY))
+            lineHeight = max(lineHeight, size.height)
+            currentX += size.width + spacing
+        }
+
+        return (CGSize(width: maxWidth, height: currentY + lineHeight), positions)
     }
 }
 
 #Preview {
-    YouView()
+    YouView(onboardingService: OnboardingService())
 }
