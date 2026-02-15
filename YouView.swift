@@ -14,6 +14,8 @@ struct YouView: View {
     @State private var hasSelectedDate = false
     @State private var hasSelectedTime = false
     @State private var isLoading = true
+    @State private var isSaving = false
+    @State private var saveError: String?
     @State private var hasUnsavedChanges = false
 
     // Temporary state for date pickers
@@ -309,16 +311,33 @@ struct YouView: View {
     // MARK: - Save Button
 
     private var saveButton: some View {
-        Button {
-            saveData()
-        } label: {
-            Text("Save Changes")
-                .font(.system(size: 17, weight: .medium))
+        VStack(spacing: 8) {
+            if let saveError {
+                Text(saveError)
+                    .font(.system(size: 14, weight: .regular))
+                    .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
+                    .multilineTextAlignment(.center)
+            }
+
+            Button {
+                saveData()
+            } label: {
+                Group {
+                    if isSaving {
+                        ProgressView()
+                            .tint(AppTheme.earth)
+                    } else {
+                        Text(saveError != nil ? "Retry Save" : "Save Changes")
+                            .font(.system(size: 17, weight: .medium))
+                    }
+                }
                 .foregroundColor(AppTheme.earth)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
                 .background(AppTheme.textPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+            .disabled(isSaving)
         }
         .padding(.top, 8)
     }
@@ -406,9 +425,16 @@ struct YouView: View {
             updateData["birthTime"] = FieldValue.delete()
         }
 
+        isSaving = true
+        saveError = nil
         Task {
-            try? await onboardingService.updateOnboardingData(userId: uid, data: updateData)
-            hasUnsavedChanges = false
+            do {
+                try await onboardingService.updateOnboardingData(userId: uid, data: updateData)
+                hasUnsavedChanges = false
+            } catch {
+                saveError = "Could not save changes. Please try again."
+            }
+            isSaving = false
         }
     }
 }

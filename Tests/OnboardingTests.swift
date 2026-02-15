@@ -269,80 +269,35 @@ final class OnboardingStepTests: XCTestCase {
     }
 
     func testOnboardingStepForwardNavigation() {
-        let steps = OnboardingStep.allCases
-        var currentStep = OnboardingStep.arrival
-
-        // Simulate forward navigation
-        if let currentIndex = steps.firstIndex(of: currentStep),
-           currentIndex + 1 < steps.count {
-            currentStep = steps[currentIndex + 1]
-        }
-
-        XCTAssertEqual(currentStep, .birthContext)
+        XCTAssertEqual(OnboardingStep.arrival.next, .birthContext)
     }
 
     func testOnboardingStepBackwardNavigation() {
-        let steps = OnboardingStep.allCases
-        var currentStep = OnboardingStep.birthContext
-
-        // Simulate backward navigation
-        if let currentIndex = steps.firstIndex(of: currentStep),
-           currentIndex > 0 {
-            currentStep = steps[currentIndex - 1]
-        }
-
-        XCTAssertEqual(currentStep, .arrival)
+        XCTAssertEqual(OnboardingStep.birthContext.previous, .arrival)
     }
 
     func testOnboardingStepCannotGoBackFromFirst() {
-        let steps = OnboardingStep.allCases
-        var currentStep = OnboardingStep.arrival
-
-        // Attempt backward navigation from first step
-        if let currentIndex = steps.firstIndex(of: currentStep),
-           currentIndex > 0 {
-            currentStep = steps[currentIndex - 1]
-        }
-
-        // Should remain at arrival
-        XCTAssertEqual(currentStep, .arrival)
+        XCTAssertNil(OnboardingStep.arrival.previous)
     }
 
     func testOnboardingStepCannotAdvancePastLast() {
-        let steps = OnboardingStep.allCases
-        var currentStep = OnboardingStep.accountCreation
-
-        // Attempt forward navigation from last step
-        if let currentIndex = steps.firstIndex(of: currentStep),
-           currentIndex + 1 < steps.count {
-            currentStep = steps[currentIndex + 1]
-        }
-
-        // Should remain at accountCreation
-        XCTAssertEqual(currentStep, .accountCreation)
+        XCTAssertNil(OnboardingStep.accountCreation.next)
     }
 
     func testFullNavigationCycle() {
-        let steps = OnboardingStep.allCases
-        var currentStep = OnboardingStep.arrival
+        var step = OnboardingStep.arrival
 
-        // Navigate forward through all steps
-        for expectedStep in steps.dropFirst() {
-            if let currentIndex = steps.firstIndex(of: currentStep),
-               currentIndex + 1 < steps.count {
-                currentStep = steps[currentIndex + 1]
-            }
-            XCTAssertEqual(currentStep, expectedStep)
+        // Forward
+        while let next = step.next {
+            step = next
         }
+        XCTAssertEqual(step, .accountCreation)
 
-        // Navigate backward through all steps
-        for expectedStep in steps.dropLast().reversed() {
-            if let currentIndex = steps.firstIndex(of: currentStep),
-               currentIndex > 0 {
-                currentStep = steps[currentIndex - 1]
-            }
-            XCTAssertEqual(currentStep, expectedStep)
+        // Backward
+        while let prev = step.previous {
+            step = prev
         }
+        XCTAssertEqual(step, .arrival)
     }
 }
 

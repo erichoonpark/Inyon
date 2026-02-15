@@ -143,3 +143,60 @@ final class AppStateTests: XCTestCase {
         XCTAssertEqual(appState.currentUser?.id, "user-2")
     }
 }
+
+// MARK: - Auth State Routing Tests
+//
+// Tests the view-routing logic from InyonApp:
+// nil userId → onboarding, non-nil userId → content view with loadUser.
+
+final class AuthStateRoutingTests: XCTestCase {
+
+    @MainActor
+    func test_nilUserId_showsOnboarding() {
+        let mockAuth = MockAuthService()
+        mockAuth.currentUserId = nil
+
+        // Mirrors InyonApp: `if let userId = authService.currentUserId` fails
+        XCTAssertNil(mockAuth.currentUserId)
+        XCTAssertFalse(mockAuth.isAuthenticated)
+    }
+
+    @MainActor
+    func test_nonNilUserId_showsContentView() {
+        let mockAuth = MockAuthService()
+        mockAuth.currentUserId = "user-123"
+
+        // Mirrors InyonApp: `if let userId = authService.currentUserId` succeeds
+        if let userId = mockAuth.currentUserId {
+            XCTAssertEqual(userId, "user-123")
+        } else {
+            XCTFail("userId should not be nil when authenticated")
+        }
+    }
+
+    @MainActor
+    func test_authStateChange_fromNilToAuthenticated() async throws {
+        let mockAuth = MockAuthService()
+        XCTAssertNil(mockAuth.currentUserId)
+
+        try await mockAuth.signIn(email: "test@inyon.com", password: "password")
+
+        // After sign-in, userId should be available for routing
+        XCTAssertNotNil(mockAuth.currentUserId)
+        if let userId = mockAuth.currentUserId {
+            XCTAssertEqual(userId, "mock-uid")
+        }
+    }
+
+    @MainActor
+    func test_authStateChange_fromAuthenticatedToNil() throws {
+        let mockAuth = MockAuthService()
+        mockAuth.currentUserId = "user-123"
+
+        try mockAuth.signOut()
+
+        // After sign-out, should route back to onboarding
+        XCTAssertNil(mockAuth.currentUserId)
+        XCTAssertFalse(mockAuth.isAuthenticated)
+    }
+}

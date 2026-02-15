@@ -1,176 +1,120 @@
 import XCTest
 @testable import Inyon
 
-// MARK: - Onboarding Flow Navigation Tests
+// MARK: - OnboardingStep Navigation Tests
 //
-// Tests the step-by-step navigation logic of OnboardingFlow.
-// Each test simulates the navigation functions (advanceToNext, goBack, navigateTo)
-// using the same logic as OnboardingFlow.swift.
+// Tests the production OnboardingStep.next and .previous properties
+// that drive navigation in OnboardingFlow.
 
 final class OnboardingFlowNavigationTests: XCTestCase {
 
-    // MARK: - Initial State
+    // MARK: - Forward Navigation (.next)
 
-    func test_initialStep_isArrival() {
-        let currentStep = OnboardingStep.arrival
-        XCTAssertEqual(currentStep, .arrival)
-        XCTAssertEqual(currentStep.rawValue, 0)
+    func test_arrival_next_isBirthContext() {
+        XCTAssertEqual(OnboardingStep.arrival.next, .birthContext)
     }
 
-    // MARK: - Forward Navigation (advanceToNext)
-
-    func test_advanceFromArrival_movesToBirthContext() {
-        var currentStep = OnboardingStep.arrival
-        advanceToNext(&currentStep)
-        XCTAssertEqual(currentStep, .birthContext)
+    func test_birthContext_next_isPersonalAnchor() {
+        XCTAssertEqual(OnboardingStep.birthContext.next, .personalAnchor)
     }
 
-    func test_advanceFromBirthContext_movesToPersonalAnchor() {
-        var currentStep = OnboardingStep.birthContext
-        advanceToNext(&currentStep)
-        XCTAssertEqual(currentStep, .personalAnchor)
+    func test_personalAnchor_next_isAccountCreation() {
+        XCTAssertEqual(OnboardingStep.personalAnchor.next, .accountCreation)
     }
 
-    func test_advanceFromPersonalAnchor_movesToAccountCreation() {
-        var currentStep = OnboardingStep.personalAnchor
-        advanceToNext(&currentStep)
-        XCTAssertEqual(currentStep, .accountCreation)
+    func test_accountCreation_next_isNil() {
+        XCTAssertNil(OnboardingStep.accountCreation.next, "Should not advance past last step")
     }
 
-    func test_advanceFromAccountCreation_staysAtAccountCreation() {
-        var currentStep = OnboardingStep.accountCreation
-        advanceToNext(&currentStep)
-        XCTAssertEqual(currentStep, .accountCreation, "Should not advance past the last step")
+    // MARK: - Backward Navigation (.previous)
+
+    func test_birthContext_previous_isArrival() {
+        XCTAssertEqual(OnboardingStep.birthContext.previous, .arrival)
     }
 
-    // MARK: - Backward Navigation (goBack)
-
-    func test_goBackFromBirthContext_returnsToArrival() {
-        var currentStep = OnboardingStep.birthContext
-        goBack(&currentStep)
-        XCTAssertEqual(currentStep, .arrival)
+    func test_personalAnchor_previous_isBirthContext() {
+        XCTAssertEqual(OnboardingStep.personalAnchor.previous, .birthContext)
     }
 
-    func test_goBackFromPersonalAnchor_returnsToBirthContext() {
-        var currentStep = OnboardingStep.personalAnchor
-        goBack(&currentStep)
-        XCTAssertEqual(currentStep, .birthContext)
+    func test_accountCreation_previous_isPersonalAnchor() {
+        XCTAssertEqual(OnboardingStep.accountCreation.previous, .personalAnchor)
     }
 
-    func test_goBackFromAccountCreation_returnsToPersonalAnchor() {
-        var currentStep = OnboardingStep.accountCreation
-        goBack(&currentStep)
-        XCTAssertEqual(currentStep, .personalAnchor)
-    }
-
-    func test_goBackFromArrival_staysAtArrival() {
-        var currentStep = OnboardingStep.arrival
-        goBack(&currentStep)
-        XCTAssertEqual(currentStep, .arrival, "Should not go back before the first step")
-    }
-
-    // MARK: - Direct Navigation (navigateTo)
-
-    func test_navigateToAccountCreation_jumpsDirectly() {
-        var currentStep = OnboardingStep.arrival
-        currentStep = .accountCreation
-        XCTAssertEqual(currentStep, .accountCreation)
-    }
-
-    func test_navigateToArrival_fromAccountCreation() {
-        var currentStep = OnboardingStep.accountCreation
-        currentStep = .arrival
-        XCTAssertEqual(currentStep, .arrival)
-    }
-
-    // MARK: - Login Path (isReturningUser)
-
-    func test_loginFromArrival_setsReturningUserAndJumpsToAccountCreation() {
-        var currentStep = OnboardingStep.arrival
-        var isReturningUser = false
-
-        // Simulate tapping "Log in" on ArrivalView
-        isReturningUser = true
-        currentStep = .accountCreation
-
-        XCTAssertTrue(isReturningUser)
-        XCTAssertEqual(currentStep, .accountCreation)
-    }
-
-    func test_backFromLogin_clearsReturningUserAndReturnsToArrival() {
-        var currentStep = OnboardingStep.accountCreation
-        var isReturningUser = true
-
-        // Simulate tapping back from LoginView
-        isReturningUser = false
-        currentStep = .arrival
-
-        XCTAssertFalse(isReturningUser)
-        XCTAssertEqual(currentStep, .arrival)
+    func test_arrival_previous_isNil() {
+        XCTAssertNil(OnboardingStep.arrival.previous, "Should not go back before first step")
     }
 
     // MARK: - Full Cycle
 
-    func test_fullForwardThenBackwardCycle() {
-        var currentStep = OnboardingStep.arrival
+    func test_fullForwardCycle() {
+        var step = OnboardingStep.arrival
 
-        // Forward: arrival → birthContext → personalAnchor → accountCreation
-        advanceToNext(&currentStep)
-        XCTAssertEqual(currentStep, .birthContext)
+        step = step.next!
+        XCTAssertEqual(step, .birthContext)
 
-        advanceToNext(&currentStep)
-        XCTAssertEqual(currentStep, .personalAnchor)
+        step = step.next!
+        XCTAssertEqual(step, .personalAnchor)
 
-        advanceToNext(&currentStep)
-        XCTAssertEqual(currentStep, .accountCreation)
+        step = step.next!
+        XCTAssertEqual(step, .accountCreation)
 
-        // Backward: accountCreation → personalAnchor → birthContext → arrival
-        goBack(&currentStep)
-        XCTAssertEqual(currentStep, .personalAnchor)
+        XCTAssertNil(step.next)
+    }
 
-        goBack(&currentStep)
-        XCTAssertEqual(currentStep, .birthContext)
+    func test_fullBackwardCycle() {
+        var step = OnboardingStep.accountCreation
 
-        goBack(&currentStep)
-        XCTAssertEqual(currentStep, .arrival)
+        step = step.previous!
+        XCTAssertEqual(step, .personalAnchor)
+
+        step = step.previous!
+        XCTAssertEqual(step, .birthContext)
+
+        step = step.previous!
+        XCTAssertEqual(step, .arrival)
+
+        XCTAssertNil(step.previous)
+    }
+
+    // MARK: - Login Path
+
+    func test_loginPath_jumpsToAccountCreation() {
+        // Login goes directly to accountCreation, bypassing intermediate steps
+        let step = OnboardingStep.accountCreation
+        XCTAssertEqual(step, .accountCreation)
+        XCTAssertEqual(step.previous, .personalAnchor)
+    }
+
+    // MARK: - Step Ordering
+
+    func test_stepCount() {
+        XCTAssertEqual(OnboardingStep.allCases.count, 4)
+    }
+
+    func test_stepOrder() {
+        let steps = OnboardingStep.allCases
+        XCTAssertEqual(steps[0], .arrival)
+        XCTAssertEqual(steps[1], .birthContext)
+        XCTAssertEqual(steps[2], .personalAnchor)
+        XCTAssertEqual(steps[3], .accountCreation)
     }
 
     func test_dataPreservedAcrossNavigation() {
         var data = OnboardingData()
-        var currentStep = OnboardingStep.arrival
+        var step = OnboardingStep.arrival
 
-        // Step 1: Advance and set birth data
-        advanceToNext(&currentStep)
+        step = step.next!
         data.birthDate = Date()
         data.birthCity = "Seoul, South Korea"
 
-        // Step 2: Advance and set anchors
-        advanceToNext(&currentStep)
+        step = step.next!
         data.personalAnchors = [.direction, .energy]
 
-        // Step 3: Go back to birth context
-        goBack(&currentStep)
-        XCTAssertEqual(currentStep, .birthContext)
+        step = step.previous!
+        XCTAssertEqual(step, .birthContext)
 
-        // Data should still be there
         XCTAssertNotNil(data.birthDate)
         XCTAssertEqual(data.birthCity, "Seoul, South Korea")
         XCTAssertEqual(data.personalAnchors.count, 2)
-    }
-
-    // MARK: - Helpers (mirror OnboardingFlow logic)
-
-    private func advanceToNext(_ currentStep: inout OnboardingStep) {
-        if let nextIndex = OnboardingStep.allCases.firstIndex(of: currentStep),
-           nextIndex + 1 < OnboardingStep.allCases.count {
-            currentStep = OnboardingStep.allCases[nextIndex + 1]
-        }
-    }
-
-    private func goBack(_ currentStep: inout OnboardingStep) {
-        if let currentIndex = OnboardingStep.allCases.firstIndex(of: currentStep),
-           currentIndex > 0 {
-            currentStep = OnboardingStep.allCases[currentIndex - 1]
-        }
     }
 }

@@ -44,10 +44,18 @@
 		AA11BB22CC33DD44EE55FF05 /* TabEnumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF15 /* TabEnumTests.swift */; };
 		AA11BB22CC33DD44EE55FF06 /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF16 /* AppStateTests.swift */; };
 		AA11BB22CC33DD44EE55FF07 /* DerivedDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF17 /* DerivedDataTests.swift */; };
+		BB11CC22DD33EE44FF550001 /* InyonUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11CC22DD33EE44FF550002 /* InyonUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		C417E49AEB3187CC3680684F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A36EF142260588C4B3ADCF34 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 15D00086A5FB822A2977E121;
+			remoteInfo = Inyon;
+		};
+		BB11CC22DD33EE44FF550007 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A36EF142260588C4B3ADCF34 /* Project object */;
 			proxyType = 1;
@@ -95,6 +103,8 @@
 		AA11BB22CC33DD44EE55FF15 /* TabEnumTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabEnumTests.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF16 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF17 /* DerivedDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DerivedDataTests.swift; sourceTree = "<group>"; };
+		BB11CC22DD33EE44FF550002 /* InyonUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InyonUITests.swift; sourceTree = "<group>"; };
+		BB11CC22DD33EE44FF550003 /* InyonUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InyonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -136,12 +146,21 @@
 			path = Tests;
 			sourceTree = "<group>";
 		};
+		BB11CC22DD33EE44FF550004 /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				BB11CC22DD33EE44FF550002 /* InyonUITests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
 		32DE4E5C0262C0B5FCE08BB5 = {
 			isa = PBXGroup;
 			children = (
 				18CE5C7005EFCF39F0867A2A /* .claude */,
 				A3973E33E465BB614C9B4BA1 /* Inyon */,
 				2880F76B38E06C9938650E03 /* Tests */,
+				BB11CC22DD33EE44FF550004 /* UITests */,
 				F238D42994EA3FB81A4C225D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -181,7 +200,6 @@
 				1DCC88BF27CEC48AA2D10A96 /* UserService.swift */,
 				AA11BB22CC33DD44EE55FF11 /* UserServiceProtocol.swift */,
 				2D1226045A0B4C5D64889718 /* YouView.swift */,
-				18CE5C7005EFCF39F0867A2A /* .claude */,
 			);
 			name = Inyon;
 			path = .;
@@ -192,6 +210,7 @@
 			children = (
 				2A257A4E3B2835355E89FAAF /* Inyon.app */,
 				E49721D5B99804F6203E5621 /* InyonTests.xctest */,
+				BB11CC22DD33EE44FF550003 /* InyonUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -238,6 +257,24 @@
 			productReference = E49721D5B99804F6203E5621 /* InyonTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		BB11CC22DD33EE44FF550005 /* InyonUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BB11CC22DD33EE44FF55000B /* Build configuration list for PBXNativeTarget "InyonUITests" */;
+			buildPhases = (
+				BB11CC22DD33EE44FF550006 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				BB11CC22DD33EE44FF550008 /* PBXTargetDependency */,
+			);
+			name = InyonUITests;
+			packageProductDependencies = (
+			);
+			productName = InyonUITests;
+			productReference = BB11CC22DD33EE44FF550003 /* InyonUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -266,6 +303,7 @@
 			targets = (
 				15D00086A5FB822A2977E121 /* Inyon */,
 				D1652A08E88E57B35F2F30CD /* InyonTests */,
+				BB11CC22DD33EE44FF550005 /* InyonUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -330,6 +368,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BB11CC22DD33EE44FF550006 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BB11CC22DD33EE44FF550001 /* InyonUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -337,6 +383,11 @@
 			isa = PBXTargetDependency;
 			target = 15D00086A5FB822A2977E121 /* Inyon */;
 			targetProxy = C417E49AEB3187CC3680684F /* PBXContainerItemProxy */;
+		};
+		BB11CC22DD33EE44FF550008 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 15D00086A5FB822A2977E121 /* Inyon */;
+			targetProxy = BB11CC22DD33EE44FF550007 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -542,6 +593,38 @@
 			};
 			name = Debug;
 		};
+		BB11CC22DD33EE44FF550009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Inyon;
+			};
+			name = Debug;
+		};
+		BB11CC22DD33EE44FF55000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Inyon;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -568,6 +651,15 @@
 			buildConfigurations = (
 				EA2148138DD5071DFF2940B9 /* Debug */,
 				3176F4566B3177D8144CA5B6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		BB11CC22DD33EE44FF55000B /* Build configuration list for PBXNativeTarget "InyonUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BB11CC22DD33EE44FF550009 /* Debug */,
+				BB11CC22DD33EE44FF55000A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

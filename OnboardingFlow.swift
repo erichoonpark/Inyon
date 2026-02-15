@@ -50,6 +50,20 @@ enum OnboardingStep: Int, CaseIterable {
     case birthContext
     case personalAnchor
     case accountCreation
+
+    var next: OnboardingStep? {
+        let steps = Self.allCases
+        guard let index = steps.firstIndex(of: self),
+              index + 1 < steps.count else { return nil }
+        return steps[index + 1]
+    }
+
+    var previous: OnboardingStep? {
+        let steps = Self.allCases
+        guard let index = steps.firstIndex(of: self),
+              index > 0 else { return nil }
+        return steps[index - 1]
+    }
 }
 
 // MARK: - Onboarding Flow Coordinator
@@ -59,6 +73,8 @@ struct OnboardingFlow: View {
     @State private var data = OnboardingData()
     @State private var isVisible = false
     @State private var isReturningUser: Bool = false
+    @State private var isSaving = false
+    @State private var saveError: String?
     @EnvironmentObject private var authService: AuthService
 
     let onboardingService: OnboardingServiceProtocol
@@ -88,13 +104,44 @@ struct OnboardingFlow: View {
                         }, onComplete: onComplete)
                     } else {
                         AccountCreationView(data: data, onBack: goBack, onComplete: {
-                            saveOnboardingData()
-                            onComplete()
+                            saveOnboardingDataThenComplete()
                         })
                     }
                 }
             }
             .opacity(isVisible ? 1 : 0)
+
+            if isSaving {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 16) {
+                    if let saveError {
+                        Text(saveError)
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
+                            .multilineTextAlignment(.center)
+
+                        Button {
+                            saveOnboardingDataThenComplete()
+                        } label: {
+                            Text("Retry")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundColor(AppTheme.earth)
+                                .padding(.horizontal, 32)
+                                .padding(.vertical, 14)
+                                .background(AppTheme.textPrimary)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        }
+                    } else {
+                        ProgressView()
+                            .tint(AppTheme.textPrimary)
+                    }
+                }
+                .padding(32)
+                .background(AppTheme.surface)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+            }
         }
         .onAppear {
             withAnimation(.easeIn(duration: 0.25)) {
@@ -123,9 +170,8 @@ struct OnboardingFlow: View {
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            if let nextIndex = OnboardingStep.allCases.firstIndex(of: currentStep),
-               nextIndex + 1 < OnboardingStep.allCases.count {
-                currentStep = OnboardingStep.allCases[nextIndex + 1]
+            if let next = currentStep.next {
+                currentStep = next
             }
 
             withAnimation(.easeInOut(duration: 0.25)) {
@@ -140,9 +186,8 @@ struct OnboardingFlow: View {
         }
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-            if let currentIndex = OnboardingStep.allCases.firstIndex(of: currentStep),
-               currentIndex > 0 {
-                currentStep = OnboardingStep.allCases[currentIndex - 1]
+            if let previous = currentStep.previous {
+                currentStep = previous
             }
 
             withAnimation(.easeInOut(duration: 0.25)) {
@@ -151,9 +196,20 @@ struct OnboardingFlow: View {
         }
     }
 
-    private func saveOnboardingData() {
+    private func saveOnboardingDataThenComplete() {
+        isSaving = true
+        saveError = nil
         Task {
-            try? await onboardingService.saveOnboardingData(data, userId: authService.currentUserId)
+            do {
+                try await onboardingService.saveOnboardingData(data, userId: authService.currentUserId)
+                if let uid = authService.currentUserId {
+                    try? await onboardingService.migrateAnonymousData(toUserId: uid)
+                }
+                isSaving = false
+                onComplete()
+            } catch {
+                saveError = "Could not save your data. Please try again."
+            }
         }
     }
 }
@@ -640,13 +696,24 @@ struct AccountCreationView: View {
     var onBack: () -> Void
     var onComplete: () -> Void
 
+    @EnvironmentObject private var authService: AuthService
+    @State private var email = ""
+    @State private var password = ""
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    @State private var showEmailForm = false
     @State private var isVisible = false
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Button {
-                    onBack()
+                    if showEmailForm {
+                        showEmailForm = false
+                        errorMessage = nil
+                    } else {
+                        onBack()
+                    }
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 17, weight: .medium))
@@ -655,6 +722,7 @@ struct AccountCreationView: View {
                         .contentShape(Rectangle())
                 }
                 .accessibilityLabel("Back")
+                .disabled(isLoading)
                 Spacer()
             }
             .padding(.horizontal, 8)
@@ -666,60 +734,139 @@ struct AccountCreationView: View {
                     .font(.system(size: 26, weight: .medium))
                     .foregroundColor(AppTheme.textPrimary)
                     .multilineTextAlignment(.center)
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
+                        .multilineTextAlignment(.center)
+                }
             }
             .padding(.horizontal, 40)
             .opacity(isVisible ? 1 : 0)
 
             Spacer()
 
-            VStack(spacing: 12) {
-                // Apple Sign In
-                Button {
-                    // TODO: Implement Apple Sign In
-                    onComplete()
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "apple.logo")
-                            .font(.system(size: 18))
-                        Text("Continue with Apple")
-                            .font(.system(size: 17, weight: .medium))
-                    }
-                    .foregroundColor(AppTheme.earth)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(AppTheme.textPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
+            if showEmailForm {
+                VStack(spacing: 16) {
+                    TextField("Email", text: $email)
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .tint(AppTheme.textPrimary)
+                        .textContentType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                        )
+                        .disabled(isLoading)
 
-                // Email Sign In
-                Button {
-                    // TODO: Implement Email Sign In
-                    onComplete()
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "envelope")
-                            .font(.system(size: 16))
-                        Text("Continue with Email")
-                            .font(.system(size: 17, weight: .medium))
+                    SecureField("Password", text: $password)
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .tint(AppTheme.textPrimary)
+                        .textContentType(.newPassword)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                        )
+                        .disabled(isLoading)
+
+                    Button {
+                        createAccount()
+                    } label: {
+                        Group {
+                            if isLoading {
+                                ProgressView()
+                                    .tint(AppTheme.earth)
+                            } else {
+                                Text("Create Account")
+                                    .font(.system(size: 17, weight: .medium))
+                            }
+                        }
+                        .foregroundColor(AppTheme.earth)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(
+                            (!isLoading && !email.isEmpty && password.count >= 6)
+                                ? AppTheme.textPrimary
+                                : AppTheme.textPrimary.opacity(0.3)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .foregroundColor(AppTheme.textPrimary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(Color.clear)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
-                    )
+                    .disabled(isLoading || email.isEmpty || password.count < 6)
                 }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 48)
+                .opacity(isVisible ? 1 : 0)
+            } else {
+                VStack(spacing: 12) {
+                    // Apple Sign In
+                    Button {
+                        // TODO: Implement Apple Sign In
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "apple.logo")
+                                .font(.system(size: 18))
+                            Text("Continue with Apple")
+                                .font(.system(size: 17, weight: .medium))
+                        }
+                        .foregroundColor(AppTheme.earth)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(AppTheme.textPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+
+                    // Email Sign In
+                    Button {
+                        showEmailForm = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "envelope")
+                                .font(.system(size: 16))
+                            Text("Continue with Email")
+                                .font(.system(size: 17, weight: .medium))
+                        }
+                        .foregroundColor(AppTheme.textPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 48)
+                .opacity(isVisible ? 1 : 0)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 48)
-            .opacity(isVisible ? 1 : 0)
         }
         .onAppear {
             withAnimation(.easeIn(duration: 0.3).delay(0.1)) {
                 isVisible = true
             }
+        }
+    }
+
+    private func createAccount() {
+        guard !email.isEmpty, password.count >= 6 else { return }
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                _ = try await authService.createAccount(email: email, password: password)
+                onComplete()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
         }
     }
 }
@@ -730,13 +877,24 @@ struct LoginView: View {
     var onBack: () -> Void
     var onComplete: () -> Void
 
+    @EnvironmentObject private var authService: AuthService
+    @State private var email = ""
+    @State private var password = ""
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    @State private var showEmailForm = false
     @State private var isVisible = false
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Button {
-                    onBack()
+                    if showEmailForm {
+                        showEmailForm = false
+                        errorMessage = nil
+                    } else {
+                        onBack()
+                    }
                 } label: {
                     Image(systemName: "chevron.left")
                         .font(.system(size: 17, weight: .medium))
@@ -745,6 +903,7 @@ struct LoginView: View {
                         .contentShape(Rectangle())
                 }
                 .accessibilityLabel("Back")
+                .disabled(isLoading)
                 Spacer()
             }
             .padding(.horizontal, 8)
@@ -756,60 +915,139 @@ struct LoginView: View {
                     .font(.system(size: 26, weight: .medium))
                     .foregroundColor(AppTheme.textPrimary)
                     .multilineTextAlignment(.center)
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .font(.system(size: 14, weight: .regular))
+                        .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
+                        .multilineTextAlignment(.center)
+                }
             }
             .padding(.horizontal, 40)
             .opacity(isVisible ? 1 : 0)
 
             Spacer()
 
-            VStack(spacing: 12) {
-                // Apple Sign In
-                Button {
-                    // TODO: Implement Apple Sign In
-                    onComplete()
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "apple.logo")
-                            .font(.system(size: 18))
-                        Text("Continue with Apple")
-                            .font(.system(size: 17, weight: .medium))
-                    }
-                    .foregroundColor(AppTheme.earth)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(AppTheme.textPrimary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                }
+            if showEmailForm {
+                VStack(spacing: 16) {
+                    TextField("Email", text: $email)
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .tint(AppTheme.textPrimary)
+                        .textContentType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                        )
+                        .disabled(isLoading)
 
-                // Email Sign In
-                Button {
-                    // TODO: Implement Email Sign In
-                    onComplete()
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "envelope")
-                            .font(.system(size: 16))
-                        Text("Continue with Email")
-                            .font(.system(size: 17, weight: .medium))
+                    SecureField("Password", text: $password)
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .tint(AppTheme.textPrimary)
+                        .textContentType(.password)
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                        )
+                        .disabled(isLoading)
+
+                    Button {
+                        signIn()
+                    } label: {
+                        Group {
+                            if isLoading {
+                                ProgressView()
+                                    .tint(AppTheme.earth)
+                            } else {
+                                Text("Sign In")
+                                    .font(.system(size: 17, weight: .medium))
+                            }
+                        }
+                        .foregroundColor(AppTheme.earth)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(
+                            (!isLoading && !email.isEmpty && !password.isEmpty)
+                                ? AppTheme.textPrimary
+                                : AppTheme.textPrimary.opacity(0.3)
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .foregroundColor(AppTheme.textPrimary)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 18)
-                    .background(Color.clear)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 14)
-                            .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
-                    )
+                    .disabled(isLoading || email.isEmpty || password.isEmpty)
                 }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 48)
+                .opacity(isVisible ? 1 : 0)
+            } else {
+                VStack(spacing: 12) {
+                    // Apple Sign In
+                    Button {
+                        // TODO: Implement Apple Sign In
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "apple.logo")
+                                .font(.system(size: 18))
+                            Text("Continue with Apple")
+                                .font(.system(size: 17, weight: .medium))
+                        }
+                        .foregroundColor(AppTheme.earth)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(AppTheme.textPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+
+                    // Email Sign In
+                    Button {
+                        showEmailForm = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "envelope")
+                                .font(.system(size: 16))
+                            Text("Continue with Email")
+                                .font(.system(size: 17, weight: .medium))
+                        }
+                        .foregroundColor(AppTheme.textPrimary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                        )
+                    }
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 48)
+                .opacity(isVisible ? 1 : 0)
             }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 48)
-            .opacity(isVisible ? 1 : 0)
         }
         .onAppear {
             withAnimation(.easeIn(duration: 0.3).delay(0.1)) {
                 isVisible = true
             }
+        }
+    }
+
+    private func signIn() {
+        guard !email.isEmpty, !password.isEmpty else { return }
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                try await authService.signIn(email: email, password: password)
+                onComplete()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
         }
     }
 }

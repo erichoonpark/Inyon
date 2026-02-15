@@ -16,11 +16,11 @@ struct InyonApp: App {
             Group {
                 if authService.isLoading {
                     ProgressView()
-                } else if authService.isAuthenticated {
+                } else if let userId = authService.currentUserId {
                     ContentView(onboardingService: onboardingService)
                         .environmentObject(appState)
                         .task {
-                            await appState.loadUser(id: authService.currentUserId!)
+                            await appState.loadUser(id: userId)
                         }
                 } else {
                     OnboardingFlow(onboardingService: onboardingService, onComplete: {
