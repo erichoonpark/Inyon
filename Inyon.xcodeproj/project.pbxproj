@@ -37,6 +37,13 @@
 		F96A3579347B988032BE07C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23F9A2ADC06C5C58A4DAFEA4 /* Assets.xcassets */; };
 		FA52B53D47E948A0DF846F34 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CE80129396A00FC3FD8A9C /* GuideView.swift */; };
 		FA60D68CA522B47449A52286 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BD8A7AA986B81866AE9A92CC /* FirebaseFirestore */; };
+		AA11BB22CC33DD44EE55FF01 /* UserServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF11 /* UserServiceProtocol.swift */; };
+		AA11BB22CC33DD44EE55FF02 /* DerivedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF12 /* DerivedData.swift */; };
+		AA11BB22CC33DD44EE55FF03 /* MockUserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF13 /* MockUserService.swift */; };
+		AA11BB22CC33DD44EE55FF04 /* UserModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF14 /* UserModelTests.swift */; };
+		AA11BB22CC33DD44EE55FF05 /* TabEnumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF15 /* TabEnumTests.swift */; };
+		AA11BB22CC33DD44EE55FF06 /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF16 /* AppStateTests.swift */; };
+		AA11BB22CC33DD44EE55FF07 /* DerivedDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF17 /* DerivedDataTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +88,13 @@
 		ECEC983BA3C91520977BD07C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		F9A0EB9FC9F33431DA918146 /* OnboardingServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingServiceProtocol.swift; sourceTree = "<group>"; };
 		F9E9EDC7419092D1AD19636A /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF11 /* UserServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserServiceProtocol.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF12 /* DerivedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DerivedData.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF13 /* MockUserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockUserService.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF14 /* UserModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserModelTests.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF15 /* TabEnumTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabEnumTests.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF16 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
+		AA11BB22CC33DD44EE55FF17 /* DerivedDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DerivedDataTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,10 +123,14 @@
 			isa = PBXGroup;
 			children = (
 				9CD1FA309F2CFF597E7E3845 /* AppIconConfigurationTests.swift */,
+				AA11BB22CC33DD44EE55FF16 /* AppStateTests.swift */,
+				AA11BB22CC33DD44EE55FF17 /* DerivedDataTests.swift */,
 				46741F543C97E567184E678A /* OnboardingDataFlowTests.swift */,
 				7197B1AC9501417EEE09F4C1 /* OnboardingFlowNavigationTests.swift */,
 				EBAA904754D6242982DC830C /* OnboardingServiceTests.swift */,
 				6A31F674DDA8160E16BC5B49 /* OnboardingTests.swift */,
+				AA11BB22CC33DD44EE55FF15 /* TabEnumTests.swift */,
+				AA11BB22CC33DD44EE55FF14 /* UserModelTests.swift */,
 				96A0F74CEA14DD9C1C2CBD28 /* Mocks */,
 			);
 			path = Tests;
@@ -133,6 +151,7 @@
 			children = (
 				57E78A908AF47AFE93D03F71 /* MockAuthService.swift */,
 				D7626D4C55720F30D5F84767 /* MockOnboardingService.swift */,
+				AA11BB22CC33DD44EE55FF13 /* MockUserService.swift */,
 			);
 			path = Mocks;
 			sourceTree = "<group>";
@@ -146,6 +165,7 @@
 				96782318C050A3ADD573D9F2 /* AuthService.swift */,
 				854519AC6D67CDAD09998D75 /* AuthServiceProtocol.swift */,
 				DEC4632DD693B1291BAA1FBE /* ContentView.swift */,
+				AA11BB22CC33DD44EE55FF12 /* DerivedData.swift */,
 				3EAF1C3CCE3764843F3C1894 /* GoogleService-Info.plist */,
 				6DB96CBA1C1BE4072E3AA2AC /* GuideComponents.swift */,
 				B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */,
@@ -159,6 +179,7 @@
 				ECEC983BA3C91520977BD07C /* Theme.swift */,
 				02033E1152CB0D86C11C4694 /* User.swift */,
 				1DCC88BF27CEC48AA2D10A96 /* UserService.swift */,
+				AA11BB22CC33DD44EE55FF11 /* UserServiceProtocol.swift */,
 				2D1226045A0B4C5D64889718 /* YouView.swift */,
 				18CE5C7005EFCF39F0867A2A /* .claude */,
 			);
@@ -284,6 +305,8 @@
 				9D8029507479A845C92F1639 /* Theme.swift in Sources */,
 				381D953F7B10D92527D80DB7 /* User.swift in Sources */,
 				31186B0476A42ACCEE8A90AA /* UserService.swift in Sources */,
+				AA11BB22CC33DD44EE55FF01 /* UserServiceProtocol.swift in Sources */,
+				AA11BB22CC33DD44EE55FF02 /* DerivedData.swift in Sources */,
 				52BFC7444BC4631BEED7686B /* YouView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -299,6 +322,11 @@
 				0FB73300CCF8525CB9DCC648 /* OnboardingFlowNavigationTests.swift in Sources */,
 				8494CE7ED00C0FD45874585E /* OnboardingServiceTests.swift in Sources */,
 				ADE75E54B2114EBF058008A2 /* OnboardingTests.swift in Sources */,
+				AA11BB22CC33DD44EE55FF03 /* MockUserService.swift in Sources */,
+				AA11BB22CC33DD44EE55FF04 /* UserModelTests.swift in Sources */,
+				AA11BB22CC33DD44EE55FF05 /* TabEnumTests.swift in Sources */,
+				AA11BB22CC33DD44EE55FF06 /* AppStateTests.swift in Sources */,
+				AA11BB22CC33DD44EE55FF07 /* DerivedDataTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

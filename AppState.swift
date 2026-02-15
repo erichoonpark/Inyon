@@ -5,7 +5,11 @@ final class AppState: ObservableObject {
     @Published var currentUser: User?
     @Published var isLoadingUser = false
 
-    private let userService = UserService()
+    private let userService: UserServiceProtocol
+
+    init(userService: UserServiceProtocol = UserService()) {
+        self.userService = userService
+    }
 
     func loadUser(id: String) async {
         isLoadingUser = true

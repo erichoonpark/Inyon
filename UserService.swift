@@ -1,7 +1,7 @@
 import Foundation
 import FirebaseFirestore
 
-final class UserService {
+final class UserService: UserServiceProtocol {
     private let db = Firestore.firestore()
     private let collection = "users"
 

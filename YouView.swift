@@ -326,28 +326,11 @@ struct YouView: View {
     // MARK: - Derived Data (Placeholder Logic)
 
     private var derivedLunarBirthday: String {
-        guard let date = birthDate else {
-            return "—"
-        }
-        // Placeholder: In production, use proper lunar calendar conversion
-        // For now, show a formatted version indicating this is derived
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter.string(from: date) + " (approx.)"
+        DerivedData.lunarBirthday(from: birthDate)
     }
 
     private var derivedZodiac: String {
-        guard let date = birthDate else {
-            return "—"
-        }
-        // Placeholder: Chinese zodiac based on birth year
-        // Simplified cycle starting from 1924 (Rat year)
-        let year = Calendar.current.component(.year, from: date)
-        let zodiacAnimals = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
-                            "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"]
-        let index = (year - 1924) % 12
-        let safeIndex = index < 0 ? index + 12 : index
-        return zodiacAnimals[safeIndex]
+        DerivedData.zodiacAnimal(from: birthDate)
     }
 
     // MARK: - Data Operations
