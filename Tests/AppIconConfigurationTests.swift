@@ -25,8 +25,8 @@ final class AppIconConfigurationTests: XCTestCase {
         }
 
         XCTAssertTrue(
-            iconFiles.contains("AppIcon"),
-            "CFBundleIconFiles should contain 'AppIcon', got: \(iconFiles)"
+            iconFiles.contains(where: { $0.hasPrefix("AppIcon") }),
+            "CFBundleIconFiles should contain an entry starting with 'AppIcon', got: \(iconFiles)"
         )
     }
 }

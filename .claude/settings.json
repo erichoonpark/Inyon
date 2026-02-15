@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-tests-on-change.sh",
+            "timeout": 300,
+            "statusMessage": "Running tests..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "FULL_SUITE=1 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/run-tests-on-change.sh",
+            "timeout": 300,
+            "statusMessage": "Verifying all tests pass..."
+          }
+        ]
+      }
+    ]
+  }
+}

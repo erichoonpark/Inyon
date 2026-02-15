@@ -1,0 +1,99 @@
+#!/bin/bash
+# ──────────────────────────────────────────────────────────────
+# pre-push hook
+#
+# Blocks git push unless BOTH unit tests and UI/E2E tests pass.
+# Bypass once (discouraged): git push --no-verify
+# ──────────────────────────────────────────────────────────────
+
+set -euo pipefail
+
+echo ""
+echo "════════════════════════════════════════════════════════"
+echo "  PRE-PUSH QUALITY GATE"
+echo "════════════════════════════════════════════════════════"
+echo ""
+
+# ── Simulator destination selection ───────────────────────────
+DESTINATION=""
+
+# Try iPhone 16 first
+if xcrun simctl list devices available 2>/dev/null | grep -q "iPhone 16"; then
+    DESTINATION="platform=iOS Simulator,name=iPhone 16"
+    echo "→ Simulator: iPhone 16"
+else
+    # Fall back to first available iOS simulator
+    FIRST_SIM=$(xcrun simctl list devices available 2>/dev/null \
+        | grep -E '^\s+.+\(' \
+        | head -1 \
+        | sed 's/^[[:space:]]*//' \
+        | sed 's/ (.*//')
+
+    if [[ -z "$FIRST_SIM" ]]; then
+        echo "✗ No iOS simulators available. Install one via Xcode."
+        exit 1
+    fi
+
+    DESTINATION="platform=iOS Simulator,name=$FIRST_SIM"
+    echo "→ Simulator: $FIRST_SIM (iPhone 16 not available)"
+fi
+
+echo ""
+
+# ── A. Unit Tests ─────────────────────────────────────────────
+echo "────────────────────────────────────────────────────────"
+echo "  STEP 1/2: Unit Tests (InyonTests)"
+echo "────────────────────────────────────────────────────────"
+echo ""
+
+if ! xcodebuild test \
+    -scheme Inyon \
+    -destination "$DESTINATION" \
+    -only-testing:InyonTests \
+    -quiet 2>&1; then
+
+    echo ""
+    echo "✗ Unit tests failed. Push blocked."
+    echo "  Fix failing tests, then try again."
+    exit 1
+fi
+
+echo "✓ Unit tests passed."
+echo ""
+
+# ── B. UI/E2E Tests ──────────────────────────────────────────
+echo "────────────────────────────────────────────────────────"
+echo "  STEP 2/2: UI/E2E Tests (InyonUITests)"
+echo "────────────────────────────────────────────────────────"
+echo ""
+
+UI_TEST_OUTPUT=$(xcodebuild test \
+    -scheme Inyon \
+    -destination "$DESTINATION" \
+    -only-testing:InyonUITests \
+    -quiet 2>&1) && UI_EXIT=0 || UI_EXIT=$?
+
+if [[ $UI_EXIT -ne 0 ]]; then
+    # Check if the failure is because the target/suite doesn't exist
+    if echo "$UI_TEST_OUTPUT" | grep -qiE 'no test|unable to find.*InyonUITests|does not contain'; then
+        echo ""
+        echo "✗ UI/E2E tests are required before push."
+        echo "  Create/enable InyonUITests target in the Inyon scheme."
+        exit 1
+    fi
+
+    echo "$UI_TEST_OUTPUT" | grep -E '(error:|Test Case.*failed|FAILED)' | head -20
+    echo ""
+    echo "✗ UI/E2E tests failed. Push blocked."
+    echo "  Fix failing tests, then try again."
+    exit 1
+fi
+
+echo "✓ UI/E2E tests passed."
+echo ""
+
+# ── Success ───────────────────────────────────────────────────
+echo "════════════════════════════════════════════════════════"
+echo "  ✓ All quality gates passed. Pushing."
+echo "════════════════════════════════════════════════════════"
+echo ""

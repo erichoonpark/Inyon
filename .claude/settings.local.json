@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(swift build:*)"
+      "Bash(swift build:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd login path to onboarding arrival screen\n\nSplit the arrival screen into two paths: \"Get Started\" for new users\nand \"Already have an account? Log in\" for returning users. The login\npath skips onboarding steps and shows a LoginView directly.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(xcodebuild build-for-testing:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(xcodebuild test:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(chmod:*)",
+      "Bash(python3:*)",
+      "Bash(bash -n /Users/ericpark/projects/Inyon/.claude/hooks/run-tests-on-change.sh)"
     ]
   }
 }

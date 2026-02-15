@@ -1,0 +1,48 @@
+{
+  // VS Code Tasks for Inyon (macOS only)
+  //
+  // "Claude Done Text" — sends an iMessage when Claude finishes a task.
+  // "Claude Done Text Test" — sends a test iMessage to verify setup.
+  //
+  // To change the phone number:
+  //   Replace "+12135981088" in both tasks below.
+  //
+  // To run a task:
+  //   Cmd+Shift+P > "Tasks: Run Task" > select the task name.
+  //
+  // To bind to a keyboard shortcut:
+  //   Open keybindings.json (Cmd+K Cmd+S > click the {} icon), then add:
+  //   {
+  //     "key": "ctrl+shift+d",
+  //     "command": "workbench.action.tasks.runTask",
+  //     "args": "Claude Done Text"
+  //   }
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Claude Done Text",
+      "type": "shell",
+      "command": "osascript -e 'tell application \"Messages\" to send \"Claude finished: ${input:description} at '$(date +%H:%M)'\" to buddy \"+12135981088\" of (first account whose service type is iMessage)'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent"
+      }
+    },
+    {
+      "label": "Claude Done Text Test",
+      "type": "shell",
+      "command": "echo 'Testing Claude notification...' && which osascript || (echo 'ERROR: osascript not found. This task requires macOS.' && exit 1) && osascript -e 'tell application \"Messages\" to send \"Claude test notification at '$(date +%H:%M)'\" to buddy \"+12135981088\" of (first account whose service type is iMessage)' && echo 'Test notification sent.'",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "description",
+      "type": "promptString",
+      "description": "What did Claude finish? (e.g. HomeView refactor)"
+    }
+  ]
+}
