@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -30,13 +30,6 @@
 		9D70227C6010885126F94D47 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3EAF1C3CCE3764843F3C1894 /* GoogleService-Info.plist */; };
 		9D8029507479A845C92F1639 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECEC983BA3C91520977BD07C /* Theme.swift */; };
 		A9BB82531D0A8911456CB17C /* OnboardingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E9EDC7419092D1AD19636A /* OnboardingService.swift */; };
-		ADE75E54B2114EBF058008A2 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A31F674DDA8160E16BC5B49 /* OnboardingTests.swift */; };
-		C3695D3C0A2B1D029DB1DCD4 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DCABA9CC9830799F06027A /* OnboardingFlow.swift */; };
-		C90BA042872923D1228CA513 /* GuideContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */; };
-		CC4C9D02F715FE5A1AAF7125 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96782318C050A3ADD573D9F2 /* AuthService.swift */; };
-		F96A3579347B988032BE07C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23F9A2ADC06C5C58A4DAFEA4 /* Assets.xcassets */; };
-		FA52B53D47E948A0DF846F34 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CE80129396A00FC3FD8A9C /* GuideView.swift */; };
-		FA60D68CA522B47449A52286 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BD8A7AA986B81866AE9A92CC /* FirebaseFirestore */; };
 		AA11BB22CC33DD44EE55FF01 /* UserServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF11 /* UserServiceProtocol.swift */; };
 		AA11BB22CC33DD44EE55FF02 /* DerivedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF12 /* DerivedData.swift */; };
 		AA11BB22CC33DD44EE55FF03 /* MockUserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF13 /* MockUserService.swift */; };
@@ -44,18 +37,25 @@
 		AA11BB22CC33DD44EE55FF05 /* TabEnumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF15 /* TabEnumTests.swift */; };
 		AA11BB22CC33DD44EE55FF06 /* AppStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF16 /* AppStateTests.swift */; };
 		AA11BB22CC33DD44EE55FF07 /* DerivedDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA11BB22CC33DD44EE55FF17 /* DerivedDataTests.swift */; };
+		ADE75E54B2114EBF058008A2 /* OnboardingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A31F674DDA8160E16BC5B49 /* OnboardingTests.swift */; };
 		BB11CC22DD33EE44FF550001 /* InyonUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11CC22DD33EE44FF550002 /* InyonUITests.swift */; };
+		C3695D3C0A2B1D029DB1DCD4 /* OnboardingFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0DCABA9CC9830799F06027A /* OnboardingFlow.swift */; };
+		C90BA042872923D1228CA513 /* GuideContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */; };
+		CC4C9D02F715FE5A1AAF7125 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96782318C050A3ADD573D9F2 /* AuthService.swift */; };
+		F96A3579347B988032BE07C7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23F9A2ADC06C5C58A4DAFEA4 /* Assets.xcassets */; };
+		FA52B53D47E948A0DF846F34 /* GuideView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2CE80129396A00FC3FD8A9C /* GuideView.swift */; };
+		FA60D68CA522B47449A52286 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = BD8A7AA986B81866AE9A92CC /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		C417E49AEB3187CC3680684F /* PBXContainerItemProxy */ = {
+		BB11CC22DD33EE44FF550007 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A36EF142260588C4B3ADCF34 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 15D00086A5FB822A2977E121;
 			remoteInfo = Inyon;
 		};
-		BB11CC22DD33EE44FF550007 /* PBXContainerItemProxy */ = {
+		C417E49AEB3187CC3680684F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A36EF142260588C4B3ADCF34 /* Project object */;
 			proxyType = 1;
@@ -80,22 +80,13 @@
 		6A31F674DDA8160E16BC5B49 /* OnboardingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingTests.swift; sourceTree = "<group>"; };
 		6DB96CBA1C1BE4072E3AA2AC /* GuideComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideComponents.swift; sourceTree = "<group>"; };
 		7197B1AC9501417EEE09F4C1 /* OnboardingFlowNavigationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowNavigationTests.swift; sourceTree = "<group>"; };
-		80848B29DAD76A58FEFD777C /* .gitignore */ = {isa = PBXFileReference; path = .gitignore; sourceTree = "<group>"; };
+		80848B29DAD76A58FEFD777C /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = Inyon.xcodeproj; sourceTree = "<group>"; };
 		854519AC6D67CDAD09998D75 /* AuthServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthServiceProtocol.swift; sourceTree = "<group>"; };
 		8C019A3F1945EA7BC4B35D44 /* settings.local.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.local.json; sourceTree = "<group>"; };
 		96782318C050A3ADD573D9F2 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		9CD1FA309F2CFF597E7E3845 /* AppIconConfigurationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconConfigurationTests.swift; sourceTree = "<group>"; };
 		A0DCABA9CC9830799F06027A /* OnboardingFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlow.swift; sourceTree = "<group>"; };
-		B2CE80129396A00FC3FD8A9C /* GuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideView.swift; sourceTree = "<group>"; };
-		B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideContent.swift; sourceTree = "<group>"; };
-		D7626D4C55720F30D5F84767 /* MockOnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockOnboardingService.swift; sourceTree = "<group>"; };
-		DEC4632DD693B1291BAA1FBE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		E49721D5B99804F6203E5621 /* InyonTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InyonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		EBAA904754D6242982DC830C /* OnboardingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingServiceTests.swift; sourceTree = "<group>"; };
-		ECEC983BA3C91520977BD07C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		F9A0EB9FC9F33431DA918146 /* OnboardingServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingServiceProtocol.swift; sourceTree = "<group>"; };
-		F9E9EDC7419092D1AD19636A /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF11 /* UserServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserServiceProtocol.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF12 /* DerivedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DerivedData.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF13 /* MockUserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockUserService.swift; sourceTree = "<group>"; };
@@ -103,8 +94,17 @@
 		AA11BB22CC33DD44EE55FF15 /* TabEnumTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabEnumTests.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF16 /* AppStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStateTests.swift; sourceTree = "<group>"; };
 		AA11BB22CC33DD44EE55FF17 /* DerivedDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DerivedDataTests.swift; sourceTree = "<group>"; };
+		B2CE80129396A00FC3FD8A9C /* GuideView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideView.swift; sourceTree = "<group>"; };
+		B7FC7BB39BEC7C26FA74F788 /* GuideContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuideContent.swift; sourceTree = "<group>"; };
 		BB11CC22DD33EE44FF550002 /* InyonUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InyonUITests.swift; sourceTree = "<group>"; };
 		BB11CC22DD33EE44FF550003 /* InyonUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InyonUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D7626D4C55720F30D5F84767 /* MockOnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockOnboardingService.swift; sourceTree = "<group>"; };
+		DEC4632DD693B1291BAA1FBE /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		E49721D5B99804F6203E5621 /* InyonTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InyonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBAA904754D6242982DC830C /* OnboardingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingServiceTests.swift; sourceTree = "<group>"; };
+		ECEC983BA3C91520977BD07C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		F9A0EB9FC9F33431DA918146 /* OnboardingServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingServiceProtocol.swift; sourceTree = "<group>"; };
+		F9E9EDC7419092D1AD19636A /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,14 +144,6 @@
 				96A0F74CEA14DD9C1C2CBD28 /* Mocks */,
 			);
 			path = Tests;
-			sourceTree = "<group>";
-		};
-		BB11CC22DD33EE44FF550004 /* UITests */ = {
-			isa = PBXGroup;
-			children = (
-				BB11CC22DD33EE44FF550002 /* InyonUITests.swift */,
-			);
-			path = UITests;
 			sourceTree = "<group>";
 		};
 		32DE4E5C0262C0B5FCE08BB5 = {
@@ -205,6 +197,19 @@
 			path = .;
 			sourceTree = "<group>";
 		};
+		BB11CC22DD33EE44FF550004 /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				BB11CC22DD33EE44FF550002 /* InyonUITests.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
+		E3DD81E52F4272A0006653EE /* Products */ = {
+			isa = PBXGroup;
+			name = Products;
+			sourceTree = "<group>";
+		};
 		F238D42994EA3FB81A4C225D /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -239,24 +244,6 @@
 			productReference = 2A257A4E3B2835355E89FAAF /* Inyon.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D1652A08E88E57B35F2F30CD /* InyonTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = B22FB44950E7FE48B528F3F9 /* Build configuration list for PBXNativeTarget "InyonTests" */;
-			buildPhases = (
-				AF34242417AA9379CC2D1867 /* Sources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				873A9AFFE3AEB2108E6BE1A1 /* PBXTargetDependency */,
-			);
-			name = InyonTests;
-			packageProductDependencies = (
-			);
-			productName = InyonTests;
-			productReference = E49721D5B99804F6203E5621 /* InyonTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 		BB11CC22DD33EE44FF550005 /* InyonUITests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BB11CC22DD33EE44FF55000B /* Build configuration list for PBXNativeTarget "InyonUITests" */;
@@ -274,6 +261,24 @@
 			productName = InyonUITests;
 			productReference = BB11CC22DD33EE44FF550003 /* InyonUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		D1652A08E88E57B35F2F30CD /* InyonTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B22FB44950E7FE48B528F3F9 /* Build configuration list for PBXNativeTarget "InyonTests" */;
+			buildPhases = (
+				AF34242417AA9379CC2D1867 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				873A9AFFE3AEB2108E6BE1A1 /* PBXTargetDependency */,
+			);
+			name = InyonTests;
+			packageProductDependencies = (
+			);
+			productName = InyonTests;
+			productReference = E49721D5B99804F6203E5621 /* InyonTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -297,8 +302,13 @@
 			packageReferences = (
 				D568EF165C4CDC45BB833261 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E3DD81E52F4272A0006653EE /* Products */;
+					ProjectRef = 84229A127D912EDB3EF10E80 /* Inyon.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				15D00086A5FB822A2977E121 /* Inyon */,
@@ -496,6 +506,38 @@
 			};
 			name = Debug;
 		};
+		BB11CC22DD33EE44FF550009 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Inyon;
+			};
+			name = Debug;
+		};
+		BB11CC22DD33EE44FF55000A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app.uitests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Inyon;
+			};
+			name = Release;
+		};
 		C3B9AE64555ED1791950D870 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -592,38 +634,6 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Inyon.app/Inyon";
 			};
 			name = Debug;
-		};
-		BB11CC22DD33EE44FF550009 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GENERATE_INFOPLIST_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app.uitests;
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Inyon;
-			};
-			name = Debug;
-		};
-		BB11CC22DD33EE44FF55000A /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				GENERATE_INFOPLIST_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.inyon.app.uitests;
-				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Inyon;
-			};
-			name = Release;
 		};
 /* End XCBuildConfiguration section */
 

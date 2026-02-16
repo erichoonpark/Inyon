@@ -211,6 +211,7 @@ struct OnboardingFlow: View {
                 isSaving = false
                 onComplete()
             } catch {
+                isSaving = false
                 saveError = "Could not save your data. Please try again."
             }
         }
@@ -266,6 +267,7 @@ struct ArrivalView: View {
                         .font(.system(size: 15, weight: .regular))
                         .foregroundColor(AppTheme.textSecondary)
                 }
+                .accessibilityIdentifier("arrival.loginButton")
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 48)
@@ -918,12 +920,14 @@ struct LoginView: View {
                     .font(.system(size: 26, weight: .medium))
                     .foregroundColor(AppTheme.textPrimary)
                     .multilineTextAlignment(.center)
+                    .accessibilityIdentifier("login.title")
 
                 if let errorMessage {
                     Text(errorMessage)
                         .font(.system(size: 14, weight: .regular))
                         .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
                         .multilineTextAlignment(.center)
+                        .accessibilityIdentifier("login.errorMessage")
                 }
             }
             .padding(.horizontal, 40)
@@ -947,6 +951,7 @@ struct LoginView: View {
                                 .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
                         )
                         .disabled(isLoading)
+                        .accessibilityIdentifier("login.emailField")
 
                     SecureField("Password", text: $password)
                         .font(.system(size: 17, weight: .regular))
@@ -960,6 +965,7 @@ struct LoginView: View {
                                 .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
                         )
                         .disabled(isLoading)
+                        .accessibilityIdentifier("login.passwordField")
 
                     Button {
                         signIn()
@@ -983,6 +989,7 @@ struct LoginView: View {
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
+                    .accessibilityIdentifier("login.signInButton")
                     .disabled(isLoading || email.isEmpty || password.isEmpty)
                 }
                 .padding(.horizontal, 24)
@@ -1026,6 +1033,7 @@ struct LoginView: View {
                                 .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
                         )
                     }
+                    .accessibilityIdentifier("login.continueWithEmailButton")
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 48)

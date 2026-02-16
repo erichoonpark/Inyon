@@ -738,3 +738,128 @@ final class YouViewSaveTests: XCTestCase {
         XCTAssertNil(saveError, "Error should be cleared after successful retry")
     }
 }
+
+private final class MockMigrationExecutor: OnboardingMigrationExecuting {
+    var callCount = 0
+    var lastAnonymousSessionId: String?
+    var lastUserId: String?
+    var result: Result<Bool, Error> = .success(true)
+
+    func migrateAnonymousData(anonymousSessionId: String, toUserId userId: String) async throws -> Bool {
+        callCount += 1
+        lastAnonymousSessionId = anonymousSessionId
+        lastUserId = userId
+
+        switch result {
+        case .success(let migrated):
+            return migrated
+        case .failure(let error):
+            throw error
+        }
+    }
+}
+
+final class OnboardingServiceMigrationTests: XCTestCase {
+
+    func test_mergeOnboardingMigrationData_existingUserFieldsWin() {
+        let anonymousData: [String: Any] = [
+            "birthCity": "Seoul, South Korea",
+            "personalAnchors": ["Direction"],
+            "notificationsEnabled": false
+        ]
+        let existingUserData: [String: Any] = [
+            "birthCity": "Busan, South Korea",
+            "notificationsEnabled": true,
+            "customField": "keep-me"
+        ]
+
+        let merged = mergeOnboardingMigrationData(
+            anonymousData: anonymousData,
+            existingUserData: existingUserData
+        )
+
+        XCTAssertEqual(merged["birthCity"] as? String, "Busan, South Korea")
+        XCTAssertEqual(merged["notificationsEnabled"] as? Bool, true)
+        XCTAssertEqual(merged["personalAnchors"] as? [String], ["Direction"])
+        XCTAssertEqual(merged["customField"] as? String, "keep-me")
+    }
+
+    func test_mergeOnboardingMigrationData_withoutUserDocument_returnsAnonymousData() {
+        let anonymousData: [String: Any] = [
+            "birthCity": "Seoul, South Korea",
+            "personalAnchors": ["Direction"]
+        ]
+
+        let merged = mergeOnboardingMigrationData(
+            anonymousData: anonymousData,
+            existingUserData: nil
+        )
+
+        XCTAssertEqual(merged["birthCity"] as? String, "Seoul, South Korea")
+        XCTAssertEqual(merged["personalAnchors"] as? [String], ["Direction"])
+    }
+
+    func test_migrateAnonymousData_callsTransactionalExecutor_andClearsSessionKey_onSuccess() async throws {
+        let suiteName = "OnboardingServiceMigrationTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("Expected isolated UserDefaults suite")
+            return
+        }
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        defaults.set("anon-123", forKey: OnboardingService.anonymousIdKey)
+        let executor = MockMigrationExecutor()
+        executor.result = .success(true)
+        let service = OnboardingService(userDefaults: defaults, migrationExecutor: executor)
+
+        try await service.migrateAnonymousData(toUserId: "user-abc")
+
+        XCTAssertEqual(executor.callCount, 1)
+        XCTAssertEqual(executor.lastAnonymousSessionId, "anon-123")
+        XCTAssertEqual(executor.lastUserId, "user-abc")
+        XCTAssertNil(defaults.string(forKey: OnboardingService.anonymousIdKey))
+    }
+
+    func test_migrateAnonymousData_keepsSessionKey_whenNoAnonymousRecordMigrated() async throws {
+        let suiteName = "OnboardingServiceMigrationTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("Expected isolated UserDefaults suite")
+            return
+        }
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        defaults.set("anon-456", forKey: OnboardingService.anonymousIdKey)
+        let executor = MockMigrationExecutor()
+        executor.result = .success(false)
+        let service = OnboardingService(userDefaults: defaults, migrationExecutor: executor)
+
+        try await service.migrateAnonymousData(toUserId: "user-xyz")
+
+        XCTAssertEqual(executor.callCount, 1)
+        XCTAssertEqual(defaults.string(forKey: OnboardingService.anonymousIdKey), "anon-456")
+    }
+
+    func test_migrateAnonymousData_propagatesError_andDoesNotClearSessionKey() async {
+        let suiteName = "OnboardingServiceMigrationTests.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            XCTFail("Expected isolated UserDefaults suite")
+            return
+        }
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        defaults.set("anon-789", forKey: OnboardingService.anonymousIdKey)
+        let executor = MockMigrationExecutor()
+        executor.result = .failure(MockError.forced)
+        let service = OnboardingService(userDefaults: defaults, migrationExecutor: executor)
+
+        do {
+            try await service.migrateAnonymousData(toUserId: "user-error")
+            XCTFail("Expected migrateAnonymousData to throw")
+        } catch {
+            XCTAssertTrue(error is MockError)
+        }
+
+        XCTAssertEqual(executor.callCount, 1)
+        XCTAssertEqual(defaults.string(forKey: OnboardingService.anonymousIdKey), "anon-789")
+    }
+}

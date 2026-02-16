@@ -16,27 +16,24 @@ echo ""
 
 # ── Simulator destination selection ───────────────────────────
 DESTINATION=""
+HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SELECTOR_SCRIPT="$HOOK_DIR/../scripts/select_simulator.sh"
 
-# Try iPhone 16 first
-if xcrun simctl list devices available 2>/dev/null | grep -q "iPhone 16"; then
-    DESTINATION="platform=iOS Simulator,name=iPhone 16"
-    echo "→ Simulator: iPhone 16"
-else
-    # Fall back to first available iOS simulator
-    FIRST_SIM=$(xcrun simctl list devices available 2>/dev/null \
-        | grep -E '^\s+.+\(' \
-        | head -1 \
-        | sed 's/^[[:space:]]*//' \
-        | sed 's/ ([0-9A-F]\{8\}-.*//')
-
-    if [[ -z "$FIRST_SIM" ]]; then
-        echo "✗ No iOS simulators available. Install one via Xcode."
-        exit 1
-    fi
-
-    DESTINATION="platform=iOS Simulator,name=$FIRST_SIM"
-    echo "→ Simulator: $FIRST_SIM (iPhone 16 not available)"
+if [[ ! -f "$SELECTOR_SCRIPT" ]]; then
+    echo "✗ Missing simulator selector script: $SELECTOR_SCRIPT"
+    exit 1
 fi
+
+# shellcheck source=/dev/null
+source "$SELECTOR_SCRIPT"
+
+SIMULATOR_NAME="$(select_simulator_name)" || {
+    echo "✗ No iOS simulators available. Install one via Xcode."
+    exit 1
+}
+
+DESTINATION="platform=iOS Simulator,name=$SIMULATOR_NAME"
+echo "→ Simulator: $SIMULATOR_NAME"
 
 echo ""
 

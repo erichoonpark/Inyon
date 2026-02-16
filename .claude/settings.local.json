@@ -12,7 +12,12 @@
       "Bash(git push:*)",
       "Bash(chmod:*)",
       "Bash(python3:*)",
-      "Bash(bash -n /Users/ericpark/projects/Inyon/.claude/hooks/run-tests-on-change.sh)"
+      "Bash(bash -n /Users/ericpark/projects/Inyon/.claude/hooks/run-tests-on-change.sh)",
+      "Bash(xcrun simctl list:*)",
+      "Bash(/bin/sh:*)",
+      "Bash(xcodebuild -list:*)",
+      "Bash(FULL_SUITE=1 ./.claude/hooks/run-tests-on-change.sh:*)",
+      "Bash(bash /Users/ericpark/projects/Inyon/scripts/prepush_hook_tests.sh)"
     ]
   }
 }
