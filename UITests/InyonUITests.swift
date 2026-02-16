@@ -120,6 +120,85 @@ final class InyonUITests: XCTestCase {
         XCTAssertTrue(welcomeBack.exists, "User should remain on login view after failed sign-in")
     }
 
+    // MARK: - Logout Flow
+
+    /// Asserts that tapping Log Out from You tab returns user to onboarding.
+    func test_youTab_logout_returnsToOnboarding() throws {
+        launchApp(authMode: "signed_in")
+
+        // Navigate to You tab
+        let youTab = app.buttons["YOU"]
+        guard waitForExistence(youTab) else {
+            XCTFail("YOU tab not found")
+            return
+        }
+        youTab.tap()
+
+        // Tap Log Out
+        let logoutButton = app.buttons["you.logoutButton"]
+        guard waitForExistence(logoutButton) else {
+            XCTFail("Log Out button not found in You tab")
+            return
+        }
+        logoutButton.tap()
+
+        // Confirm in alert
+        let confirmButton = app.buttons["Log Out"]
+        guard waitForExistence(confirmButton, timeout: 5) else {
+            XCTFail("Logout confirmation alert not shown")
+            return
+        }
+        confirmButton.tap()
+
+        // Assert onboarding start screen appears
+        let getStarted = app.buttons["Get Started"]
+        XCTAssertTrue(waitForExistence(getStarted, timeout: 10), "Onboarding Get Started should appear after logout")
+    }
+
+    /// Asserts that sign-out failure shows error and user remains signed in.
+    func test_youTab_logoutFailure_showsError_andStaysSignedIn() throws {
+        launchApp(authMode: "sign_out_failure")
+
+        // Navigate to You tab
+        let youTab = app.buttons["YOU"]
+        guard waitForExistence(youTab) else {
+            XCTFail("YOU tab not found")
+            return
+        }
+        youTab.tap()
+
+        // Tap Log Out
+        let logoutButton = app.buttons["you.logoutButton"]
+        guard waitForExistence(logoutButton) else {
+            XCTFail("Log Out button not found")
+            return
+        }
+        logoutButton.tap()
+
+        // Confirm in alert
+        let confirmButton = app.buttons["Log Out"]
+        guard waitForExistence(confirmButton, timeout: 5) else {
+            XCTFail("Logout confirmation alert not shown")
+            return
+        }
+        confirmButton.tap()
+
+        // Error alert should appear
+        let errorAlert = app.alerts["Unable to log out"]
+        XCTAssertTrue(waitForExistence(errorAlert, timeout: 5), "Error alert should appear after failed sign-out")
+
+        // Dismiss error
+        let cancelButton = errorAlert.buttons["Cancel"]
+        guard waitForExistence(cancelButton, timeout: 3) else {
+            XCTFail("Cancel button not found in error alert")
+            return
+        }
+        cancelButton.tap()
+
+        // User should still be on You tab (not kicked to onboarding)
+        XCTAssertTrue(logoutButton.exists, "User should remain on You tab after failed logout")
+    }
+
     // MARK: - Priority 5: Email Validation Disables Submit
 
     /// Verifies Sign In button disabled for empty email/password and enabled when valid.

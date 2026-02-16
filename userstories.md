@@ -13,6 +13,7 @@
   - anonymous onboarding doc is deleted only in successful transaction commit
   - migration errors propagate and block completion path
 - As a user, I can edit profile context in You tab and persist changes.
+- As a signed-in user, I can log out from the You tab and return to onboarding.
 - As a team, pre-push blocks push unless unit and UI/E2E test suites pass.
 - As a team, pre-push simulator selection is exact-name and robust to `iPhone 16e` vs `iPhone 16`.
 

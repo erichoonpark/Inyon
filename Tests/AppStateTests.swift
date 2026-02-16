@@ -106,6 +106,33 @@ final class AppStateTests: XCTestCase {
         XCTAssertFalse(appState.isLoadingUser)
     }
 
+    // MARK: - Clear User
+
+    @MainActor
+    func test_clearUser_resetsState() async {
+        let mockService = MockUserService()
+        let user = User(
+            id: "user-1",
+            firstName: "Minjun",
+            lastName: "Kim",
+            email: "minjun@example.com",
+            birthDate: Date(),
+            birthTime: nil,
+            birthTimeUnknown: true,
+            birthLocation: "Seoul, South Korea"
+        )
+        mockService.fetchResult = .success(user)
+
+        let appState = AppState(userService: mockService)
+        await appState.loadUser(id: "user-1")
+        XCTAssertNotNil(appState.currentUser)
+
+        appState.clearUser()
+
+        XCTAssertNil(appState.currentUser, "currentUser should be nil after clearUser")
+        XCTAssertFalse(appState.isLoadingUser, "isLoadingUser should be false after clearUser")
+    }
+
     // MARK: - Replacing User
 
     @MainActor
@@ -198,5 +225,47 @@ final class AuthStateRoutingTests: XCTestCase {
         // After sign-out, should route back to onboarding
         XCTAssertNil(mockAuth.currentUserId)
         XCTAssertFalse(mockAuth.isAuthenticated)
+    }
+
+    @MainActor
+    func test_signOut_failure_keepsUserAuthenticated() {
+        let mockAuth = MockAuthService()
+        mockAuth.currentUserId = "user-123"
+        mockAuth.signOutResult = .failure(MockError.forced)
+
+        XCTAssertThrowsError(try mockAuth.signOut())
+        XCTAssertEqual(mockAuth.currentUserId, "user-123", "User should remain authenticated after sign-out failure")
+        XCTAssertTrue(mockAuth.isAuthenticated)
+    }
+
+    @MainActor
+    func test_signOut_clearsAppState() async throws {
+        let mockAuth = MockAuthService()
+        mockAuth.currentUserId = "user-123"
+
+        let mockUserService = MockUserService()
+        mockUserService.fetchResult = .success(User(
+            id: "user-123",
+            firstName: "Test",
+            lastName: "User",
+            email: "test@example.com",
+            birthDate: Date(),
+            birthTime: nil,
+            birthTimeUnknown: false,
+            birthLocation: "Seoul, South Korea"
+        ))
+
+        let appState = AppState(userService: mockUserService)
+        await appState.loadUser(id: "user-123")
+        XCTAssertNotNil(appState.currentUser)
+
+        // Simulate what InyonApp.onChange does on sign-out
+        try mockAuth.signOut()
+        if mockAuth.currentUserId == nil {
+            appState.clearUser()
+        }
+
+        XCTAssertNil(mockAuth.currentUserId)
+        XCTAssertNil(appState.currentUser, "AppState should be cleared after sign-out")
     }
 }

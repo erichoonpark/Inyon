@@ -57,8 +57,10 @@ Anonymous-to-authenticated onboarding migration now uses Firestore transaction s
 `AuthService` supports UITest-only auth behavior via launch environment.
 
 - `INYON_UI_TEST_AUTH_MODE=sign_in_failure`: forces deterministic sign-in failure without live backend call.
+- `INYON_UI_TEST_AUTH_MODE=signed_in`: starts app in authenticated state (skips Firebase, uses mock user ID).
+- `INYON_UI_TEST_AUTH_MODE=sign_out_failure`: starts authenticated and forces deterministic sign-out failure.
 
-This mode is used only by UI tests and does not affect production runtime behavior.
+These modes are used only by UI tests and do not affect production runtime behavior.
 
 ## How To Verify Before Push
 

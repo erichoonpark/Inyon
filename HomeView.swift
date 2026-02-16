@@ -6,6 +6,21 @@ struct HomeView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
+                // Logo header
+                HStack(spacing: 8) {
+                    Image("InyonLogo")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                    Text("INYON")
+                        .font(.system(size: 13, weight: .medium, design: .monospaced))
+                        .tracking(1.5)
+                        .foregroundColor(AppTheme.textPrimary)
+
+                    Spacer()
+                }
+
                 // Date header
                 VStack(alignment: .leading, spacing: 4) {
                     Text(today.formatted(.dateTime.weekday(.wide)))

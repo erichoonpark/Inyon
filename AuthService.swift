@@ -3,11 +3,14 @@ import FirebaseAuth
 
 enum AuthServiceError: LocalizedError {
     case forcedUITestSignInFailure
+    case forcedUITestSignOutFailure
 
     var errorDescription: String? {
         switch self {
         case .forcedUITestSignInFailure:
             return "Unable to sign in. Check your credentials and try again."
+        case .forcedUITestSignOutFailure:
+            return "Unable to log out. Please try again."
         }
     }
 }
@@ -23,7 +26,12 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
     init() {
         uiTestAuthMode = ProcessInfo.processInfo.environment["INYON_UI_TEST_AUTH_MODE"]
         if uiTestAuthMode != nil {
-            currentUserId = nil
+            // Modes that test authenticated flows start signed in
+            if uiTestAuthMode == "signed_in" || uiTestAuthMode == "sign_out_failure" {
+                currentUserId = "ui-test-user"
+            } else {
+                currentUserId = nil
+            }
             isLoading = false
             return
         }
@@ -57,6 +65,13 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
     }
 
     func signOut() throws {
+        if uiTestAuthMode != nil {
+            if uiTestAuthMode == "sign_out_failure" {
+                throw AuthServiceError.forcedUITestSignOutFailure
+            }
+            currentUserId = nil
+            return
+        }
         try Auth.auth().signOut()
     }
 }

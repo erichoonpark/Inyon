@@ -27,6 +27,21 @@ struct YouView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 32) {
+                // Logo header
+                HStack(spacing: 8) {
+                    Image("AppIcon")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                    Text("INYON")
+                        .font(.system(size: 13, weight: .medium, design: .monospaced))
+                        .tracking(1.5)
+                        .foregroundColor(AppTheme.textPrimary)
+
+                    Spacer()
+                }
+
                 // Header
                 Text("You")
                     .font(.system(size: 28, weight: .semibold))
@@ -38,14 +53,14 @@ struct YouView: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                         .padding(.top, 40)
                 } else {
-                    // Editable Section
-                    editableSection
+                    // Cultural Context (read-only)
+                    derivedContextSection
 
                     // Notification Preferences
                     notificationSection
 
-                    // Derived Context (read-only)
-                    derivedContextSection
+                    // Birth Context (editable)
+                    editableSection
 
                     // Save Button
                     if hasUnsavedChanges {

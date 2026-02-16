@@ -60,7 +60,7 @@ struct CustomBottomNav: View {
                             selectedTab = tab
                         }
                     } label: {
-                        VStack(spacing: 6) {
+                        VStack(spacing: 4) {
                             Text(tab.rawValue)
                                 .font(.system(size: 13, weight: .medium, design: .monospaced))
                                 .tracking(1.2)
@@ -84,7 +84,7 @@ struct CustomBottomNav: View {
                                 }
                             }
                         }
-                        .frame(width: itemWidth, height: 60)
+                        .frame(width: itemWidth, height: 42)
                         .contentShape(Rectangle())
                     }
                 }
@@ -100,7 +100,7 @@ struct CustomBottomNav: View {
                 alignment: .top
             )
         }
-        .frame(height: 60)
+        .frame(height: 42)
     }
 }
 
