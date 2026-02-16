@@ -96,6 +96,12 @@ reset_attempts() {
     rm -f "$ATTEMPT_FILE"
 }
 
+# ── Preflight: check for xcodebuild ───────────────────────────
+if ! command -v xcodebuild &>/dev/null; then
+    echo "xcodebuild not found — skipping tests (not an Xcode environment)." >&2
+    exit 0
+fi
+
 # ── Run tests ─────────────────────────────────────────────────
 TEST_OUTPUT=$(xcodebuild test \
     -project Inyon.xcodeproj \
