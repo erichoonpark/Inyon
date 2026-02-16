@@ -11,6 +11,11 @@ final class AppState: ObservableObject {
         self.userService = userService
     }
 
+    func clearUser() {
+        currentUser = nil
+        isLoadingUser = false
+    }
+
     func loadUser(id: String) async {
         isLoadingUser = true
         do {

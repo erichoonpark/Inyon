@@ -31,6 +31,11 @@ struct InyonApp: App {
                 }
             }
             .environmentObject(authService)
+            .onChange(of: authService.currentUserId) { _, newValue in
+                if newValue == nil {
+                    appState.clearUser()
+                }
+            }
         }
     }
 }

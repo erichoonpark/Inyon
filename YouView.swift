@@ -17,6 +17,8 @@ struct YouView: View {
     @State private var isSaving = false
     @State private var saveError: String?
     @State private var hasUnsavedChanges = false
+    @State private var showLogoutConfirmation = false
+    @State private var logoutError: String?
 
     // Temporary state for date pickers
     @State private var selectedDate = Date()
@@ -49,6 +51,9 @@ struct YouView: View {
                     if hasUnsavedChanges {
                         saveButton
                     }
+
+                    // Log Out
+                    logoutSection
                 }
             }
             .padding(20)
@@ -57,6 +62,23 @@ struct YouView: View {
         .background(AppTheme.earth)
         .onAppear {
             loadData()
+        }
+        .alert("Log out of Inyon?", isPresented: $showLogoutConfirmation) {
+            Button("Log Out", role: .destructive) {
+                performLogout()
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .alert("Unable to log out", isPresented: .init(
+            get: { logoutError != nil },
+            set: { if !$0 { logoutError = nil } }
+        )) {
+            Button("Try Again") {
+                performLogout()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text(logoutError ?? "")
         }
     }
 
@@ -342,6 +364,27 @@ struct YouView: View {
         .padding(.top, 8)
     }
 
+    // MARK: - Log Out Section
+
+    private var logoutSection: some View {
+        VStack(spacing: 0) {
+            Rectangle()
+                .fill(AppTheme.divider)
+                .frame(height: 1)
+                .padding(.bottom, 24)
+
+            Button {
+                showLogoutConfirmation = true
+            } label: {
+                Text("Log Out")
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
+            }
+            .accessibilityIdentifier("you.logoutButton")
+        }
+        .padding(.top, 8)
+    }
+
     // MARK: - Derived Data (Placeholder Logic)
 
     private var derivedLunarBirthday: String {
@@ -353,6 +396,14 @@ struct YouView: View {
     }
 
     // MARK: - Data Operations
+
+    private func performLogout() {
+        do {
+            try authService.signOut()
+        } catch {
+            logoutError = "Something went wrong. Please try again."
+        }
+    }
 
     /// Loads onboarding data from Firestore: users/{uid}/onboarding/context
     private func loadData() {
