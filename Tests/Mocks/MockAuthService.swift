@@ -20,11 +20,17 @@ final class MockAuthService: AuthServiceProtocol {
     var signInResult: Result<Void, Error> = .success(())
     var signOutResult: Result<Void, Error> = .success(())
 
+    /// When false, createAccount returns the uid but does NOT update currentUserId,
+    /// simulating the real AuthService race where the auth state listener hasn't fired yet.
+    var autoUpdateAuthState: Bool = true
+
     func createAccount(email: String, password: String) async throws -> String {
         createAccountCalls.append((email, password))
         switch createAccountResult {
         case .success(let uid):
-            currentUserId = uid
+            if autoUpdateAuthState {
+                currentUserId = uid
+            }
             return uid
         case .failure(let error):
             throw error

@@ -75,6 +75,7 @@ struct OnboardingFlow: View {
     @State private var isReturningUser: Bool = false
     @State private var isSaving = false
     @State private var saveError: String?
+    @State private var authenticatedUid: String?
     @EnvironmentObject private var authService: AuthService
 
     let onboardingService: OnboardingServiceProtocol
@@ -103,7 +104,8 @@ struct OnboardingFlow: View {
                             navigateTo(.arrival)
                         }, onComplete: onComplete)
                     } else {
-                        AccountCreationView(data: data, onBack: goBack, onComplete: {
+                        AccountCreationView(data: data, onBack: goBack, onComplete: { uid in
+                            authenticatedUid = uid
                             saveOnboardingDataThenComplete()
                         })
                     }
@@ -197,13 +199,14 @@ struct OnboardingFlow: View {
     }
 
     private func saveOnboardingDataThenComplete() {
+        let userId = authenticatedUid ?? authService.currentUserId
         isSaving = true
         saveError = nil
         Task {
             do {
-                try await onboardingService.saveOnboardingData(data, userId: authService.currentUserId)
-                if let uid = authService.currentUserId {
-                    try? await onboardingService.migrateAnonymousData(toUserId: uid)
+                try await onboardingService.saveOnboardingData(data, userId: userId)
+                if let userId {
+                    try await onboardingService.migrateAnonymousData(toUserId: userId)
                 }
                 isSaving = false
                 onComplete()
@@ -694,7 +697,7 @@ struct PersonalAnchorView: View {
 struct AccountCreationView: View {
     var data: OnboardingData
     var onBack: () -> Void
-    var onComplete: () -> Void
+    var onComplete: (_ uid: String) -> Void
 
     @EnvironmentObject private var authService: AuthService
     @State private var email = ""
@@ -861,8 +864,8 @@ struct AccountCreationView: View {
         errorMessage = nil
         Task {
             do {
-                _ = try await authService.createAccount(email: email, password: password)
-                onComplete()
+                let uid = try await authService.createAccount(email: email, password: password)
+                onComplete(uid)
             } catch {
                 errorMessage = error.localizedDescription
             }

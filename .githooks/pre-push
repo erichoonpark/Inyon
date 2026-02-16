@@ -27,7 +27,7 @@ else
         | grep -E '^\s+.+\(' \
         | head -1 \
         | sed 's/^[[:space:]]*//' \
-        | sed 's/ (.*//')
+        | sed 's/ ([0-9A-F]\{8\}-.*//')
 
     if [[ -z "$FIRST_SIM" ]]; then
         echo "✗ No iOS simulators available. Install one via Xcode."

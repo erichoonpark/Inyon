@@ -21,7 +21,7 @@ struct HomeView: View {
 
                 // Day Master section
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("DAY MASTER")
+                    Text("DAY ELEMENT")
                         .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .tracking(1.5)
                         .foregroundColor(AppTheme.textSecondary)

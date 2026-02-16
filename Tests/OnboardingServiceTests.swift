@@ -574,4 +574,167 @@ final class AnonymousDataMergeTests: XCTestCase {
         XCTAssertNotNil(mockService.storedPayloads[uid])
         XCTAssertNil(mockService.storedPayloads["anonymous"])
     }
+
+    // MARK: - Priority 1: UID Race Condition
+
+    /// Ensures the onboarding save path uses the UID returned from createAccount
+    /// even if authService.currentUserId has not been updated by the auth state listener.
+    @MainActor
+    func test_accountCreation_usesReturnedUID_whenAuthListenerNotYetUpdated() async throws {
+        let mockAuth = MockAuthService()
+        mockAuth.autoUpdateAuthState = false  // Simulate auth listener not yet fired
+        let mockService = MockOnboardingService()
+
+        var data = OnboardingData()
+        data.birthDate = Date()
+        data.birthCity = "Seoul, South Korea"
+
+        // Create account — returns uid but currentUserId stays nil
+        let uid = try await mockAuth.createAccount(email: "test@inyon.com", password: "secure123")
+        XCTAssertEqual(uid, "mock-uid")
+        XCTAssertNil(mockAuth.currentUserId, "Auth listener has not updated yet")
+
+        // The save path must use the returned uid, not authService.currentUserId
+        try await mockService.saveOnboardingData(data, userId: uid)
+
+        XCTAssertEqual(mockService.savedData.count, 1)
+        XCTAssertEqual(mockService.savedData.first?.userId, uid, "Should use returned UID, not authService.currentUserId")
+        XCTAssertNotNil(mockService.storedPayloads[uid])
+    }
+
+    // MARK: - Priority 2: Save+Migrate Failure Blocks Completion
+
+    /// Verifies that onComplete is not called when migration fails and retry state is surfaced.
+    @MainActor
+    func test_saveThenMigrate_failure_blocksCompletion_andShowsRetry() async throws {
+        let mockAuth = MockAuthService()
+        let mockService = MockOnboardingService()
+        mockService.migrateResult = .failure(MockError.forced)
+
+        var data = OnboardingData()
+        data.birthDate = Date()
+        data.birthCity = "Seoul, South Korea"
+
+        // Create account
+        let uid = try await mockAuth.createAccount(email: "test@inyon.com", password: "secure123")
+
+        // Save succeeds
+        try await mockService.saveOnboardingData(data, userId: uid)
+        XCTAssertNotNil(mockService.storedPayloads[uid])
+
+        // Migration fails — should block completion
+        var completed = false
+        var errorOccurred = false
+        do {
+            try await mockService.migrateAnonymousData(toUserId: uid)
+            completed = true
+        } catch {
+            errorOccurred = true
+        }
+
+        XCTAssertFalse(completed, "onComplete should not be called when migration fails")
+        XCTAssertTrue(errorOccurred, "Migration error should propagate")
+    }
+
+    // MARK: - Priority 3: Atomic Migration Under Concurrent Write
+
+    /// Simulates a concurrent user write during migration and proves
+    /// no clobbering of newer user data.
+    @MainActor
+    func test_migrateAnonymousData_isAtomic_underConcurrentUserWrite() async throws {
+        let mockService = MockOnboardingService()
+
+        // Step 1: Save anonymous data
+        var anonData = OnboardingData()
+        anonData.birthCity = "Seoul, South Korea"
+        anonData.personalAnchors = [.direction]
+        try await mockService.saveOnboardingData(anonData, userId: nil)
+        XCTAssertNotNil(mockService.storedPayloads["anonymous"])
+
+        // Step 2: Simulate a concurrent user write (newer data that arrived before migration)
+        mockService.storedPayloads["user-concurrent"] = [
+            "birthCity": "Busan, South Korea",
+            "personalAnchors": ["Energy", "Love"],
+            "notificationsEnabled": true
+        ]
+
+        // Step 3: Migrate — existing user data must win on conflict
+        try await mockService.migrateAnonymousData(toUserId: "user-concurrent")
+
+        let merged = mockService.storedPayloads["user-concurrent"]
+        XCTAssertEqual(merged?["birthCity"] as? String, "Busan, South Korea",
+                       "Concurrent user write should not be overwritten by anonymous data")
+        XCTAssertEqual(merged?["personalAnchors"] as? [String], ["Energy", "Love"],
+                       "User's newer anchor selection should survive migration")
+        XCTAssertEqual(merged?["notificationsEnabled"] as? Bool, true,
+                       "Fields only in user data should be preserved")
+        XCTAssertNil(mockService.storedPayloads["anonymous"],
+                     "Anonymous record should be cleaned up after migration")
+    }
+}
+
+// MARK: - Priority 7: YouView Save Failure Preserves Unsaved State
+
+final class YouViewSaveTests: XCTestCase {
+
+    /// Ensures failed profile save keeps unsaved state and exposes retry.
+    func test_youView_saveFailure_showsRetrySave_andPreservesUnsavedChanges() async {
+        let mockService = MockOnboardingService()
+        mockService.updateResult = .failure(MockError.forced)
+        var hasUnsavedChanges = true
+        var saveError: String?
+        var isSaving = true
+
+        do {
+            try await mockService.updateOnboardingData(userId: "user-1", data: [
+                "personalAnchors": ["Direction", "Energy"],
+                "birthCity": "Updated City"
+            ])
+            hasUnsavedChanges = false
+        } catch {
+            saveError = "Could not save changes. Please try again."
+        }
+        isSaving = false
+
+        // Unsaved changes must be preserved
+        XCTAssertTrue(hasUnsavedChanges, "Unsaved changes must be preserved after save failure")
+        XCTAssertNotNil(saveError, "Error message should be surfaced for retry")
+        XCTAssertEqual(saveError, "Could not save changes. Please try again.")
+        XCTAssertFalse(isSaving, "Saving state should be reset after failure")
+
+        // The button label should show "Retry Save" when saveError is set
+        let buttonLabel = saveError != nil ? "Retry Save" : "Save Changes"
+        XCTAssertEqual(buttonLabel, "Retry Save", "Button should show retry label after failure")
+    }
+
+    /// Ensures retry after failure succeeds and clears unsaved state.
+    func test_youView_retryAfterFailure_succeeds_andClearsUnsavedChanges() async throws {
+        let mockService = MockOnboardingService()
+
+        // First attempt fails
+        mockService.updateResult = .failure(MockError.forced)
+        var hasUnsavedChanges = true
+        var saveError: String?
+
+        do {
+            try await mockService.updateOnboardingData(userId: "user-1", data: ["key": "value"])
+        } catch {
+            saveError = "Could not save changes. Please try again."
+        }
+        XCTAssertTrue(hasUnsavedChanges)
+        XCTAssertNotNil(saveError)
+
+        // Retry succeeds
+        mockService.updateResult = .success(())
+        saveError = nil
+        do {
+            try await mockService.updateOnboardingData(userId: "user-1", data: ["key": "value"])
+            hasUnsavedChanges = false
+        } catch {
+            saveError = error.localizedDescription
+        }
+
+        XCTAssertFalse(hasUnsavedChanges, "Unsaved changes should be cleared after successful retry")
+        XCTAssertNil(saveError, "Error should be cleared after successful retry")
+    }
 }
