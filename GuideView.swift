@@ -6,7 +6,7 @@ struct GuideView: View {
             VStack(spacing: GuideStyle.sectionSpacing) {
                 // Logo + title header
                 HStack(spacing: 8) {
-                    Image("AppIcon")
+                    Image("InyonLogo")
                         .resizable()
                         .frame(width: 24, height: 24)
                         .clipShape(RoundedRectangle(cornerRadius: 6))

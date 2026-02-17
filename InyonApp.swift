@@ -5,6 +5,7 @@ import FirebaseCore
 struct InyonApp: App {
     @StateObject private var authService = AuthService()
     @StateObject private var appState = AppState()
+    @AppStorage("inyon.hasSeenPostSignup") private var hasSeenPostSignup = false
     private let onboardingService: OnboardingServiceProtocol = OnboardingService()
 
     init() {
@@ -15,13 +16,36 @@ struct InyonApp: App {
         WindowGroup {
             Group {
                 if authService.isLoading {
-                    ProgressView()
+                    // Branded loading screen
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image("InyonLogo")
+                            .resizable()
+                            .frame(width: 64, height: 64)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                        Text("INYON")
+                            .font(.system(size: 15, weight: .medium, design: .monospaced))
+                            .tracking(2)
+                            .foregroundColor(AppTheme.textPrimary)
+                        ProgressView()
+                            .tint(AppTheme.textSecondary)
+                            .padding(.top, 8)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(AppTheme.earth.ignoresSafeArea())
                 } else if let userId = authService.currentUserId {
-                    ContentView(onboardingService: onboardingService)
-                        .environmentObject(appState)
-                        .task {
-                            await appState.loadUser(id: userId)
+                    if !hasSeenPostSignup {
+                        PostSignupView {
+                            hasSeenPostSignup = true
                         }
+                    } else {
+                        ContentView(onboardingService: onboardingService)
+                            .environmentObject(appState)
+                            .task {
+                                await appState.loadUser(id: userId)
+                            }
+                    }
                 } else {
                     OnboardingFlow(onboardingService: onboardingService, onComplete: {
                         // TODO: Handle auth completion

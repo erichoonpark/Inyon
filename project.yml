@@ -21,11 +21,22 @@ targets:
           - "*.yml"
           - ".git/**"
           - "Tests/**"
+          - "UITests/**"
+          - "functions/**"
+          - "scripts/**"
+          - ".githooks/**"
+          - ".claude/**"
+          - ".firebaserc"
+          - "firebase.json"
+          - "firestore.rules"
+          - "Inyon.xcodeproj"
     dependencies:
       - package: Firebase
         product: FirebaseAuth
       - package: Firebase
         product: FirebaseFirestore
+      - package: Firebase
+        product: FirebaseFunctions
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.inyon.app
       INFOPLIST_GENERATION_MODE: GeneratedFile

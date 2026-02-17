@@ -39,6 +39,11 @@ Pods/
 timeline.xctimeline
 playground.xcworkspace
 
+# Firebase Cloud Functions
+functions/node_modules/
+functions/lib/
+functions/package-lock.json
+
 # Secrets (never commit)
 *.env
 *.secret

@@ -29,7 +29,7 @@ struct YouView: View {
             VStack(alignment: .leading, spacing: 32) {
                 // Logo header
                 HStack(spacing: 8) {
-                    Image("AppIcon")
+                    Image("InyonLogo")
                         .resizable()
                         .frame(width: 24, height: 24)
                         .clipShape(RoundedRectangle(cornerRadius: 6))

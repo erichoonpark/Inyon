@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Onboarding context
+      match /onboarding/{doc} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Daily insights (read-only from client, written by Cloud Functions)
+      match /dailyInsights/{insightId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if false; // Only Cloud Functions can write
+      }
+    }
+
+    // Anonymous onboarding data
+    match /onboarding/anonymous/users/{sessionId} {
+      allow read, write: if true; // Anonymous access for pre-auth onboarding
+    }
+  }
+}
