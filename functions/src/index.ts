@@ -87,7 +87,9 @@ export const getDailyInsight = onCall(
       );
     }
 
-    const docId = `${localDate}_${timeZoneId}`;
+    // Sanitize timezone for use as Firestore doc ID (slashes are path separators)
+    const safeTimeZoneId = timeZoneId.replace(/\//g, "-");
+    const docId = `${localDate}_${safeTimeZoneId}`;
     const docRef = db
       .collection("users")
       .doc(uid)
