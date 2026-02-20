@@ -42,6 +42,7 @@ struct InyonApp: App {
                     } else {
                         ContentView(onboardingService: onboardingService)
                             .environmentObject(appState)
+                            .environmentObject(authService)
                             .task {
                                 await appState.loadUser(id: userId)
                             }
