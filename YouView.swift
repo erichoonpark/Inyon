@@ -1,15 +1,18 @@
 import SwiftUI
 import FirebaseFirestore
+import UserNotifications
 
 struct YouView: View {
     let onboardingService: OnboardingServiceProtocol
     @EnvironmentObject private var authService: AuthService
+    @StateObject private var notificationService = NotificationService()
 
     @State private var birthDate: Date?
     @State private var birthTime: Date?
     @State private var personalAnchors: Set<PersonalAnchor> = []
     @State private var notificationsEnabled = false
     @State private var preferredNotificationTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+    @State private var showNotificationDeniedAlert = false
 
     @State private var hasSelectedDate = false
     @State private var hasSelectedTime = false
@@ -83,6 +86,16 @@ struct YouView: View {
                 performLogout()
             }
             Button("Cancel", role: .cancel) {}
+        }
+        .alert("Notifications Disabled", isPresented: $showNotificationDeniedAlert) {
+            Button("Open Settings") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enable notifications in Settings to receive daily reflections.")
         }
         .alert("Unable to log out", isPresented: .init(
             get: { logoutError != nil },
@@ -256,8 +269,15 @@ struct YouView: View {
                         .foregroundColor(AppTheme.textPrimary)
                 }
                 .tint(AppTheme.earthRed)
-                .onChange(of: notificationsEnabled) { _, _ in
+                .onChange(of: notificationsEnabled) { _, newValue in
                     hasUnsavedChanges = true
+                    Task {
+                        if newValue {
+                            await handleNotificationToggleOn()
+                        } else {
+                            notificationService.cancelAll()
+                        }
+                    }
                 }
 
                 if notificationsEnabled {
@@ -281,8 +301,11 @@ struct YouView: View {
                         .labelsHidden()
                         .tint(AppTheme.textPrimary)
                         .colorScheme(.dark)
-                        .onChange(of: preferredNotificationTime) { _, _ in
+                        .onChange(of: preferredNotificationTime) { _, newTime in
                             hasUnsavedChanges = true
+                            Task {
+                                await notificationService.scheduleDaily(at: newTime)
+                            }
                         }
                     }
                 }
@@ -417,6 +440,26 @@ struct YouView: View {
             try authService.signOut()
         } catch {
             logoutError = "Something went wrong. Please try again."
+        }
+    }
+
+    private func handleNotificationToggleOn() async {
+        await notificationService.checkStatus()
+        switch notificationService.authorizationStatus {
+        case .notDetermined:
+            let granted = (try? await notificationService.requestAuthorization()) ?? false
+            if granted {
+                await notificationService.scheduleDaily(at: preferredNotificationTime)
+            } else {
+                notificationsEnabled = false
+            }
+        case .authorized, .provisional, .ephemeral:
+            await notificationService.scheduleDaily(at: preferredNotificationTime)
+        case .denied:
+            notificationsEnabled = false
+            showNotificationDeniedAlert = true
+        @unknown default:
+            break
         }
     }
 

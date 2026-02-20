@@ -355,7 +355,7 @@ final class FirestorePayloadTests: XCTestCase {
         // Should not have birthDate, birthTime, or birthCity when nil/empty
         XCTAssertNil(payload["birthDate"])
         XCTAssertNil(payload["birthTime"])
-        XCTAssertNil(payload["birthCity"])
+        XCTAssertNil(payload["birthLocation"])
 
         // isBirthTimeUnknown should default to false
         XCTAssertEqual(payload["isBirthTimeUnknown"] as? Bool, false)
@@ -448,7 +448,7 @@ final class FirestorePayloadTests: XCTestCase {
         data.personalAnchors = [.direction]
         let payload = data.toFirestoreData()
 
-        let expectedKeys: Set<String> = ["createdAt", "birthDate", "birthTime", "personalAnchors", "isBirthTimeUnknown", "birthCity"]
+        let expectedKeys: Set<String> = ["createdAt", "birthDate", "birthTime", "personalAnchors", "isBirthTimeUnknown", "birthLocation"]
         let actualKeys = Set(payload.keys)
 
         XCTAssertEqual(actualKeys, expectedKeys)
@@ -482,14 +482,14 @@ final class FirestorePayloadTests: XCTestCase {
         data.birthCity = "San Francisco, CA, United States"
         let payload = data.toFirestoreData()
 
-        XCTAssertEqual(payload["birthCity"] as? String, "San Francisco, CA, United States")
+        XCTAssertEqual(payload["birthLocation"] as? String, "San Francisco, CA, United States")
     }
 
     func testToFirestoreDataWithEmptyBirthCity() {
         let data = OnboardingData()
         let payload = data.toFirestoreData()
 
-        XCTAssertNil(payload["birthCity"], "Empty birthCity should not appear in payload")
+        XCTAssertNil(payload["birthLocation"], "Empty birthCity should not appear in payload")
     }
 }
 

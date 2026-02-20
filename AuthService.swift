@@ -52,6 +52,11 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
         currentUserId != nil
     }
 
+    var isEmailVerified: Bool {
+        if uiTestAuthMode != nil { return true }
+        return Auth.auth().currentUser?.isEmailVerified ?? false
+    }
+
     func createAccount(email: String, password: String) async throws -> String {
         let result = try await Auth.auth().createUser(withEmail: email, password: password)
         return result.user.uid
@@ -73,5 +78,18 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
             return
         }
         try Auth.auth().signOut()
+    }
+
+    func sendPasswordReset(email: String) async throws {
+        try await Auth.auth().sendPasswordReset(withEmail: email)
+    }
+
+    func sendEmailVerification() async throws {
+        guard let user = Auth.auth().currentUser else { return }
+        try await user.sendEmailVerification()
+    }
+
+    func reloadUser() async throws {
+        try await Auth.auth().currentUser?.reload()
     }
 }

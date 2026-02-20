@@ -161,7 +161,7 @@ final class OnboardingDataFlowTests: XCTestCase {
         XCTAssertNotNil(payload["birthDate"])
         XCTAssertNotNil(payload["birthTime"])
         XCTAssertEqual(payload["isBirthTimeUnknown"] as? Bool, false)
-        XCTAssertEqual(payload["birthCity"] as? String, "Busan, South Korea")
+        XCTAssertEqual(payload["birthLocation"] as? String, "Busan, South Korea")
 
         let anchors = payload["personalAnchors"] as? [String]
         XCTAssertNotNil(anchors)
@@ -183,7 +183,7 @@ final class OnboardingDataFlowTests: XCTestCase {
         XCTAssertNotNil(payload["birthDate"])
         XCTAssertNil(payload["birthTime"], "Unknown time should not appear in payload")
         XCTAssertEqual(payload["isBirthTimeUnknown"] as? Bool, true)
-        XCTAssertEqual(payload["birthCity"] as? String, "Seoul, South Korea")
+        XCTAssertEqual(payload["birthLocation"] as? String, "Seoul, South Korea")
     }
 
     func test_completeFlow_skippedAnchors_producesEmptyArray() {

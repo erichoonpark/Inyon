@@ -9,16 +9,22 @@ enum MockError: Error {
 final class MockAuthService: AuthServiceProtocol {
     var currentUserId: String?
     var isAuthenticated: Bool { currentUserId != nil }
+    var isEmailVerified: Bool = true
 
     // Call recording
     var createAccountCalls: [(email: String, password: String)] = []
     var signInCalls: [(email: String, password: String)] = []
     var signOutCallCount = 0
+    var sendPasswordResetCalls: [String] = []
+    var sendEmailVerificationCallCount = 0
+    var reloadUserCallCount = 0
 
     // Controllable results
     var createAccountResult: Result<String, Error> = .success("mock-uid")
     var signInResult: Result<Void, Error> = .success(())
     var signOutResult: Result<Void, Error> = .success(())
+    var sendPasswordResetResult: Result<Void, Error> = .success(())
+    var sendEmailVerificationResult: Result<Void, Error> = .success(())
 
     /// When false, createAccount returns the uid but does NOT update currentUserId,
     /// simulating the real AuthService race where the auth state listener hasn't fired yet.
@@ -55,5 +61,25 @@ final class MockAuthService: AuthServiceProtocol {
         case .failure(let error):
             throw error
         }
+    }
+
+    func sendPasswordReset(email: String) async throws {
+        sendPasswordResetCalls.append(email)
+        switch sendPasswordResetResult {
+        case .success: break
+        case .failure(let error): throw error
+        }
+    }
+
+    func sendEmailVerification() async throws {
+        sendEmailVerificationCallCount += 1
+        switch sendEmailVerificationResult {
+        case .success: break
+        case .failure(let error): throw error
+        }
+    }
+
+    func reloadUser() async throws {
+        reloadUserCallCount += 1
     }
 }

@@ -144,7 +144,7 @@ export const getDailyInsight = onCall(
       }
     }
 
-    // Generate insight via OpenAI
+    // Generate insight via OpenAI with timeout and retry
     const openai = new OpenAI({apiKey: openaiApiKey.value()});
 
     const prompt = `You are Inyon, a calm reflective app grounded in Korean Saju tradition.
@@ -169,32 +169,66 @@ Write a daily reflection for the user. Rules:
 Respond with only valid JSON in this format:
 {"insightText": "Your 3-4 sentence reflection here."}`;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{role: "user", content: prompt}],
-      response_format: {type: "json_object"},
-      temperature: 0.7,
-      max_tokens: 300,
-    });
+    const maxRetries = 2;
+    let parsed: InsightResponse | null = null;
 
-    const content = completion.choices[0]?.message?.content;
-    if (!content) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+        const completion = await openai.chat.completions.create(
+          {
+            model: "gpt-4o-mini",
+            messages: [{role: "user", content: prompt}],
+            response_format: {type: "json_object"},
+            temperature: 0.7,
+            max_tokens: 300,
+          },
+          {signal: controller.signal}
+        );
+
+        clearTimeout(timeoutId);
+
+        const content = completion.choices[0]?.message?.content;
+        if (!content) {
+          throw new Error("Empty response from model.");
+        }
+
+        parsed = JSON.parse(content) as InsightResponse;
+
+        if (
+          !parsed.insightText ||
+          typeof parsed.insightText !== "string" ||
+          parsed.insightText.length < 20
+        ) {
+          throw new Error("Reflection content is invalid.");
+        }
+
+        break; // Success — exit retry loop
+      } catch (err: unknown) {
+        const isLastAttempt = attempt === maxRetries;
+        const error = err instanceof Error ? err : new Error(String(err));
+
+        if (isLastAttempt) {
+          if (error.name === "AbortError") {
+            throw new HttpsError(
+              "deadline-exceeded",
+              "Reflection generation timed out."
+            );
+          }
+          throw new HttpsError("internal", "Failed to generate reflection.");
+        }
+
+        // Wait before retrying (exponential backoff: 1s, 2s)
+        await new Promise((resolve) =>
+          setTimeout(resolve, Math.pow(2, attempt) * 1000)
+        );
+      }
+    }
+
+    if (!parsed) {
       throw new HttpsError("internal", "Failed to generate reflection.");
-    }
-
-    let parsed: InsightResponse;
-    try {
-      parsed = JSON.parse(content) as InsightResponse;
-    } catch {
-      throw new HttpsError("internal", "Invalid response from model.");
-    }
-
-    if (
-      !parsed.insightText ||
-      typeof parsed.insightText !== "string" ||
-      parsed.insightText.length < 20
-    ) {
-      throw new HttpsError("internal", "Reflection content is invalid.");
     }
 
     const version = "v1";
@@ -208,7 +242,7 @@ Respond with only valid JSON in this format:
       elementTheme,
       heavenlyStem,
       earthlyBranch,
-      insightText: parsed.insightText,
+      insightText: parsed!.insightText,
       generatedAt,
       version,
       source: "generated",

@@ -86,7 +86,7 @@ final class OnboardingServiceTests: XCTestCase {
 
         let loaded = try await mockService.loadOnboardingData(userId: "user-123")
         XCTAssertNotNil(loaded)
-        XCTAssertEqual(loaded?["birthCity"] as? String, "Seoul, South Korea")
+        XCTAssertEqual(loaded?["birthLocation"] as? String, "Seoul, South Korea")
     }
 
     // MARK: - Load: No Data Returns Nil
@@ -454,7 +454,7 @@ final class AnonymousDataMergeTests: XCTestCase {
         try await mockService.saveOnboardingData(data, userId: nil)
 
         let stored = mockService.storedPayloads["anonymous"]
-        XCTAssertEqual(stored?["birthCity"] as? String, "Busan, South Korea")
+        XCTAssertEqual(stored?["birthLocation"] as? String, "Busan, South Korea")
     }
 
     // MARK: - Migration: No Existing User Data
@@ -490,7 +490,7 @@ final class AnonymousDataMergeTests: XCTestCase {
 
         // Pre-existing user data
         mockService.storedPayloads["user-123"] = [
-            "birthCity": "Busan, South Korea",
+            "birthLocation": "Busan, South Korea",
             "personalAnchors": ["Energy"]
         ]
 
@@ -498,7 +498,7 @@ final class AnonymousDataMergeTests: XCTestCase {
         try await mockService.migrateAnonymousData(toUserId: "user-123")
 
         let merged = mockService.storedPayloads["user-123"]
-        XCTAssertEqual(merged?["birthCity"] as? String, "Busan, South Korea", "Existing data should win on conflict")
+        XCTAssertEqual(merged?["birthLocation"] as? String, "Busan, South Korea", "Existing data should win on conflict")
     }
 
     // MARK: - Migration: No Anonymous Data
@@ -534,7 +534,7 @@ final class AnonymousDataMergeTests: XCTestCase {
 
     func test_migrate_failure_preservesAnonymousData() async {
         let mockService = MockOnboardingService()
-        mockService.storedPayloads["anonymous"] = ["birthCity": "Seoul, South Korea"]
+        mockService.storedPayloads["anonymous"] = ["birthLocation": "Seoul, South Korea"]
         mockService.migrateResult = .failure(MockError.forced)
 
         do {
@@ -653,7 +653,7 @@ final class AnonymousDataMergeTests: XCTestCase {
 
         // Step 2: Simulate a concurrent user write (newer data that arrived before migration)
         mockService.storedPayloads["user-concurrent"] = [
-            "birthCity": "Busan, South Korea",
+            "birthLocation": "Busan, South Korea",
             "personalAnchors": ["Energy", "Love"],
             "notificationsEnabled": true
         ]
@@ -662,7 +662,7 @@ final class AnonymousDataMergeTests: XCTestCase {
         try await mockService.migrateAnonymousData(toUserId: "user-concurrent")
 
         let merged = mockService.storedPayloads["user-concurrent"]
-        XCTAssertEqual(merged?["birthCity"] as? String, "Busan, South Korea",
+        XCTAssertEqual(merged?["birthLocation"] as? String, "Busan, South Korea",
                        "Concurrent user write should not be overwritten by anonymous data")
         XCTAssertEqual(merged?["personalAnchors"] as? [String], ["Energy", "Love"],
                        "User's newer anchor selection should survive migration")
@@ -688,7 +688,7 @@ final class YouViewSaveTests: XCTestCase {
         do {
             try await mockService.updateOnboardingData(userId: "user-1", data: [
                 "personalAnchors": ["Direction", "Energy"],
-                "birthCity": "Updated City"
+                "birthLocation": "Updated City"
             ])
             hasUnsavedChanges = false
         } catch {
@@ -763,12 +763,12 @@ final class OnboardingServiceMigrationTests: XCTestCase {
 
     func test_mergeOnboardingMigrationData_existingUserFieldsWin() {
         let anonymousData: [String: Any] = [
-            "birthCity": "Seoul, South Korea",
+            "birthLocation": "Seoul, South Korea",
             "personalAnchors": ["Direction"],
             "notificationsEnabled": false
         ]
         let existingUserData: [String: Any] = [
-            "birthCity": "Busan, South Korea",
+            "birthLocation": "Busan, South Korea",
             "notificationsEnabled": true,
             "customField": "keep-me"
         ]
@@ -778,7 +778,7 @@ final class OnboardingServiceMigrationTests: XCTestCase {
             existingUserData: existingUserData
         )
 
-        XCTAssertEqual(merged["birthCity"] as? String, "Busan, South Korea")
+        XCTAssertEqual(merged["birthLocation"] as? String, "Busan, South Korea")
         XCTAssertEqual(merged["notificationsEnabled"] as? Bool, true)
         XCTAssertEqual(merged["personalAnchors"] as? [String], ["Direction"])
         XCTAssertEqual(merged["customField"] as? String, "keep-me")
@@ -786,7 +786,7 @@ final class OnboardingServiceMigrationTests: XCTestCase {
 
     func test_mergeOnboardingMigrationData_withoutUserDocument_returnsAnonymousData() {
         let anonymousData: [String: Any] = [
-            "birthCity": "Seoul, South Korea",
+            "birthLocation": "Seoul, South Korea",
             "personalAnchors": ["Direction"]
         ]
 
@@ -795,7 +795,7 @@ final class OnboardingServiceMigrationTests: XCTestCase {
             existingUserData: nil
         )
 
-        XCTAssertEqual(merged["birthCity"] as? String, "Seoul, South Korea")
+        XCTAssertEqual(merged["birthLocation"] as? String, "Seoul, South Korea")
         XCTAssertEqual(merged["personalAnchors"] as? [String], ["Direction"])
     }
 

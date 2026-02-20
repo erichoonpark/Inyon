@@ -5,6 +5,8 @@ import FirebaseFirestore
 // MARK: - Onboarding Data Model
 
 struct OnboardingData {
+    var firstName: String = ""
+    var lastName: String = ""
     var birthDate: Date?
     var birthTime: Date?
     var isBirthTimeUnknown: Bool = false
@@ -17,6 +19,14 @@ struct OnboardingData {
             "personalAnchors": personalAnchors.map { $0.rawValue }
         ]
 
+        if !firstName.isEmpty {
+            dict["firstName"] = firstName
+        }
+
+        if !lastName.isEmpty {
+            dict["lastName"] = lastName
+        }
+
         if let birthDate = birthDate {
             dict["birthDate"] = Timestamp(date: birthDate)
         }
@@ -28,7 +38,7 @@ struct OnboardingData {
         dict["isBirthTimeUnknown"] = isBirthTimeUnknown
 
         if !birthCity.isEmpty {
-            dict["birthCity"] = birthCity
+            dict["birthLocation"] = birthCity
         }
 
         return dict
@@ -104,7 +114,7 @@ struct OnboardingFlow: View {
                             navigateTo(.arrival)
                         }, onComplete: onComplete)
                     } else {
-                        AccountCreationView(data: data, onBack: goBack, onComplete: { uid in
+                        AccountCreationView(data: $data, onBack: goBack, onComplete: { uid in
                             authenticatedUid = uid
                             saveOnboardingDataThenComplete()
                         })
@@ -697,7 +707,7 @@ struct PersonalAnchorView: View {
 // MARK: - Screen 4: Account Creation
 
 struct AccountCreationView: View {
-    var data: OnboardingData
+    @Binding var data: OnboardingData
     var onBack: () -> Void
     var onComplete: (_ uid: String) -> Void
 
@@ -754,6 +764,34 @@ struct AccountCreationView: View {
 
             if showEmailForm {
                 VStack(spacing: 16) {
+                    HStack(spacing: 12) {
+                        TextField("First name", text: $data.firstName)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(AppTheme.textPrimary)
+                            .tint(AppTheme.textPrimary)
+                            .textContentType(.givenName)
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, 16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                            )
+                            .disabled(isLoading)
+
+                        TextField("Last name", text: $data.lastName)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(AppTheme.textPrimary)
+                            .tint(AppTheme.textPrimary)
+                            .textContentType(.familyName)
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, 16)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                            )
+                            .disabled(isLoading)
+                    }
+
                     TextField("Email", text: $email)
                         .font(.system(size: 17, weight: .regular))
                         .foregroundColor(AppTheme.textPrimary)
@@ -798,54 +836,29 @@ struct AccountCreationView: View {
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 18)
                         .background(
-                            (!isLoading && !email.isEmpty && password.count >= 6)
+                            canCreateAccount
                                 ? AppTheme.textPrimary
                                 : AppTheme.textPrimary.opacity(0.3)
                         )
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .disabled(isLoading || email.isEmpty || password.count < 6)
+                    .disabled(!canCreateAccount)
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 48)
                 .opacity(isVisible ? 1 : 0)
             } else {
                 VStack(spacing: 12) {
-                    // Apple Sign In
-                    Button {
-                        // TODO: Implement Apple Sign In
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "apple.logo")
-                                .font(.system(size: 18))
-                            Text("Continue with Apple")
-                                .font(.system(size: 17, weight: .medium))
-                        }
-                        .foregroundColor(AppTheme.earth)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(AppTheme.textPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                    }
-
-                    // Email Sign In
                     Button {
                         showEmailForm = true
                     } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "envelope")
-                                .font(.system(size: 16))
-                            Text("Continue with Email")
-                                .font(.system(size: 17, weight: .medium))
-                        }
-                        .foregroundColor(AppTheme.textPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(Color.clear)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
-                        )
+                        Text("Continue with Email")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundColor(AppTheme.earth)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(AppTheme.textPrimary)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                 }
                 .padding(.horizontal, 24)
@@ -860,13 +873,18 @@ struct AccountCreationView: View {
         }
     }
 
+    private var canCreateAccount: Bool {
+        !isLoading && !data.firstName.isEmpty && !data.lastName.isEmpty && !email.isEmpty && password.count >= 6
+    }
+
     private func createAccount() {
-        guard !email.isEmpty, password.count >= 6 else { return }
+        guard canCreateAccount else { return }
         isLoading = true
         errorMessage = nil
         Task {
             do {
                 let uid = try await authService.createAccount(email: email, password: password)
+                try? await authService.sendEmailVerification()
                 onComplete(uid)
             } catch {
                 errorMessage = error.localizedDescription
@@ -888,13 +906,17 @@ struct LoginView: View {
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var showEmailForm = false
+    @State private var showForgotPassword = false
     @State private var isVisible = false
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
                 Button {
-                    if showEmailForm {
+                    if showForgotPassword {
+                        showForgotPassword = false
+                        errorMessage = nil
+                    } else if showEmailForm {
                         showEmailForm = false
                         errorMessage = nil
                     } else {
@@ -916,7 +938,7 @@ struct LoginView: View {
             Spacer()
 
             VStack(spacing: 16) {
-                Text("Welcome back.")
+                Text(showForgotPassword ? "Reset your password." : "Welcome back.")
                     .font(.system(size: 26, weight: .medium))
                     .foregroundColor(AppTheme.textPrimary)
                     .multilineTextAlignment(.center)
@@ -935,7 +957,9 @@ struct LoginView: View {
 
             Spacer()
 
-            if showEmailForm {
+            if showForgotPassword {
+                forgotPasswordContent
+            } else if showEmailForm {
                 VStack(spacing: 16) {
                     TextField("Email", text: $email)
                         .font(.system(size: 17, weight: .regular))
@@ -991,47 +1015,31 @@ struct LoginView: View {
                     }
                     .accessibilityIdentifier("login.signInButton")
                     .disabled(isLoading || email.isEmpty || password.isEmpty)
+
+                    Button {
+                        showForgotPassword = true
+                        errorMessage = nil
+                    } label: {
+                        Text("Forgot password?")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 48)
                 .opacity(isVisible ? 1 : 0)
             } else {
                 VStack(spacing: 12) {
-                    // Apple Sign In
-                    Button {
-                        // TODO: Implement Apple Sign In
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "apple.logo")
-                                .font(.system(size: 18))
-                            Text("Continue with Apple")
-                                .font(.system(size: 17, weight: .medium))
-                        }
-                        .foregroundColor(AppTheme.earth)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(AppTheme.textPrimary)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
-                    }
-
-                    // Email Sign In
                     Button {
                         showEmailForm = true
                     } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "envelope")
-                                .font(.system(size: 16))
-                            Text("Continue with Email")
-                                .font(.system(size: 17, weight: .medium))
-                        }
-                        .foregroundColor(AppTheme.textPrimary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 18)
-                        .background(Color.clear)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
-                        )
+                        Text("Continue with Email")
+                            .font(.system(size: 17, weight: .medium))
+                            .foregroundColor(AppTheme.earth)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .background(AppTheme.textPrimary)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .accessibilityIdentifier("login.continueWithEmailButton")
                 }
@@ -1047,6 +1055,79 @@ struct LoginView: View {
         }
     }
 
+    @State private var resetEmailSent = false
+
+    private var forgotPasswordContent: some View {
+        VStack(spacing: 16) {
+            if resetEmailSent {
+                VStack(spacing: 12) {
+                    Image(systemName: "envelope.badge.shield.half.filled")
+                        .font(.system(size: 32))
+                        .foregroundColor(AppTheme.textPrimary)
+
+                    Text("Check your email for a reset link.")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+                        .multilineTextAlignment(.center)
+
+                    Button {
+                        showForgotPassword = false
+                        resetEmailSent = false
+                        errorMessage = nil
+                    } label: {
+                        Text("Back to Sign In")
+                            .font(.system(size: 15, weight: .medium))
+                            .foregroundColor(AppTheme.textPrimary)
+                            .underline()
+                    }
+                    .padding(.top, 8)
+                }
+            } else {
+                TextField("Email", text: $email)
+                    .font(.system(size: 17, weight: .regular))
+                    .foregroundColor(AppTheme.textPrimary)
+                    .tint(AppTheme.textPrimary)
+                    .textContentType(.emailAddress)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .padding(.vertical, 14)
+                    .padding(.horizontal, 16)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                    )
+                    .disabled(isLoading)
+
+                Button {
+                    sendPasswordReset()
+                } label: {
+                    Group {
+                        if isLoading {
+                            ProgressView()
+                                .tint(AppTheme.earth)
+                        } else {
+                            Text("Send Reset Link")
+                                .font(.system(size: 17, weight: .medium))
+                        }
+                    }
+                    .foregroundColor(AppTheme.earth)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
+                    .background(
+                        (!isLoading && !email.isEmpty)
+                            ? AppTheme.textPrimary
+                            : AppTheme.textPrimary.opacity(0.3)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .disabled(isLoading || email.isEmpty)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.bottom, 48)
+        .opacity(isVisible ? 1 : 0)
+    }
+
     private func signIn() {
         guard !email.isEmpty, !password.isEmpty else { return }
         isLoading = true
@@ -1055,6 +1136,21 @@ struct LoginView: View {
             do {
                 try await authService.signIn(email: email, password: password)
                 onComplete()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+
+    private func sendPasswordReset() {
+        guard !email.isEmpty else { return }
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                try await authService.sendPasswordReset(email: email)
+                resetEmailSent = true
             } catch {
                 errorMessage = error.localizedDescription
             }

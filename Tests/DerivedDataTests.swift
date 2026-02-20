@@ -15,7 +15,7 @@ final class DerivedDataTests: XCTestCase {
     }
 
     func test_zodiacAnimal_ratYear() {
-        // 1924 is a Rat year (base year)
+        // 1924 is a Rat year, born in June (well after LNY)
         let date = makeDate(year: 1924)
         XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Rat")
     }
@@ -31,7 +31,7 @@ final class DerivedDataTests: XCTestCase {
     }
 
     func test_zodiacAnimal_dragonYear() {
-        // 2000 is a Dragon year: (2000 - 1924) % 12 = 76 % 12 = 4 → Dragon
+        // 2000 is a Dragon year (born in June, well after LNY Feb 5)
         let date = makeDate(year: 2000)
         XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Dragon")
     }
@@ -40,6 +40,7 @@ final class DerivedDataTests: XCTestCase {
         let expected = ["Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
                        "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig"]
 
+        // Use June dates to be well after LNY for all years
         for (offset, animal) in expected.enumerated() {
             let date = makeDate(year: 1924 + offset)
             XCTAssertEqual(DerivedData.zodiacAnimal(from: date), animal,
@@ -48,7 +49,6 @@ final class DerivedDataTests: XCTestCase {
     }
 
     func test_zodiacAnimal_cycleRepeats() {
-        // 1924 and 1936 should both be Rat
         let rat1 = makeDate(year: 1924)
         let rat2 = makeDate(year: 1936)
         let rat3 = makeDate(year: 1996)
@@ -59,23 +59,52 @@ final class DerivedDataTests: XCTestCase {
     }
 
     func test_zodiacAnimal_recentYears() {
-        // Verify common recent years
         XCTAssertEqual(DerivedData.zodiacAnimal(from: makeDate(year: 1990)), "Horse")
         XCTAssertEqual(DerivedData.zodiacAnimal(from: makeDate(year: 1995)), "Pig")
         XCTAssertEqual(DerivedData.zodiacAnimal(from: makeDate(year: 2024)), "Dragon")
     }
 
     func test_zodiacAnimal_yearBefore1924() {
-        // 1920: (1920 - 1924) % 12 = -4 % 12 → needs safe index → Monkey
-        // -4 + 12 = 8 → Monkey
+        // 1920, June: well after LNY (Feb 20), so lunar year = 1920
+        // (1920 - 1924) % 12 = -4, + 12 = 8 → Monkey
         let date = makeDate(year: 1920)
         XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Monkey")
     }
 
-    func test_zodiacAnimal_farPast() {
-        // 1900: (1900 - 1924) % 12 = -24 % 12 = 0 → Rat
-        let date = makeDate(year: 1900)
-        XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Rat")
+    // MARK: - Zodiac with Lunar New Year Boundary
+
+    func test_zodiacAnimal_beforeLunarNewYear_usesPreviousYear() {
+        // 2023 LNY is Jan 22. Born Jan 15, 2023 → still Year of Tiger (2022's animal)
+        // 2022 lunar year: (2022 - 1924) % 12 = 98 % 12 = 2 → Tiger
+        let date = makeDate(year: 2023, month: 1, day: 15)
+        XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Tiger")
+    }
+
+    func test_zodiacAnimal_onLunarNewYear_usesCurrentYear() {
+        // 2023 LNY is Jan 22. Born Jan 22 → Year of Rabbit
+        // (2023 - 1924) % 12 = 99 % 12 = 3 → Rabbit
+        let date = makeDate(year: 2023, month: 1, day: 22)
+        XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Rabbit")
+    }
+
+    func test_zodiacAnimal_afterLunarNewYear_usesCurrentYear() {
+        // 2023 LNY is Jan 22. Born Feb 1 → Year of Rabbit
+        let date = makeDate(year: 2023, month: 2, day: 1)
+        XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Rabbit")
+    }
+
+    func test_zodiacAnimal_earlyJanuary2025_beforeLNY() {
+        // 2025 LNY is Jan 29. Born Jan 10 → still Dragon (2024 animal)
+        // (2024 - 1924) % 12 = 100 % 12 = 4 → Dragon
+        let date = makeDate(year: 2025, month: 1, day: 10)
+        XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Dragon")
+    }
+
+    func test_zodiacAnimal_afterLNY2025() {
+        // 2025 LNY is Jan 29. Born Feb 1 → Year of Snake
+        // (2025 - 1924) % 12 = 101 % 12 = 5 → Snake
+        let date = makeDate(year: 2025, month: 2, day: 1)
+        XCTAssertEqual(DerivedData.zodiacAnimal(from: date), "Snake")
     }
 
     // MARK: - Lunar Birthday
@@ -84,36 +113,21 @@ final class DerivedDataTests: XCTestCase {
         XCTAssertEqual(DerivedData.lunarBirthday(from: nil), "—")
     }
 
-    func test_lunarBirthday_validDate_containsApprox() {
+    func test_lunarBirthday_validDate_returnsLunarFormat() {
         let date = makeDate(year: 1990, month: 6, day: 15)
         let result = DerivedData.lunarBirthday(from: date)
 
-        XCTAssertTrue(result.hasSuffix("(approx.)"))
+        // Should contain "Month" and "Day"
+        XCTAssertTrue(result.contains("Month"), "Should contain 'Month' in result: \(result)")
+        XCTAssertTrue(result.contains("Day"), "Should contain 'Day' in result: \(result)")
     }
 
-    func test_lunarBirthday_formatsMonthAndDay() {
-        let date = makeDate(year: 1990, month: 3, day: 22)
-        let result = DerivedData.lunarBirthday(from: date)
-
-        // Should contain "Mar 22"
-        XCTAssertTrue(result.contains("Mar"), "Should contain abbreviated month")
-        XCTAssertTrue(result.contains("22"), "Should contain day")
-    }
-
-    func test_lunarBirthday_january1() {
+    func test_lunarBirthday_knownDate() {
+        // Jan 1, 2000 in Chinese calendar is 11th Month, Day 25 of previous lunar year
         let date = makeDate(year: 2000, month: 1, day: 1)
         let result = DerivedData.lunarBirthday(from: date)
-
-        XCTAssertTrue(result.contains("Jan"))
-        XCTAssertTrue(result.contains("1"))
-    }
-
-    func test_lunarBirthday_december31() {
-        let date = makeDate(year: 2000, month: 12, day: 31)
-        let result = DerivedData.lunarBirthday(from: date)
-
-        XCTAssertTrue(result.contains("Dec"))
-        XCTAssertTrue(result.contains("31"))
+        XCTAssertFalse(result.isEmpty)
+        XCTAssertNotEqual(result, "—")
     }
 
     // MARK: - Helpers

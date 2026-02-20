@@ -22,6 +22,7 @@
 		52BFC7444BC4631BEED7686B /* YouView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D1226045A0B4C5D64889718 /* YouView.swift */; };
 		5727B181A17C0B9E0E9AA2DD /* MockDailyInsightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C8BDF27048A0C8117DF504C /* MockDailyInsightService.swift */; };
 		5862313F8DBB422507E290C6 /* InyonApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */; };
+		59C53A71A6F566B4D3ED1F8B /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE1068DD88030596958B00DC /* NotificationService.swift */; };
 		655A518CB201C02401A75E08 /* HomeViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39D432659FABD34403BD728A /* HomeViewModelTests.swift */; };
 		6A4C24A27314DD63BA76E863 /* TabEnumTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0ED40F2EE22395E85002B11 /* TabEnumTests.swift */; };
 		6CB1C5CDA3363A1C413C7183 /* PostSignupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF88158AB21C84BDAC5BBD4D /* PostSignupView.swift */; };
@@ -103,6 +104,7 @@
 		E49721D5B99804F6203E5621 /* InyonTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = InyonTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EBAA904754D6242982DC830C /* OnboardingServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingServiceTests.swift; sourceTree = "<group>"; };
 		ECEC983BA3C91520977BD07C /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		EE1068DD88030596958B00DC /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		F9A0EB9FC9F33431DA918146 /* OnboardingServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingServiceProtocol.swift; sourceTree = "<group>"; };
 		F9E9EDC7419092D1AD19636A /* OnboardingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingService.swift; sourceTree = "<group>"; };
 		FFACFC459463CD8DAEE394B3 /* UserServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserServiceProtocol.swift; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 				1DDE2616856A9C16AFE06F08 /* HomeView.swift */,
 				041A282934B35CDB83FB6939 /* HomeViewModel.swift */,
 				4BA5C6029AFDEFB8ABAA84DA /* InyonApp.swift */,
+				EE1068DD88030596958B00DC /* NotificationService.swift */,
 				A0DCABA9CC9830799F06027A /* OnboardingFlow.swift */,
 				F9E9EDC7419092D1AD19636A /* OnboardingService.swift */,
 				F9A0EB9FC9F33431DA918146 /* OnboardingServiceProtocol.swift */,
@@ -319,6 +322,7 @@
 				86DC9EEE2890D555F1872492 /* HomeView.swift in Sources */,
 				847DCB322317379A747304DE /* HomeViewModel.swift in Sources */,
 				5862313F8DBB422507E290C6 /* InyonApp.swift in Sources */,
+				59C53A71A6F566B4D3ED1F8B /* NotificationService.swift in Sources */,
 				C3695D3C0A2B1D029DB1DCD4 /* OnboardingFlow.swift in Sources */,
 				A9BB82531D0A8911456CB17C /* OnboardingService.swift in Sources */,
 				187314A93A49C4534AFFB30B /* OnboardingServiceProtocol.swift in Sources */,

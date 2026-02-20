@@ -1,4 +1,5 @@
 import SwiftUI
+import os.log
 
 // MARK: - Style Constants
 
@@ -377,30 +378,24 @@ struct ViewChartCTA: View {
 
 // MARK: - Analytics (Debug Stubs)
 
+private let guideLogger = Logger(subsystem: "com.inyon.app", category: "Guide")
+
 enum GuideAnalytics {
     static func trackGuideOpened() {
-        #if DEBUG
-        print("[Analytics] guide_opened")
-        #endif
+        guideLogger.debug("guide_opened")
     }
 
     static func trackSectionExpanded(isExpanded: Bool) {
-        #if DEBUG
         if isExpanded {
-            print("[Analytics] guide_section_expanded")
+            guideLogger.debug("guide_section_expanded")
         }
-        #endif
     }
 
     static func trackElementOpened(_ name: String) {
-        #if DEBUG
-        print("[Analytics] element_opened: \(name)")
-        #endif
+        guideLogger.debug("element_opened: \(name)")
     }
 
     static func trackViewChartTapped() {
-        #if DEBUG
-        print("[Analytics] cta_view_chart_tapped")
-        #endif
+        guideLogger.debug("cta_view_chart_tapped")
     }
 }

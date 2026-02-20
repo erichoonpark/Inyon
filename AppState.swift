@@ -1,4 +1,7 @@
 import Foundation
+import os.log
+
+private let logger = Logger(subsystem: "com.inyon.app", category: "AppState")
 
 @MainActor
 final class AppState: ObservableObject {
@@ -21,7 +24,7 @@ final class AppState: ObservableObject {
         do {
             currentUser = try await userService.fetchUser(id: id)
         } catch {
-            print("Failed to load user: \(error)")
+            logger.error("Failed to load user: \(error.localizedDescription)")
         }
         isLoadingUser = false
     }
