@@ -691,4 +691,5 @@ struct FlowLayout: Layout {
 
 #Preview {
     YouView(onboardingService: OnboardingService())
+        .environmentObject(AuthService())
 }
