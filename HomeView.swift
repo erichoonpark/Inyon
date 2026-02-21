@@ -354,4 +354,5 @@ struct FiveElementsStrip: View {
 
 #Preview {
     HomeView()
+        .environmentObject(AuthService())
 }
