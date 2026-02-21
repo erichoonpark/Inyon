@@ -113,21 +113,14 @@ final class DerivedDataTests: XCTestCase {
         XCTAssertEqual(DerivedData.lunarBirthday(from: nil), "—")
     }
 
-    func test_lunarBirthday_validDate_returnsLunarFormat() {
+    func test_lunarBirthday_validDate_returnsMonthDay() {
         let date = makeDate(year: 1990, month: 6, day: 15)
-        let result = DerivedData.lunarBirthday(from: date)
-
-        // Should contain "Month" and "Day"
-        XCTAssertTrue(result.contains("Month"), "Should contain 'Month' in result: \(result)")
-        XCTAssertTrue(result.contains("Day"), "Should contain 'Day' in result: \(result)")
+        XCTAssertEqual(DerivedData.lunarBirthday(from: date), "Jun 15")
     }
 
-    func test_lunarBirthday_knownDate() {
-        // Jan 1, 2000 in Chinese calendar is 11th Month, Day 25 of previous lunar year
+    func test_lunarBirthday_january() {
         let date = makeDate(year: 2000, month: 1, day: 1)
-        let result = DerivedData.lunarBirthday(from: date)
-        XCTAssertFalse(result.isEmpty)
-        XCTAssertNotEqual(result, "—")
+        XCTAssertEqual(DerivedData.lunarBirthday(from: date), "Jan 1")
     }
 
     // MARK: - Helpers

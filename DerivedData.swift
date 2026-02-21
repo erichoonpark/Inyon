@@ -66,24 +66,14 @@ enum DerivedData {
         return zodiacAnimals[index]
     }
 
-    // MARK: - Lunar Birthday (Approximate)
+    // MARK: - Lunar Birthday
 
-    /// Returns an approximate lunar birthday using the Chinese calendar.
-    /// Uses Foundation's Chinese calendar for conversion.
+    /// Returns the birthday formatted as "Jan 20".
     static func lunarBirthday(from date: Date?) -> String {
         guard let date else { return "—" }
 
-        let chineseCalendar = Calendar(identifier: .chinese)
-        let lunarMonth = chineseCalendar.component(.month, from: date)
-        let lunarDay = chineseCalendar.component(.day, from: date)
-
-        let monthNames = [
-            "1st Month", "2nd Month", "3rd Month", "4th Month",
-            "5th Month", "6th Month", "7th Month", "8th Month",
-            "9th Month", "10th Month", "11th Month", "12th Month"
-        ]
-
-        let monthName = lunarMonth <= 12 ? monthNames[lunarMonth - 1] : "\(lunarMonth)th Month"
-        return "\(monthName), Day \(lunarDay)"
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter.string(from: date)
     }
 }

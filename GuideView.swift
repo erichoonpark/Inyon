@@ -70,9 +70,7 @@ struct GuideView: View {
                     iconName: GuideContent.howInyonUses.iconName,
                     title: GuideContent.howInyonUses.title,
                     summary: GuideContent.howInyonUses.summary
-                ) {
-                    ViewChartCTA()
-                }
+                )
             }
             .padding(.horizontal, GuideStyle.horizontalPadding)
             .padding(.vertical, 24)
