@@ -349,33 +349,6 @@ struct IsIsNotCard: View {
     }
 }
 
-// MARK: - View Chart CTA
-
-struct ViewChartCTA: View {
-    var body: some View {
-        Button {
-            GuideAnalytics.trackViewChartTapped()
-            // TODO: Navigate to chart view
-        } label: {
-            HStack {
-                Text("View my chart")
-                    .font(.body)
-                    .fontWeight(.medium)
-
-                Image(systemName: "arrow.right")
-                    .font(.body)
-            }
-            .foregroundStyle(.white)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(GuideStyle.accentGreen)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
-        .accessibilityLabel("View my chart")
-        .accessibilityHint("Opens your personal Saju chart")
-    }
-}
-
 // MARK: - Analytics (Debug Stubs)
 
 private let guideLogger = Logger(subsystem: "com.inyon.app", category: "Guide")
@@ -395,7 +368,5 @@ enum GuideAnalytics {
         guideLogger.debug("element_opened: \(name)")
     }
 
-    static func trackViewChartTapped() {
-        guideLogger.debug("cta_view_chart_tapped")
-    }
+
 }

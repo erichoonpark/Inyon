@@ -30,12 +30,51 @@ const STEM_ELEMENTS: Record<number, string> = {
 };
 
 const ELEMENT_THEMES: Record<string, string> = {
-  Wood: "Growth, flexibility, vision",
-  Fire: "Warmth, clarity, expression",
-  Earth: "Stability, nourishment, grounding",
-  Metal: "Precision, refinement, letting go",
-  Water: "Flow, depth, adaptation",
+  Wood: "growth, flexibility, vision",
+  Fire: "warmth, clarity, expression",
+  Earth: "stability, nourishment, grounding",
+  Metal: "precision, refinement, letting go",
+  Water: "flow, depth, adaptation",
 };
+
+// Generating cycle: each element produces the next
+const ELEMENT_GENERATES: Record<string, string> = {
+  Wood: "Fire", Fire: "Earth", Earth: "Metal", Metal: "Water", Water: "Wood",
+};
+
+// Controlling cycle: each element restrains the target
+const ELEMENT_CONTROLS: Record<string, string> = {
+  Wood: "Earth", Earth: "Water", Water: "Fire", Fire: "Metal", Metal: "Wood",
+};
+
+// Zodiac animals aligned to Earthly Branch cycle (1900 = Rat)
+const ZODIAC_ANIMALS = [
+  "Rat", "Ox", "Tiger", "Rabbit", "Dragon", "Snake",
+  "Horse", "Goat", "Monkey", "Rooster", "Dog", "Pig",
+];
+
+/**
+ * Returns the approximate zodiac animal for a birth year.
+ * Approximate — does not account for Lunar New Year boundary.
+ */
+function getBirthZodiac(birthDate: Date): string {
+  const year = birthDate.getUTCFullYear();
+  const index = ((year - 1900) % 12 + 12) % 12;
+  return ZODIAC_ANIMALS[index];
+}
+
+/**
+ * Describes the relationship of a birth element to today's element
+ * from the perspective of the person (how today's energy meets them).
+ */
+function getElementRelationship(birthEl: string, dayEl: string): string {
+  if (birthEl === dayEl) return "resonates with";
+  if (ELEMENT_GENERATES[birthEl] === dayEl) return "feeds into";
+  if (ELEMENT_GENERATES[dayEl] === birthEl) return "is nourished by";
+  if (ELEMENT_CONTROLS[birthEl] === dayEl) return "tempers";
+  if (ELEMENT_CONTROLS[dayEl] === birthEl) return "is challenged by";
+  return "meets";
+}
 
 /**
  * Calculate the day's Heavenly Stem and Earthly Branch index
@@ -137,37 +176,40 @@ export const getDailyInsight = onCall(
           bd.toISOString().split("T")[0]
         );
         const birthElement = STEM_ELEMENTS[birthStem.stemIndex];
+        const birthTheme = ELEMENT_THEMES[birthElement];
+        const zodiac = getBirthZodiac(bd);
+        const relationship = getElementRelationship(birthElement, dayElement);
         birthContext =
-          `The user's birth element is ${birthElement}. ` +
-          `Today's element is ${dayElement}. ` +
-          `Consider the relationship between these elements.`;
+          `Birth element: ${birthElement} (${birthTheme})\n` +
+          `Birth zodiac: ${zodiac} year\n` +
+          `Their ${birthElement} nature ${relationship} today's ${dayElement} energy — ` +
+          `let this dynamic inform the reflection naturally.`;
       }
     }
 
     // Generate insight via OpenAI with timeout and retry
     const openai = new OpenAI({apiKey: openaiApiKey.value()});
 
-    const prompt = `You are Inyon, a calm reflective app grounded in Korean Saju tradition.
+    const prompt = `You are Inyon, a calm reflective voice grounded in Korean Saju tradition.
 
-Today's Saju day data:
+Today's Saju data:
 - Date: ${localDate}
-- Day Element: ${dayElement} (${elementTheme})
 - Heavenly Stem: ${heavenlyStem}
 - Earthly Branch: ${earthlyBranch}
-${birthContext ? `\nUser context:\n- ${birthContext}` : ""}
+- Element: ${dayElement} — ${elementTheme}
+${birthContext ? `\nUser context:\n${birthContext}` : ""}
 
-Write a daily reflection for the user. Rules:
-1. Exactly 3-4 sentences.
-2. Reflective, calm, non-prescriptive tone.
-3. Mention the day's energetic tendency, not prediction.
-4. Use hedging language: "may", "can", "tends to", "often".
-5. Never predict outcomes, give advice, or use directive language.
-6. Never mention medical, legal, or financial topics.
-7. Never use fear-based or urgent language.
-8. The reflection should leave the reader feeling steadier.
+Write a daily reflection. Rules:
+1. 2–3 sentences. Be concise.
+2. Calm, grounded, non-prescriptive.
+3. Draw from the specific stem or branch quality — avoid generic elemental summaries.
+4. If user context is provided, weave the element relationship into the reflection naturally without naming the dynamic explicitly.
+5. Use hedging language: "may", "can", "tends to", "often".
+6. No predictions, no advice, no directive language ("you should", "now is the time").
+7. No fear-based or urgent language.
+8. The reader should feel steadier after reading.
 
-Respond with only valid JSON in this format:
-{"insightText": "Your 3-4 sentence reflection here."}`;
+Respond with only valid JSON: {"insightText": "..."}`;
 
     const maxRetries = 2;
     let parsed: InsightResponse | null = null;
@@ -183,7 +225,7 @@ Respond with only valid JSON in this format:
             messages: [{role: "user", content: prompt}],
             response_format: {type: "json_object"},
             temperature: 0.7,
-            max_tokens: 300,
+            max_tokens: 200,
           },
           {signal: controller.signal}
         );

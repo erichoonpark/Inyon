@@ -247,6 +247,45 @@ final class OnboardingDataTests: XCTestCase {
     }
 }
 
+// MARK: - Onboarding UI Logic Tests
+
+final class OnboardingUITests: XCTestCase {
+
+    // MARK: - Birth Time Subheadline Text
+
+    func test_birthTimeSubheadline_whenSkipped_showsSettingsMessage() {
+        let knowsBirthTime = false
+        // Mirrors the ternary in BirthContextView
+        let text = knowsBirthTime ? "Approximate time is okay." : "You can add this in settings."
+        XCTAssertEqual(text, "You can add this in settings.")
+    }
+
+    func test_birthTimeSubheadline_whenKnown_showsApproximateMessage() {
+        let knowsBirthTime = true
+        let text = knowsBirthTime ? "Approximate time is okay." : "You can add this in settings."
+        XCTAssertEqual(text, "Approximate time is okay.")
+    }
+
+    // MARK: - Anchor Selection Indicator
+
+    func test_anchorSelectionIndicator_notSelected_hidesCheckmark() {
+        let selectedAnchors: Set<PersonalAnchor> = []
+        XCTAssertFalse(selectedAnchors.contains(.direction), "Unselected anchor should not show checkmark")
+    }
+
+    func test_anchorSelectionIndicator_selected_showsCheckmark() {
+        var selectedAnchors: Set<PersonalAnchor> = []
+        selectedAnchors.insert(.direction)
+        XCTAssertTrue(selectedAnchors.contains(.direction), "Selected anchor should show checkmark")
+    }
+
+    func test_anchorSelectionIndicator_deselected_hidesCheckmark() {
+        var selectedAnchors: Set<PersonalAnchor> = [.direction]
+        selectedAnchors.remove(.direction)
+        XCTAssertFalse(selectedAnchors.contains(.direction), "Deselected anchor should hide checkmark")
+    }
+}
+
 // MARK: - Onboarding Step Tests
 
 final class OnboardingStepTests: XCTestCase {

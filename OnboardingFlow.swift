@@ -465,33 +465,25 @@ struct BirthContextView: View {
                                 }
                             }
                         } else {
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack(spacing: 16) {
-                                    Text("Skipped")
-                                        .font(.system(size: 17, weight: .regular))
-                                        .foregroundColor(AppTheme.textSecondary)
-
-                                    Button {
-                                        knowsBirthTime = true
-                                    } label: {
-                                        Text("Add later")
-                                            .font(.system(size: 15, weight: .regular))
-                                            .foregroundColor(AppTheme.textSecondary)
-                                            .underline()
-                                    }
-                                }
-
-                                Text("You can add this in settings.")
-                                    .font(.system(size: 13, weight: .regular))
+                            HStack(spacing: 16) {
+                                Text("Skipped")
+                                    .font(.system(size: 17, weight: .regular))
                                     .foregroundColor(AppTheme.textSecondary)
+
+                                Button {
+                                    knowsBirthTime = true
+                                } label: {
+                                    Text("Add later")
+                                        .font(.system(size: 15, weight: .regular))
+                                        .foregroundColor(AppTheme.textSecondary)
+                                        .underline()
+                                }
                             }
                         }
 
-                        if knowsBirthTime {
-                            Text("Approximate time is okay.")
-                                .font(.system(size: 13, weight: .regular))
-                                .foregroundColor(AppTheme.textSecondary)
-                        }
+                        Text(knowsBirthTime ? "Approximate time is okay." : "You can add this in settings.")
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
                     }
 
                     // Birth City
@@ -508,6 +500,8 @@ struct BirthContextView: View {
                                     .foregroundColor(AppTheme.textPrimary)
                                     .tint(AppTheme.textPrimary)
                                     .autocorrectionDisabled()
+                                    .frame(maxWidth: .infinity)
+                                    .contentShape(Rectangle())
                                     .onChange(of: cityQuery) { _, newValue in
                                         cityCompleter.search(newValue)
                                     }
@@ -648,9 +642,9 @@ struct PersonalAnchorView: View {
                                 Spacer()
 
                                 if selectedAnchors.contains(anchor) {
-                                    Rectangle()
-                                        .fill(AppTheme.textPrimary)
-                                        .frame(width: 20, height: 2)
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 15, weight: .medium))
+                                        .foregroundColor(AppTheme.textPrimary)
                                 }
                             }
                             .padding(.vertical, 18)

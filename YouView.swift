@@ -14,9 +14,14 @@ struct YouView: View {
     @State private var preferredNotificationTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
     @State private var showNotificationDeniedAlert = false
 
+    @State private var firstName = ""
+    @State private var lastName = ""
+    @State private var birthLocation = ""
+
     @State private var hasSelectedDate = false
     @State private var hasSelectedTime = false
     @State private var isLoading = true
+    @State private var isPerformingLoad = false
     @State private var isSaving = false
     @State private var saveError: String?
     @State private var hasUnsavedChanges = false
@@ -61,6 +66,9 @@ struct YouView: View {
 
                     // Notification Preferences
                     notificationSection
+
+                    // Personal Info (editable)
+                    personalInfoSection
 
                     // Birth Context (editable)
                     editableSection
@@ -110,6 +118,78 @@ struct YouView: View {
         }
     }
 
+    // MARK: - Personal Info Section
+
+    private var personalInfoSection: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            Text("PERSONAL INFO")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .tracking(1.2)
+                .foregroundColor(AppTheme.textSecondary)
+
+            VStack(alignment: .leading, spacing: 16) {
+                HStack {
+                    Text("First name")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+                    Spacer()
+                    TextField("—", text: $firstName)
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: 180)
+                        .onChange(of: firstName) { _, _ in
+                            guard !isPerformingLoad else { return }
+                            hasUnsavedChanges = true
+                        }
+                }
+
+                Rectangle()
+                    .fill(AppTheme.divider)
+                    .frame(height: 1)
+
+                HStack {
+                    Text("Last name")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+                    Spacer()
+                    TextField("—", text: $lastName)
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: 180)
+                        .onChange(of: lastName) { _, _ in
+                            guard !isPerformingLoad else { return }
+                            hasUnsavedChanges = true
+                        }
+                }
+
+                Rectangle()
+                    .fill(AppTheme.divider)
+                    .frame(height: 1)
+
+                HStack {
+                    Text("Birth location")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+                    Spacer()
+                    TextField("City", text: $birthLocation)
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .multilineTextAlignment(.trailing)
+                        .frame(maxWidth: 180)
+                        .onChange(of: birthLocation) { _, _ in
+                            guard !isPerformingLoad else { return }
+                            hasUnsavedChanges = true
+                        }
+                }
+            }
+        }
+        .padding(16)
+        .background(AppTheme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
+    }
+
     // MARK: - Editable Section
 
     private var editableSection: some View {
@@ -143,6 +223,7 @@ struct YouView: View {
                     .colorScheme(.dark)
                     .opacity(hasSelectedDate ? 1 : 0.011)
                     .onChange(of: selectedDate) { _, _ in
+                        guard !isPerformingLoad else { return }
                         hasSelectedDate = true
                         birthDate = selectedDate
                         hasUnsavedChanges = true
@@ -178,6 +259,7 @@ struct YouView: View {
                         .colorScheme(.dark)
                         .opacity(hasSelectedTime ? 1 : 0.011)
                         .onChange(of: selectedTime) { _, _ in
+                            guard !isPerformingLoad else { return }
                             hasSelectedTime = true
                             birthTime = selectedTime
                             hasUnsavedChanges = true
@@ -471,11 +553,22 @@ struct YouView: View {
         }
 
         Task {
+            isPerformingLoad = true
+            defer {
+                isPerformingLoad = false
+                hasUnsavedChanges = false
+            }
+
             do {
                 guard let data = try await onboardingService.loadOnboardingData(userId: uid) else {
                     isLoading = false
                     return
                 }
+
+                // Load personal info
+                if let fn = data["firstName"] as? String { firstName = fn }
+                if let ln = data["lastName"] as? String { lastName = ln }
+                if let bl = data["birthLocation"] as? String { birthLocation = bl }
 
                 // Load birth date
                 if let timestamp = data["birthDate"] as? Timestamp {
@@ -516,11 +609,17 @@ struct YouView: View {
         guard let uid = authService.currentUserId else { return }
 
         var updateData: [String: Any] = [
+            "firstName": firstName,
+            "lastName": lastName,
             "personalAnchors": personalAnchors.map { $0.rawValue },
             "notificationsEnabled": notificationsEnabled,
             "preferredNotificationTime": Timestamp(date: preferredNotificationTime),
             "updatedAt": FieldValue.serverTimestamp()
         ]
+
+        updateData["birthLocation"] = birthLocation.isEmpty
+            ? FieldValue.delete()
+            : birthLocation
 
         if let date = birthDate {
             updateData["birthDate"] = Timestamp(date: date)
