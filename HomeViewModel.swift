@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 final class HomeViewModel: ObservableObject {
-    enum LoadState {
+    enum LoadState: Equatable {
         case idle
         case loading
         case ready

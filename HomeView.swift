@@ -24,8 +24,8 @@ struct HomeView: View {
                     Spacer()
                 }
 
-                // Email verification banner
-                if !authService.isEmailVerified && !verificationBannerDismissed {
+                // Email verification banner — deferred until content loads
+                if viewModel.state == .ready && !authService.isEmailVerified && !verificationBannerDismissed {
                     emailVerificationBanner
                 }
 
@@ -72,61 +72,55 @@ struct HomeView: View {
 
     private func insightContent(_ insight: DailyInsight) -> some View {
         VStack(alignment: .leading, spacing: 32) {
-            // Day Element card
+            // Reflection text — lead with the actual content
+            Text(insight.insightText)
+                .font(.system(size: 17, weight: .regular))
+                .foregroundColor(AppTheme.textPrimary)
+                .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
+
+            // Compact context card: element + stem/branch
             VStack(alignment: .leading, spacing: 12) {
-                Text("DAY ELEMENT")
+                Text("TODAY'S CONTEXT")
                     .font(.system(size: 11, weight: .medium, design: .monospaced))
                     .tracking(1.5)
                     .foregroundColor(AppTheme.textSecondary)
 
-                HStack(spacing: 12) {
-                    Image(systemName: elementIcon(for: insight.dayElement))
-                        .font(.system(size: 20))
-                        .foregroundColor(AppTheme.textPrimary)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(insight.dayElement)
-                            .font(.system(size: 18, weight: .semibold))
+                HStack(alignment: .center, spacing: 0) {
+                    HStack(spacing: 10) {
+                        Image(systemName: elementIcon(for: insight.dayElement))
+                            .font(.system(size: 15))
                             .foregroundColor(AppTheme.textPrimary)
 
-                        Text(insight.elementTheme)
-                            .font(.system(size: 13))
-                            .foregroundColor(AppTheme.textSecondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(insight.dayElement)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(AppTheme.textPrimary)
+
+                            Text(insight.elementTheme)
+                                .font(.system(size: 12))
+                                .foregroundColor(AppTheme.textSecondary)
+                                .lineLimit(1)
+                        }
                     }
-                }
-            }
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-            // Stem Pair
-            VStack(alignment: .leading, spacing: 12) {
-                Text("STEM & BRANCH")
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .tracking(1.5)
-                    .foregroundColor(AppTheme.textSecondary)
+                    Rectangle()
+                        .fill(AppTheme.divider)
+                        .frame(width: 1, height: 36)
+                        .padding(.horizontal, 16)
 
-                HStack(spacing: 24) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Heavenly Stem")
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                            .tracking(1)
-                            .foregroundColor(AppTheme.textSecondary)
-
+                    VStack(alignment: .leading, spacing: 3) {
                         Text(insight.heavenlyStem)
-                            .font(.system(size: 17, weight: .medium))
+                            .font(.system(size: 13, weight: .medium))
                             .foregroundColor(AppTheme.textPrimary)
-                    }
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Earthly Branch")
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                            .tracking(1)
-                            .foregroundColor(AppTheme.textSecondary)
 
                         Text(insight.earthlyBranch)
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundColor(AppTheme.textPrimary)
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
                     }
                 }
-                .padding(16)
+                .padding(14)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(AppTheme.surface)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -136,22 +130,8 @@ struct HomeView: View {
                 )
             }
 
-            // Five Elements strip (highlight active)
+            // Five Elements strip
             FiveElementsStrip(activeElement: insight.dayElement)
-
-            // Daily insight text
-            VStack(alignment: .leading, spacing: 12) {
-                Text("TODAY")
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .tracking(1.5)
-                    .foregroundColor(AppTheme.textSecondary)
-
-                Text(insight.insightText)
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(AppTheme.textPrimary)
-                    .lineSpacing(6)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
         }
     }
 
@@ -159,38 +139,41 @@ struct HomeView: View {
 
     private var loadingContent: some View {
         VStack(alignment: .leading, spacing: 32) {
-            // Day Element placeholder
-            VStack(alignment: .leading, spacing: 12) {
-                placeholderBar(width: 100)
-                HStack(spacing: 12) {
-                    Circle()
-                        .fill(AppTheme.surface)
-                        .frame(width: 24, height: 24)
-                    VStack(alignment: .leading, spacing: 4) {
-                        placeholderBar(width: 80)
-                        placeholderBar(width: 140)
-                    }
-                }
+            // Reflection text placeholder — matches new leading position
+            VStack(alignment: .leading, spacing: 10) {
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(AppTheme.surface)
+                    .frame(maxWidth: .infinity, minHeight: 22, maxHeight: 22)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(AppTheme.surface)
+                    .frame(maxWidth: .infinity, minHeight: 22, maxHeight: 22)
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(AppTheme.surface)
+                    .frame(maxWidth: 220, minHeight: 22, maxHeight: 22)
             }
 
-            // Stem pair placeholder
+            // Context card placeholder
             VStack(alignment: .leading, spacing: 12) {
                 placeholderBar(width: 120)
                 RoundedRectangle(cornerRadius: 12)
                     .fill(AppTheme.surface)
-                    .frame(height: 70)
+                    .frame(height: 64)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(AppTheme.divider, lineWidth: 1)
                     )
             }
 
-            // Insight placeholder
+            // Elements strip placeholder
             VStack(alignment: .leading, spacing: 12) {
-                placeholderBar(width: 60)
-                placeholderBar(width: .infinity)
-                placeholderBar(width: .infinity)
-                placeholderBar(width: 200)
+                placeholderBar(width: 80)
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(AppTheme.surface)
+                    .frame(height: 72)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(AppTheme.divider, lineWidth: 1)
+                    )
             }
         }
         .redacted(reason: .placeholder)

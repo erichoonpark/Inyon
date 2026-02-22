@@ -18,12 +18,12 @@ struct PostSignupView: View {
                         .frame(width: 56, height: 56)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
 
-                    Text("You're all set.")
+                    Text("Your first reflection is ready.")
                         .font(.system(size: 26, weight: .medium))
                         .foregroundColor(AppTheme.textPrimary)
                         .multilineTextAlignment(.center)
 
-                    Text("Each day, Inyon offers a reflection drawn from your timing context.")
+                    Text("A new one appears each morning. It takes a moment to read—drawn from your birth timing, grounded in the day.")
                         .font(.system(size: 17, weight: .regular))
                         .foregroundColor(AppTheme.textSecondary)
                         .multilineTextAlignment(.center)

@@ -6,6 +6,7 @@ struct InyonApp: App {
     @StateObject private var authService = AuthService()
     @StateObject private var appState = AppState()
     @AppStorage("inyon.hasSeenPostSignup") private var hasSeenPostSignup = false
+    @Environment(\.scenePhase) private var scenePhase
     private let onboardingService: OnboardingServiceProtocol = OnboardingService()
 
     init() {
@@ -59,6 +60,11 @@ struct InyonApp: App {
             .onChange(of: authService.currentUserId) { _, newValue in
                 if newValue == nil {
                     appState.clearUser()
+                }
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active {
+                    Task { try? await authService.reloadUser() }
                 }
             }
         }

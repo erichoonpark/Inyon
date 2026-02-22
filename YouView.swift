@@ -11,7 +11,7 @@ struct YouView: View {
     @State private var birthTime: Date?
     @State private var personalAnchors: Set<PersonalAnchor> = []
     @State private var notificationsEnabled = false
-    @State private var preferredNotificationTime = Calendar.current.date(from: DateComponents(hour: 8, minute: 0)) ?? Date()
+    @State private var preferredNotificationTime: Date = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date()
     @State private var showNotificationDeniedAlert = false
 
     @State private var firstName = ""

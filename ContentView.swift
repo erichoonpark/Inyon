@@ -28,12 +28,18 @@ struct RootTabView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Group {
-                switch selectedTab {
-                case .home: HomeView()
-                case .guide: GuideView()
-                case .you: YouView(onboardingService: onboardingService)
-                }
+            ZStack {
+                HomeView()
+                    .opacity(selectedTab == .home ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .home)
+
+                GuideView()
+                    .opacity(selectedTab == .guide ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .guide)
+
+                YouView(onboardingService: onboardingService)
+                    .opacity(selectedTab == .you ? 1 : 0)
+                    .allowsHitTesting(selectedTab == .you)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 

@@ -184,6 +184,15 @@ export const getDailyInsight = onCall(
           `Birth zodiac: ${zodiac} year\n` +
           `Their ${birthElement} nature ${relationship} today's ${dayElement} energy — ` +
           `let this dynamic inform the reflection naturally.`;
+
+        const anchors: string[] = Array.isArray(obData.personalAnchors)
+          ? obData.personalAnchors
+          : [];
+        if (anchors.length > 0) {
+          birthContext +=
+            `\nUser's current focus areas: ${anchors.join(", ")}. ` +
+            `Subtly let these inform the reflection if natural — don't name them.`;
+        }
       }
     }
 
@@ -199,15 +208,18 @@ Today's Saju data:
 - Element: ${dayElement} — ${elementTheme}
 ${birthContext ? `\nUser context:\n${birthContext}` : ""}
 
-Write a daily reflection. Rules:
-1. 2–3 sentences. Be concise.
-2. Calm, grounded, non-prescriptive.
-3. Draw from the specific stem or branch quality — avoid generic elemental summaries.
-4. If user context is provided, weave the element relationship into the reflection naturally without naming the dynamic explicitly.
-5. Use hedging language: "may", "can", "tends to", "often".
-6. No predictions, no advice, no directive language ("you should", "now is the time").
-7. No fear-based or urgent language.
-8. The reader should feel steadier after reading.
+Write a daily reflection. Hard rules:
+1. Exactly 2 sentences. Not 3. Not 4. Two.
+2. Total length: 20–35 words.
+3. Calm, observational. Not analytical. Not explanatory.
+4. NEVER name elements, stems, branches, zodiac animals, or any Saju terms in the output.
+5. NEVER say "birth element", "day's element", "alignment", "resonance", "synergy", or "dynamic".
+6. Let the Saju context shape the tone and texture — not the words.
+7. Use hedging: "may", "can", "tends to", "often". Never certain.
+8. No predictions. No advice. No "you should" or "now is the time".
+9. No fear, urgency, or drama. The reader should feel steadier.
+
+Think: two quiet sentences. A moment of perspective. Nothing more.
 
 Respond with only valid JSON: {"insightText": "..."}`;
 
@@ -225,7 +237,7 @@ Respond with only valid JSON: {"insightText": "..."}`;
             messages: [{role: "user", content: prompt}],
             response_format: {type: "json_object"},
             temperature: 0.7,
-            max_tokens: 200,
+            max_tokens: 120,
           },
           {signal: controller.signal}
         );
@@ -242,7 +254,7 @@ Respond with only valid JSON: {"insightText": "..."}`;
         if (
           !parsed.insightText ||
           typeof parsed.insightText !== "string" ||
-          parsed.insightText.length < 20
+          parsed.insightText.length < 40
         ) {
           throw new Error("Reflection content is invalid.");
         }
