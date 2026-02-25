@@ -122,6 +122,7 @@ struct LearnMoreDisclosure: View {
                 .fontWeight(.medium)
                 .foregroundStyle(GuideStyle.accentGreen)
         }
+        .tint(AppTheme.textPrimary)
         .accessibilityLabel(isExpanded ? "Learn more, expanded" : "Learn more, collapsed")
         .accessibilityHint("Double tap to \(isExpanded ? "collapse" : "expand")")
         .onChange(of: isExpanded) { _, newValue in

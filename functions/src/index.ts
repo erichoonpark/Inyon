@@ -126,6 +126,18 @@ export const getDailyInsight = onCall(
       );
     }
 
+    // Reject dates more than 2 days from today to prevent historical abuse.
+    // ±2 days covers all UTC offsets (max is UTC+14 / UTC-12 = 26 hours apart).
+    const todayMs = Date.now();
+    const requestedMs = new Date(localDate + "T00:00:00Z").getTime();
+    const diffDays = Math.abs(todayMs - requestedMs) / (1000 * 60 * 60 * 24);
+    if (diffDays > 2) {
+      throw new HttpsError(
+        "invalid-argument",
+        "localDate must be within 2 days of today."
+      );
+    }
+
     // Sanitize timezone for use as Firestore doc ID (slashes are path separators)
     const safeTimeZoneId = timeZoneId.replace(/\//g, "-");
     const docId = `${localDate}_${safeTimeZoneId}`;

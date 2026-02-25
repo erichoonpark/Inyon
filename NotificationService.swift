@@ -1,8 +1,20 @@
 import Foundation
 import UserNotifications
 
+// MARK: - Protocol
+
+protocol NotificationServiceProtocol: AnyObject {
+    var authorizationStatus: UNAuthorizationStatus { get }
+    func checkStatus() async
+    func requestAuthorization() async throws -> Bool
+    func scheduleDaily(at time: Date) async
+    func cancelAll()
+}
+
+// MARK: - Implementation
+
 @MainActor
-final class NotificationService: ObservableObject {
+final class NotificationService: ObservableObject, NotificationServiceProtocol {
     @Published var authorizationStatus: UNAuthorizationStatus = .notDetermined
 
     private let center = UNUserNotificationCenter.current()

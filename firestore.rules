@@ -18,9 +18,12 @@ service cloud.firestore {
       }
     }
 
-    // Anonymous onboarding data
+    // Anonymous onboarding data (pre-auth, keyed by UUID session ID)
+    // Reads and deletes are unrestricted — needed for post-auth migration transaction.
+    // Writes are capped at 15 fields to prevent large payload injection.
     match /onboarding/anonymous/users/{sessionId} {
-      allow read, write: if true; // Anonymous access for pre-auth onboarding
+      allow read, delete: if true;
+      allow write: if request.resource.data.size() <= 15;
     }
   }
 }

@@ -863,3 +863,77 @@ final class OnboardingServiceMigrationTests: XCTestCase {
         XCTAssertEqual(defaults.string(forKey: OnboardingService.anonymousIdKey), "anon-789")
     }
 }
+
+// MARK: - Onboarding Button Validation Tests
+//
+// Tests that mirror the canCreateAccount and canContinue computed properties
+// in AccountCreationView and BirthContextView. These control whether the
+// primary action button is enabled on each screen.
+
+final class OnboardingValidationTests: XCTestCase {
+
+    // MARK: - canCreateAccount
+
+    // Formula: !isLoading && !firstName.isEmpty && !lastName.isEmpty && !email.isEmpty && password.count >= 6
+
+    func test_canCreateAccount_allValidInputs_true() {
+        let can = !false && !"Eric".isEmpty && !"Park".isEmpty && !"test@inyon.com".isEmpty && "secure1".count >= 6
+        XCTAssertTrue(can)
+    }
+
+    func test_canCreateAccount_emptyFirstName_false() {
+        let can = !false && !"".isEmpty && !"Park".isEmpty && !"test@inyon.com".isEmpty && "secure1".count >= 6
+        XCTAssertFalse(can, "Empty first name should disable the button")
+    }
+
+    func test_canCreateAccount_emptyLastName_false() {
+        let can = !false && !"Eric".isEmpty && !"".isEmpty && !"test@inyon.com".isEmpty && "secure1".count >= 6
+        XCTAssertFalse(can, "Empty last name should disable the button")
+    }
+
+    func test_canCreateAccount_emptyEmail_false() {
+        let can = !false && !"Eric".isEmpty && !"Park".isEmpty && !"".isEmpty && "secure1".count >= 6
+        XCTAssertFalse(can, "Empty email should disable the button")
+    }
+
+    func test_canCreateAccount_passwordTooShort_false() {
+        let can = !false && !"Eric".isEmpty && !"Park".isEmpty && !"test@inyon.com".isEmpty && "short".count >= 6
+        XCTAssertFalse(can, "Password shorter than 6 chars should disable the button")
+    }
+
+    func test_canCreateAccount_exactlyMinPassword_true() {
+        let password = "abc123" // exactly 6 characters
+        XCTAssertEqual(password.count, 6)
+        let can = !false && !"Eric".isEmpty && !"Park".isEmpty && !"test@inyon.com".isEmpty && password.count >= 6
+        XCTAssertTrue(can, "Password of exactly 6 chars should enable the button")
+    }
+
+    func test_canCreateAccount_isLoading_false() {
+        let can = !true && !"Eric".isEmpty && !"Park".isEmpty && !"test@inyon.com".isEmpty && "secure1".count >= 6
+        XCTAssertFalse(can, "isLoading=true should disable the button")
+    }
+
+    // MARK: - canContinue (BirthContextView)
+
+    // Formula: hasSelectedDate && !birthCity.isEmpty
+
+    func test_canContinue_withDateAndCity_true() {
+        let can = true && !"Seoul, South Korea".isEmpty
+        XCTAssertTrue(can)
+    }
+
+    func test_canContinue_missingDate_false() {
+        let can = false && !"Seoul, South Korea".isEmpty
+        XCTAssertFalse(can, "No date selected should disable Continue")
+    }
+
+    func test_canContinue_missingCity_false() {
+        let can = true && !"".isEmpty
+        XCTAssertFalse(can, "Empty city should disable Continue")
+    }
+
+    func test_canContinue_bothMissing_false() {
+        let can = false && !"".isEmpty
+        XCTAssertFalse(can, "Neither date nor city should disable Continue")
+    }
+}

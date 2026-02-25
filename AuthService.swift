@@ -24,7 +24,11 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
     private let uiTestAuthMode: String?
 
     init() {
+        #if DEBUG
         uiTestAuthMode = ProcessInfo.processInfo.environment["INYON_UI_TEST_AUTH_MODE"]
+        #else
+        uiTestAuthMode = nil
+        #endif
         if uiTestAuthMode != nil {
             // Modes that test authenticated flows start signed in
             if uiTestAuthMode == "signed_in" || uiTestAuthMode == "sign_out_failure" {

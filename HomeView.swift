@@ -3,7 +3,6 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject private var authService: AuthService
-    @State private var verificationBannerDismissed = false
     private let today = Date()
 
     var body: some View {
@@ -22,11 +21,6 @@ struct HomeView: View {
                         .foregroundColor(AppTheme.textPrimary)
 
                     Spacer()
-                }
-
-                // Email verification banner — deferred until content loads
-                if viewModel.state == .ready && !authService.isEmailVerified && !verificationBannerDismissed {
-                    emailVerificationBanner
                 }
 
                 // Date header
@@ -233,46 +227,6 @@ struct HomeView: View {
         .padding(12)
         .background(AppTheme.surface)
         .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    // MARK: - Email Verification Banner
-
-    private var emailVerificationBanner: some View {
-        HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Please verify your email.")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(AppTheme.textPrimary)
-
-                Button {
-                    Task { try? await authService.sendEmailVerification() }
-                } label: {
-                    Text("Resend verification email")
-                        .font(.system(size: 13, weight: .regular))
-                        .foregroundColor(AppTheme.textSecondary)
-                        .underline()
-                }
-            }
-
-            Spacer()
-
-            Button {
-                verificationBannerDismissed = true
-            } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(AppTheme.textSecondary)
-                    .frame(width: 28, height: 28)
-                    .contentShape(Rectangle())
-            }
-        }
-        .padding(12)
-        .background(AppTheme.surface)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(AppTheme.divider, lineWidth: 1)
-        )
     }
 
     // MARK: - Helpers

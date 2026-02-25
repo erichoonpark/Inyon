@@ -1,36 +1,25 @@
+import MapKit
 import SwiftUI
-import FirebaseFirestore
 import UserNotifications
+
+private enum YouViewField: Hashable {
+    case firstName, lastName, birthLocation
+}
 
 struct YouView: View {
     let onboardingService: OnboardingServiceProtocol
     @EnvironmentObject private var authService: AuthService
-    @StateObject private var notificationService = NotificationService()
+    @StateObject private var viewModel: YouViewModel
+    @StateObject private var cityCompleter = CitySearchCompleter()
+    @FocusState private var focusedField: YouViewField?
+    @State private var cityQuery = ""
+    @State private var verificationBannerDismissed = false
+    @State private var verificationEmailSent = false
 
-    @State private var birthDate: Date?
-    @State private var birthTime: Date?
-    @State private var personalAnchors: Set<PersonalAnchor> = []
-    @State private var notificationsEnabled = false
-    @State private var preferredNotificationTime: Date = Calendar.current.date(bySettingHour: 8, minute: 0, second: 0, of: Date()) ?? Date()
-    @State private var showNotificationDeniedAlert = false
-
-    @State private var firstName = ""
-    @State private var lastName = ""
-    @State private var birthLocation = ""
-
-    @State private var hasSelectedDate = false
-    @State private var hasSelectedTime = false
-    @State private var isLoading = true
-    @State private var isPerformingLoad = false
-    @State private var isSaving = false
-    @State private var saveError: String?
-    @State private var hasUnsavedChanges = false
-    @State private var showLogoutConfirmation = false
-    @State private var logoutError: String?
-
-    // Temporary state for date pickers
-    @State private var selectedDate = Date()
-    @State private var selectedTime = Date()
+    init(onboardingService: OnboardingServiceProtocol) {
+        self.onboardingService = onboardingService
+        _viewModel = StateObject(wrappedValue: YouViewModel(onboardingService: onboardingService))
+    }
 
     var body: some View {
         ScrollView {
@@ -55,7 +44,12 @@ struct YouView: View {
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(AppTheme.textPrimary)
 
-                if isLoading {
+                // Email verification banner
+                if !authService.isEmailVerified && !verificationBannerDismissed {
+                    emailVerificationBanner
+                }
+
+                if viewModel.isLoading {
                     ProgressView()
                         .tint(AppTheme.textSecondary)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -73,10 +67,25 @@ struct YouView: View {
                     // Birth Context (editable)
                     editableSection
 
-                    // Save Button
-                    if hasUnsavedChanges {
-                        saveButton
+                    // Save Button / Confirmation
+                    Group {
+                        if viewModel.hasUnsavedChanges {
+                            saveButton
+                        } else if viewModel.showSaveConfirmation {
+                            HStack(spacing: 8) {
+                                Image(systemName: "checkmark")
+                                    .font(.system(size: 14, weight: .medium))
+                                Text("Saved")
+                                    .font(.system(size: 15, weight: .regular))
+                            }
+                            .foregroundColor(AppTheme.textSecondary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 18)
+                            .transition(.opacity)
+                        }
                     }
+                    .animation(.easeInOut(duration: 0.25), value: viewModel.hasUnsavedChanges)
+                    .animation(.easeInOut(duration: 0.25), value: viewModel.showSaveConfirmation)
 
                     // Log Out
                     logoutSection
@@ -87,15 +96,16 @@ struct YouView: View {
         }
         .background(AppTheme.earth)
         .onAppear {
-            loadData()
+            viewModel.authService = authService
+            Task { await viewModel.loadData() }
         }
-        .alert("Log out of Inyon?", isPresented: $showLogoutConfirmation) {
+        .alert("Log out of Inyon?", isPresented: $viewModel.showLogoutConfirmation) {
             Button("Log Out", role: .destructive) {
-                performLogout()
+                viewModel.performLogout()
             }
             Button("Cancel", role: .cancel) {}
         }
-        .alert("Notifications Disabled", isPresented: $showNotificationDeniedAlert) {
+        .alert("Notifications Disabled", isPresented: $viewModel.showNotificationDeniedAlert) {
             Button("Open Settings") {
                 if let url = URL(string: UIApplication.openSettingsURLString) {
                     UIApplication.shared.open(url)
@@ -106,15 +116,15 @@ struct YouView: View {
             Text("Enable notifications in Settings to receive daily reflections.")
         }
         .alert("Unable to log out", isPresented: .init(
-            get: { logoutError != nil },
-            set: { if !$0 { logoutError = nil } }
+            get: { viewModel.logoutError != nil },
+            set: { if !$0 { viewModel.logoutError = nil } }
         )) {
             Button("Try Again") {
-                performLogout()
+                viewModel.performLogout()
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text(logoutError ?? "")
+            Text(viewModel.logoutError ?? "")
         }
     }
 
@@ -133,16 +143,18 @@ struct YouView: View {
                         .font(.system(size: 15, weight: .regular))
                         .foregroundColor(AppTheme.textSecondary)
                     Spacer()
-                    TextField("—", text: $firstName)
+                    TextField("—", text: $viewModel.firstName)
                         .font(.system(size: 15, weight: .regular))
                         .foregroundColor(AppTheme.textPrimary)
                         .multilineTextAlignment(.trailing)
                         .frame(maxWidth: 180)
-                        .onChange(of: firstName) { _, _ in
-                            guard !isPerformingLoad else { return }
-                            hasUnsavedChanges = true
+                        .focused($focusedField, equals: .firstName)
+                        .onChange(of: viewModel.firstName) { _, _ in
+                            viewModel.fieldChanged()
                         }
                 }
+                .contentShape(Rectangle())
+                .onTapGesture { focusedField = .firstName }
 
                 Rectangle()
                     .fill(AppTheme.divider)
@@ -153,35 +165,95 @@ struct YouView: View {
                         .font(.system(size: 15, weight: .regular))
                         .foregroundColor(AppTheme.textSecondary)
                     Spacer()
-                    TextField("—", text: $lastName)
+                    TextField("—", text: $viewModel.lastName)
                         .font(.system(size: 15, weight: .regular))
                         .foregroundColor(AppTheme.textPrimary)
                         .multilineTextAlignment(.trailing)
                         .frame(maxWidth: 180)
-                        .onChange(of: lastName) { _, _ in
-                            guard !isPerformingLoad else { return }
-                            hasUnsavedChanges = true
+                        .focused($focusedField, equals: .lastName)
+                        .onChange(of: viewModel.lastName) { _, _ in
+                            viewModel.fieldChanged()
                         }
                 }
+                .contentShape(Rectangle())
+                .onTapGesture { focusedField = .lastName }
 
                 Rectangle()
                     .fill(AppTheme.divider)
                     .frame(height: 1)
 
-                HStack {
-                    Text("Birth location")
-                        .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(AppTheme.textSecondary)
-                    Spacer()
-                    TextField("City", text: $birthLocation)
-                        .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(AppTheme.textPrimary)
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: 180)
-                        .onChange(of: birthLocation) { _, _ in
-                            guard !isPerformingLoad else { return }
-                            hasUnsavedChanges = true
+                // Birth location with MapKit autocomplete
+                if viewModel.birthLocation.isEmpty {
+                    HStack {
+                        Text("Birth location")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                        Spacer()
+                        TextField("City", text: $cityQuery)
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(AppTheme.textPrimary)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: 180)
+                            .autocorrectionDisabled()
+                            .focused($focusedField, equals: .birthLocation)
+                            .onChange(of: cityQuery) { _, newValue in
+                                cityCompleter.search(newValue)
+                            }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture { focusedField = .birthLocation }
+                } else {
+                    HStack {
+                        Text("Birth location")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                        Spacer()
+                        HStack(spacing: 12) {
+                            Text(viewModel.birthLocation)
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(AppTheme.textPrimary)
+                                .lineLimit(1)
+                            Button {
+                                viewModel.birthLocation = ""
+                                cityQuery = ""
+                                viewModel.fieldChanged()
+                                focusedField = .birthLocation
+                            } label: {
+                                Text("Change")
+                                    .font(.system(size: 15, weight: .regular))
+                                    .foregroundColor(AppTheme.textSecondary)
+                                    .underline()
+                            }
                         }
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        viewModel.birthLocation = ""
+                        cityQuery = ""
+                        viewModel.fieldChanged()
+                        focusedField = .birthLocation
+                    }
+                }
+
+                // Autocomplete suggestions (max 3)
+                if viewModel.birthLocation.isEmpty && !cityCompleter.results.isEmpty {
+                    ForEach(cityCompleter.results.prefix(3), id: \.self) { result in
+                        let city = [result.title, result.subtitle]
+                            .filter { !$0.isEmpty }
+                            .joined(separator: ", ")
+                        Button {
+                            viewModel.birthLocation = city
+                            cityQuery = ""
+                            cityCompleter.results = []
+                            viewModel.fieldChanged()
+                        } label: {
+                            Text(city)
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(AppTheme.textSecondary)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 6)
+                        }
+                    }
                 }
             }
         }
@@ -206,14 +278,14 @@ struct YouView: View {
                     .foregroundColor(AppTheme.textSecondary)
 
                 ZStack(alignment: .leading) {
-                    if !hasSelectedDate {
+                    if !viewModel.hasSelectedDate {
                         Text("Not set")
                             .font(.system(size: 17, weight: .regular))
                             .foregroundColor(AppTheme.textSecondary)
                     }
                     DatePicker(
                         "",
-                        selection: $selectedDate,
+                        selection: $viewModel.selectedDate,
                         in: ...Date(),
                         displayedComponents: .date
                     )
@@ -221,12 +293,9 @@ struct YouView: View {
                     .labelsHidden()
                     .tint(AppTheme.textPrimary)
                     .colorScheme(.dark)
-                    .opacity(hasSelectedDate ? 1 : 0.011)
-                    .onChange(of: selectedDate) { _, _ in
-                        guard !isPerformingLoad else { return }
-                        hasSelectedDate = true
-                        birthDate = selectedDate
-                        hasUnsavedChanges = true
+                    .opacity(viewModel.hasSelectedDate ? 1 : 0.011)
+                    .onChange(of: viewModel.selectedDate) { _, newDate in
+                        viewModel.birthDateChanged(newDate)
                     }
                 }
             }
@@ -243,34 +312,29 @@ struct YouView: View {
 
                 HStack(spacing: 16) {
                     ZStack(alignment: .leading) {
-                        if !hasSelectedTime {
+                        if !viewModel.hasSelectedTime {
                             Text("Not set")
                                 .font(.system(size: 17, weight: .regular))
                                 .foregroundColor(AppTheme.textSecondary)
                         }
                         DatePicker(
                             "",
-                            selection: $selectedTime,
+                            selection: $viewModel.selectedTime,
                             displayedComponents: .hourAndMinute
                         )
                         .datePickerStyle(.compact)
                         .labelsHidden()
                         .tint(AppTheme.textPrimary)
                         .colorScheme(.dark)
-                        .opacity(hasSelectedTime ? 1 : 0.011)
-                        .onChange(of: selectedTime) { _, _ in
-                            guard !isPerformingLoad else { return }
-                            hasSelectedTime = true
-                            birthTime = selectedTime
-                            hasUnsavedChanges = true
+                        .opacity(viewModel.hasSelectedTime ? 1 : 0.011)
+                        .onChange(of: viewModel.selectedTime) { _, newTime in
+                            viewModel.birthTimeChanged(newTime)
                         }
                     }
 
-                    if hasSelectedTime {
+                    if viewModel.hasSelectedTime {
                         Button {
-                            hasSelectedTime = false
-                            birthTime = nil
-                            hasUnsavedChanges = true
+                            viewModel.clearBirthTime()
                         } label: {
                             Text("Clear")
                                 .font(.system(size: 15, weight: .regular))
@@ -294,31 +358,26 @@ struct YouView: View {
                 FlowLayout(spacing: 10) {
                     ForEach(PersonalAnchor.allCases) { anchor in
                         Button {
-                            if personalAnchors.contains(anchor) {
-                                personalAnchors.remove(anchor)
-                            } else {
-                                personalAnchors.insert(anchor)
-                            }
-                            hasUnsavedChanges = true
+                            viewModel.toggleAnchor(anchor)
                         } label: {
                             Text(anchor.rawValue)
                                 .font(.system(size: 15, weight: .regular))
                                 .foregroundColor(
-                                    personalAnchors.contains(anchor)
+                                    viewModel.personalAnchors.contains(anchor)
                                         ? AppTheme.textPrimary
                                         : AppTheme.textSecondary
                                 )
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 10)
                                 .background(
-                                    personalAnchors.contains(anchor)
+                                    viewModel.personalAnchors.contains(anchor)
                                         ? AppTheme.surface
                                         : Color.clear
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(
-                                            personalAnchors.contains(anchor)
+                                            viewModel.personalAnchors.contains(anchor)
                                                 ? AppTheme.textPrimary.opacity(0.3)
                                                 : AppTheme.divider,
                                             lineWidth: 1
@@ -345,24 +404,17 @@ struct YouView: View {
                 .foregroundColor(AppTheme.textSecondary)
 
             VStack(alignment: .leading, spacing: 16) {
-                Toggle(isOn: $notificationsEnabled) {
+                Toggle(isOn: $viewModel.notificationsEnabled) {
                     Text("Daily reflection")
                         .font(.system(size: 17, weight: .regular))
                         .foregroundColor(AppTheme.textPrimary)
                 }
                 .tint(AppTheme.earthRed)
-                .onChange(of: notificationsEnabled) { _, newValue in
-                    hasUnsavedChanges = true
-                    Task {
-                        if newValue {
-                            await handleNotificationToggleOn()
-                        } else {
-                            notificationService.cancelAll()
-                        }
-                    }
+                .onChange(of: viewModel.notificationsEnabled) { _, newValue in
+                    viewModel.notificationEnabledChanged(newValue)
                 }
 
-                if notificationsEnabled {
+                if viewModel.notificationsEnabled {
                     Rectangle()
                         .fill(AppTheme.divider)
                         .frame(height: 1)
@@ -376,18 +428,15 @@ struct YouView: View {
 
                         DatePicker(
                             "",
-                            selection: $preferredNotificationTime,
+                            selection: $viewModel.preferredNotificationTime,
                             displayedComponents: .hourAndMinute
                         )
                         .datePickerStyle(.compact)
                         .labelsHidden()
                         .tint(AppTheme.textPrimary)
                         .colorScheme(.dark)
-                        .onChange(of: preferredNotificationTime) { _, newTime in
-                            hasUnsavedChanges = true
-                            Task {
-                                await notificationService.scheduleDaily(at: newTime)
-                            }
+                        .onChange(of: viewModel.preferredNotificationTime) { _, newTime in
+                            viewModel.notificationTimeChanged(newTime)
                         }
                     }
                 }
@@ -414,7 +463,6 @@ struct YouView: View {
             }
 
             VStack(alignment: .leading, spacing: 16) {
-                // Lunar Birthday
                 HStack {
                     Text("Lunar birthday")
                         .font(.system(size: 15, weight: .regular))
@@ -422,7 +470,7 @@ struct YouView: View {
 
                     Spacer()
 
-                    Text(derivedLunarBirthday)
+                    Text(DerivedData.lunarBirthday(from: viewModel.birthDate))
                         .font(.system(size: 15, weight: .regular))
                         .foregroundColor(AppTheme.textPrimary)
                 }
@@ -431,7 +479,6 @@ struct YouView: View {
                     .fill(AppTheme.divider)
                     .frame(height: 1)
 
-                // Chinese Zodiac
                 HStack {
                     Text("Zodiac year")
                         .font(.system(size: 15, weight: .regular))
@@ -439,7 +486,7 @@ struct YouView: View {
 
                     Spacer()
 
-                    Text(derivedZodiac)
+                    Text(DerivedData.zodiacAnimal(from: viewModel.birthDate))
                         .font(.system(size: 15, weight: .regular))
                         .foregroundColor(AppTheme.textPrimary)
                 }
@@ -454,7 +501,7 @@ struct YouView: View {
 
     private var saveButton: some View {
         VStack(spacing: 8) {
-            if let saveError {
+            if let saveError = viewModel.saveError {
                 Text(saveError)
                     .font(.system(size: 14, weight: .regular))
                     .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
@@ -462,14 +509,14 @@ struct YouView: View {
             }
 
             Button {
-                saveData()
+                Task { await viewModel.saveData() }
             } label: {
                 Group {
-                    if isSaving {
+                    if viewModel.isSaving {
                         ProgressView()
                             .tint(AppTheme.earth)
                     } else {
-                        Text(saveError != nil ? "Retry Save" : "Save Changes")
+                        Text(viewModel.saveError != nil ? "Retry Save" : "Save Changes")
                             .font(.system(size: 17, weight: .medium))
                     }
                 }
@@ -479,9 +526,58 @@ struct YouView: View {
                 .background(AppTheme.textPrimary)
                 .clipShape(RoundedRectangle(cornerRadius: 14))
             }
-            .disabled(isSaving)
+            .disabled(viewModel.isSaving)
         }
         .padding(.top, 8)
+    }
+
+    // MARK: - Email Verification Banner
+
+    private var emailVerificationBanner: some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Please verify your email.")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(AppTheme.textPrimary)
+
+                if verificationEmailSent {
+                    Text("Email sent")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+                } else {
+                    Button {
+                        Task {
+                            try? await authService.sendEmailVerification()
+                            verificationEmailSent = true
+                        }
+                    } label: {
+                        Text("Resend verification email")
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                            .underline()
+                    }
+                }
+            }
+
+            Spacer()
+
+            Button {
+                verificationBannerDismissed = true
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(AppTheme.textSecondary)
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+            }
+        }
+        .padding(12)
+        .background(AppTheme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(AppTheme.divider, lineWidth: 1)
+        )
     }
 
     // MARK: - Log Out Section
@@ -494,7 +590,7 @@ struct YouView: View {
                 .padding(.bottom, 24)
 
             Button {
-                showLogoutConfirmation = true
+                viewModel.showLogoutConfirmation = true
             } label: {
                 Text("Log Out")
                     .font(.system(size: 17, weight: .regular))
@@ -503,147 +599,6 @@ struct YouView: View {
             .accessibilityIdentifier("you.logoutButton")
         }
         .padding(.top, 8)
-    }
-
-    // MARK: - Derived Data (Placeholder Logic)
-
-    private var derivedLunarBirthday: String {
-        DerivedData.lunarBirthday(from: birthDate)
-    }
-
-    private var derivedZodiac: String {
-        DerivedData.zodiacAnimal(from: birthDate)
-    }
-
-    // MARK: - Data Operations
-
-    private func performLogout() {
-        do {
-            try authService.signOut()
-        } catch {
-            logoutError = "Something went wrong. Please try again."
-        }
-    }
-
-    private func handleNotificationToggleOn() async {
-        await notificationService.checkStatus()
-        switch notificationService.authorizationStatus {
-        case .notDetermined:
-            let granted = (try? await notificationService.requestAuthorization()) ?? false
-            if granted {
-                await notificationService.scheduleDaily(at: preferredNotificationTime)
-            } else {
-                notificationsEnabled = false
-            }
-        case .authorized, .provisional, .ephemeral:
-            await notificationService.scheduleDaily(at: preferredNotificationTime)
-        case .denied:
-            notificationsEnabled = false
-            showNotificationDeniedAlert = true
-        @unknown default:
-            break
-        }
-    }
-
-    /// Loads onboarding data from Firestore: users/{uid}/onboarding/context
-    private func loadData() {
-        guard let uid = authService.currentUserId else {
-            isLoading = false
-            return
-        }
-
-        Task {
-            isPerformingLoad = true
-            defer {
-                isPerformingLoad = false
-                hasUnsavedChanges = false
-            }
-
-            do {
-                guard let data = try await onboardingService.loadOnboardingData(userId: uid) else {
-                    isLoading = false
-                    return
-                }
-
-                // Load personal info
-                if let fn = data["firstName"] as? String { firstName = fn }
-                if let ln = data["lastName"] as? String { lastName = ln }
-                if let bl = data["birthLocation"] as? String { birthLocation = bl }
-
-                // Load birth date
-                if let timestamp = data["birthDate"] as? Timestamp {
-                    birthDate = timestamp.dateValue()
-                    selectedDate = timestamp.dateValue()
-                    hasSelectedDate = true
-                }
-
-                // Load birth time
-                if let timestamp = data["birthTime"] as? Timestamp {
-                    birthTime = timestamp.dateValue()
-                    selectedTime = timestamp.dateValue()
-                    hasSelectedTime = true
-                }
-
-                // Load personal anchors
-                if let anchorsArray = data["personalAnchors"] as? [String] {
-                    personalAnchors = Set(anchorsArray.compactMap { PersonalAnchor(rawValue: $0) })
-                }
-
-                // Load notification preferences
-                if let notifEnabled = data["notificationsEnabled"] as? Bool {
-                    notificationsEnabled = notifEnabled
-                }
-                if let notifTimestamp = data["preferredNotificationTime"] as? Timestamp {
-                    preferredNotificationTime = notifTimestamp.dateValue()
-                }
-
-                isLoading = false
-            } catch {
-                isLoading = false
-            }
-        }
-    }
-
-    /// Saves changes to Firestore: users/{uid}/onboarding/context
-    private func saveData() {
-        guard let uid = authService.currentUserId else { return }
-
-        var updateData: [String: Any] = [
-            "firstName": firstName,
-            "lastName": lastName,
-            "personalAnchors": personalAnchors.map { $0.rawValue },
-            "notificationsEnabled": notificationsEnabled,
-            "preferredNotificationTime": Timestamp(date: preferredNotificationTime),
-            "updatedAt": FieldValue.serverTimestamp()
-        ]
-
-        updateData["birthLocation"] = birthLocation.isEmpty
-            ? FieldValue.delete()
-            : birthLocation
-
-        if let date = birthDate {
-            updateData["birthDate"] = Timestamp(date: date)
-        } else {
-            updateData["birthDate"] = FieldValue.delete()
-        }
-
-        if let time = birthTime {
-            updateData["birthTime"] = Timestamp(date: time)
-        } else {
-            updateData["birthTime"] = FieldValue.delete()
-        }
-
-        isSaving = true
-        saveError = nil
-        Task {
-            do {
-                try await onboardingService.updateOnboardingData(userId: uid, data: updateData)
-                hasUnsavedChanges = false
-            } catch {
-                saveError = "Could not save changes. Please try again."
-            }
-            isSaving = false
-        }
     }
 }
 
