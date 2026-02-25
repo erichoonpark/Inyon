@@ -209,6 +209,7 @@ final class YouViewModel: ObservableObject {
     /// Called from view when birth date picker changes
     func birthDateChanged(_ date: Date) {
         guard !isPerformingLoad else { return }
+        guard birthDate != date else { return }
         hasSelectedDate = true
         birthDate = date
         hasUnsavedChanges = true
@@ -217,6 +218,7 @@ final class YouViewModel: ObservableObject {
     /// Called from view when birth time picker changes
     func birthTimeChanged(_ time: Date) {
         guard !isPerformingLoad else { return }
+        guard birthTime != time else { return }
         hasSelectedTime = true
         birthTime = time
         hasUnsavedChanges = true

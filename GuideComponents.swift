@@ -97,36 +97,50 @@ struct LearnMoreDisclosure: View {
     @State private var isExpanded = false
 
     var body: some View {
-        DisclosureGroup(isExpanded: $isExpanded) {
-            VStack(alignment: .leading, spacing: 12) {
-                ForEach(bullets, id: \.self) { bullet in
-                    HStack(alignment: .top, spacing: 8) {
-                        Circle()
-                            .fill(GuideStyle.accentGreen.opacity(0.6))
-                            .frame(width: 6, height: 6)
-                            .padding(.top, 7)
-                            .accessibilityHidden(true)
-
-                        Text(bullet)
-                            .font(.subheadline)
-                            .foregroundStyle(AppTheme.textSecondary)
-                            .lineSpacing(3)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
+        VStack(alignment: .leading, spacing: 0) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isExpanded.toggle()
+                }
+                GuideAnalytics.trackSectionExpanded(isExpanded: isExpanded)
+            } label: {
+                HStack {
+                    Text("Learn more")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(GuideStyle.accentGreen)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(AppTheme.textPrimary)
+                        .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
                 }
             }
-            .padding(.top, 12)
-        } label: {
-            Text("Learn more")
-                .font(.subheadline)
-                .fontWeight(.medium)
-                .foregroundStyle(GuideStyle.accentGreen)
-        }
-        .tint(AppTheme.textPrimary)
-        .accessibilityLabel(isExpanded ? "Learn more, expanded" : "Learn more, collapsed")
-        .accessibilityHint("Double tap to \(isExpanded ? "collapse" : "expand")")
-        .onChange(of: isExpanded) { _, newValue in
-            GuideAnalytics.trackSectionExpanded(isExpanded: newValue)
+            .accessibilityLabel(isExpanded ? "Learn more, expanded" : "Learn more, collapsed")
+            .accessibilityHint("Double tap to \(isExpanded ? "collapse" : "expand")")
+
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(bullets, id: \.self) { bullet in
+                        HStack(alignment: .top, spacing: 8) {
+                            Circle()
+                                .fill(GuideStyle.accentGreen.opacity(0.6))
+                                .frame(width: 6, height: 6)
+                                .padding(.top, 7)
+                                .accessibilityHidden(true)
+
+                            Text(bullet)
+                                .font(.subheadline)
+                                .foregroundStyle(AppTheme.textSecondary)
+                                .lineSpacing(3)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                }
+                .padding(.top, 12)
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
     }
 }
