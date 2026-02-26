@@ -113,19 +113,24 @@ final class DerivedDataTests: XCTestCase {
         XCTAssertEqual(DerivedData.lunarBirthday(from: nil), "—")
     }
 
-    func test_lunarBirthday_validDate_returnsLunarMonthDay() {
+    func test_lunarBirthday_validDate_returnsAbbreviatedFormat() {
         let date = makeDate(year: 1990, month: 6, day: 15)
         let result = DerivedData.lunarBirthday(from: date)
-        // Should be in "Month X, Day Y" format, not a Gregorian date
-        XCTAssertTrue(result.hasPrefix("Month "), "Expected lunar format, got: \(result)")
-        XCTAssertTrue(result.contains(", Day "), "Expected lunar format, got: \(result)")
+        // Should be "MMM D" format like "May 23", not "Month X, Day Y"
+        let validPrefixes = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        XCTAssertTrue(validPrefixes.contains(where: { result.hasPrefix($0) }),
+                      "Expected abbreviated month prefix, got: \(result)")
+        XCTAssertFalse(result.hasPrefix("Month "), "Should not use 'Month X' format, got: \(result)")
     }
 
-    func test_lunarBirthday_differentDate_returnsLunarMonthDay() {
+    func test_lunarBirthday_differentDate_returnsAbbreviatedFormat() {
         let date = makeDate(year: 2000, month: 1, day: 1)
         let result = DerivedData.lunarBirthday(from: date)
-        XCTAssertTrue(result.hasPrefix("Month "), "Expected lunar format, got: \(result)")
-        XCTAssertTrue(result.contains(", Day "), "Expected lunar format, got: \(result)")
+        let validPrefixes = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        XCTAssertTrue(validPrefixes.contains(where: { result.hasPrefix($0) }),
+                      "Expected abbreviated month prefix, got: \(result)")
     }
 
     // MARK: - Helpers

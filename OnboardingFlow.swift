@@ -764,7 +764,7 @@ struct AccountCreationView: View {
             if showEmailForm {
                 VStack(spacing: 16) {
                     HStack(spacing: 12) {
-                        TextField("First name", text: $data.firstName)
+                        TextField(text: $data.firstName, prompt: Text("First name").foregroundStyle(AppTheme.textSecondary)) { EmptyView() }
                             .font(.system(size: 17, weight: .regular))
                             .foregroundColor(AppTheme.textPrimary)
                             .tint(AppTheme.textPrimary)
@@ -777,7 +777,7 @@ struct AccountCreationView: View {
                             )
                             .disabled(isLoading)
 
-                        TextField("Last name", text: $data.lastName)
+                        TextField(text: $data.lastName, prompt: Text("Last name").foregroundStyle(AppTheme.textSecondary)) { EmptyView() }
                             .font(.system(size: 17, weight: .regular))
                             .foregroundColor(AppTheme.textPrimary)
                             .tint(AppTheme.textPrimary)
@@ -791,7 +791,7 @@ struct AccountCreationView: View {
                             .disabled(isLoading)
                     }
 
-                    TextField("Email", text: $email)
+                    TextField(text: $email, prompt: Text("Email").foregroundStyle(AppTheme.textSecondary)) { EmptyView() }
                         .font(.system(size: 17, weight: .regular))
                         .foregroundColor(AppTheme.textPrimary)
                         .tint(AppTheme.textPrimary)
@@ -806,7 +806,7 @@ struct AccountCreationView: View {
                         )
                         .disabled(isLoading)
 
-                    SecureField("Password", text: $password)
+                    SecureField(text: $password, prompt: Text("Password (6+ characters)").foregroundStyle(AppTheme.textSecondary)) { EmptyView() }
                         .font(.system(size: 17, weight: .regular))
                         .foregroundColor(AppTheme.textPrimary)
                         .tint(AppTheme.textPrimary)
