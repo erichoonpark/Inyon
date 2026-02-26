@@ -7,6 +7,7 @@ import FirebaseFirestore
 struct OnboardingData {
     var firstName: String = ""
     var lastName: String = ""
+    var email: String = ""
     var birthDate: Date?
     var birthTime: Date?
     var isBirthTimeUnknown: Bool = false
@@ -25,6 +26,10 @@ struct OnboardingData {
 
         if !lastName.isEmpty {
             dict["lastName"] = lastName
+        }
+
+        if !email.isEmpty {
+            dict["email"] = email
         }
 
         if let birthDate = birthDate {
@@ -879,6 +884,7 @@ struct AccountCreationView: View {
             do {
                 let uid = try await authService.createAccount(email: email, password: password)
                 try? await authService.sendEmailVerification()
+                data.email = email
                 onComplete(uid)
             } catch {
                 errorMessage = error.localizedDescription

@@ -50,8 +50,7 @@ struct InyonApp: App {
                     }
                 } else {
                     OnboardingFlow(onboardingService: onboardingService, onComplete: {
-                        // TODO: Handle auth completion
-                        // For now, this will be handled by AuthService state changes
+                        // Auth state change via AuthService listener handles the transition
                     })
                     .environmentObject(authService)
                 }

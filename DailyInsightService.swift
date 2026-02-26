@@ -11,8 +11,7 @@ final class DailyInsightService: DailyInsightServiceProtocol {
     func fetchDailyInsight(timeZoneId: String, localDate: String) async throws -> DailyInsight {
         let data: [String: Any] = [
             "timeZoneId": timeZoneId,
-            "localDate": localDate,
-            "locale": Locale.current.identifier
+            "localDate": localDate
         ]
 
         let result = try await functions.httpsCallable("getDailyInsight").call(data)
