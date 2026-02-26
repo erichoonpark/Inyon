@@ -454,16 +454,10 @@ struct YouView: View {
 
     private var derivedContextSection: some View {
         VStack(alignment: .leading, spacing: 24) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("CULTURAL CONTEXT")
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .tracking(1.2)
-                    .foregroundColor(AppTheme.textSecondary)
-
-                Text("Informational, not predictive")
-                    .font(.system(size: 13, weight: .regular))
-                    .foregroundColor(AppTheme.textSecondary.opacity(0.7))
-            }
+            Text("YOUR SAJU ROOTS")
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .tracking(1.2)
+                .foregroundColor(AppTheme.textSecondary)
 
             VStack(alignment: .leading, spacing: 16) {
                 HStack {

@@ -246,7 +246,7 @@ struct HomeView: View {
         switch element.lowercased() {
         case "wood": return "leaf"
         case "fire": return "flame"
-        case "earth": return "square.on.square"
+        case "earth": return "mountain.2"
         case "metal": return "circle.hexagongrid"
         case "water": return "drop"
         default: return "circle"
@@ -262,7 +262,7 @@ struct FiveElementsStrip: View {
     private let elements = [
         ("Wood", "leaf"),
         ("Fire", "flame"),
-        ("Earth", "square.on.square"),
+        ("Earth", "mountain.2"),
         ("Metal", "circle.hexagongrid"),
         ("Water", "drop")
     ]
