@@ -104,14 +104,25 @@ struct HomeView: View {
                         .frame(width: 1, height: 36)
                         .padding(.horizontal, 16)
 
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(insight.heavenlyStem)
-                            .font(.system(size: 13, weight: .medium))
-                            .foregroundColor(AppTheme.textPrimary)
-
-                        Text(insight.earthlyBranch)
-                            .font(.system(size: 13, weight: .regular))
-                            .foregroundColor(AppTheme.textSecondary)
+                    VStack(alignment: .leading, spacing: 8) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("ENVIRONMENT")
+                                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                                .tracking(0.8)
+                                .foregroundColor(AppTheme.textSecondary.opacity(0.7))
+                            Text(insight.heavenlyStem)
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(AppTheme.textPrimary)
+                        }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("YOU")
+                                .font(.system(size: 9, weight: .medium, design: .monospaced))
+                                .tracking(0.8)
+                                .foregroundColor(AppTheme.textSecondary.opacity(0.7))
+                            Text(insight.earthlyBranch)
+                                .font(.system(size: 13, weight: .regular))
+                                .foregroundColor(AppTheme.textSecondary)
+                        }
                     }
                 }
                 .padding(14)

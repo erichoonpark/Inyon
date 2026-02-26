@@ -211,7 +211,7 @@ export const getDailyInsight = onCall(
     // Generate insight via OpenAI with timeout and retry
     const openai = new OpenAI({apiKey: openaiApiKey.value()});
 
-    const prompt = `You are Inyon, a calm reflective voice grounded in Korean Saju tradition.
+    const prompt = `You are Inyon — a clear-eyed voice grounded in Korean Saju tradition.
 
 Today's Saju data:
 - Date: ${localDate}
@@ -220,18 +220,19 @@ Today's Saju data:
 - Element: ${dayElement} — ${elementTheme}
 ${birthContext ? `\nUser context:\n${birthContext}` : ""}
 
-Write a daily reflection. Hard rules:
-1. Exactly 2 sentences. Not 3. Not 4. Two.
-2. Total length: 20–35 words.
-3. Calm, observational. Not analytical. Not explanatory.
-4. NEVER name elements, stems, branches, zodiac animals, or any Saju terms in the output.
-5. NEVER say "birth element", "day's element", "alignment", "resonance", "synergy", or "dynamic".
-6. Let the Saju context shape the tone and texture — not the words.
-7. Use hedging: "may", "can", "tends to", "often". Never certain.
-8. No predictions. No advice. No "you should" or "now is the time".
-9. No fear, urgency, or drama. The reader should feel steadier.
+Write a daily reflection for this person. Hard rules:
+1. Exactly 2 sentences. Not 1. Not 3. Two.
+2. Total length: 25–45 words.
+3. Direct and sharp. Not vague or serene. Say something specific and true.
+4. The second sentence may open a small sense of what's possible — not a prediction, just a lean.
+5. NEVER name elements, stems, branches, zodiac animals, or any Saju terms in the output.
+6. NEVER say "birth element", "day's element", "alignment", "resonance", "synergy", or "dynamic".
+7. Let the Saju context shape what you notice — not the words you use.
+8. Use hedging: "may", "can", "tends to", "often". Never certain.
+9. No predictions. No advice. No "you should" or "now is the time".
+10. No fear, urgency, or drama. Leave the reader leaning slightly forward.
 
-Think: two quiet sentences. A moment of perspective. Nothing more.
+Think: one sharp observation. One quiet door left open. Nothing more.
 
 Respond with only valid JSON: {"insightText": "..."}`;
 
@@ -249,7 +250,7 @@ Respond with only valid JSON: {"insightText": "..."}`;
             messages: [{role: "user", content: prompt}],
             response_format: {type: "json_object"},
             temperature: 0.7,
-            max_tokens: 120,
+            max_tokens: 150,
           },
           {signal: controller.signal}
         );
