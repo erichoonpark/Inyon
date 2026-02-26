@@ -37,6 +37,8 @@ targets:
         product: FirebaseFirestore
       - package: Firebase
         product: FirebaseFunctions
+      - package: Firebase
+        product: FirebaseAnalytics
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.inyon.app
       INFOPLIST_GENERATION_MODE: GeneratedFile
