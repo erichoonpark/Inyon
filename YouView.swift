@@ -15,6 +15,7 @@ struct YouView: View {
     @State private var cityQuery = ""
     @State private var verificationBannerDismissed = false
     @State private var verificationEmailSent = false
+    @State private var verificationEmailError: String?
 
     init(onboardingService: OnboardingServiceProtocol) {
         self.onboardingService = onboardingService
@@ -310,13 +311,8 @@ struct YouView: View {
                     .font(.system(size: 15, weight: .regular))
                     .foregroundColor(AppTheme.textSecondary)
 
-                HStack(spacing: 16) {
-                    ZStack(alignment: .leading) {
-                        if !viewModel.hasSelectedTime {
-                            Text("Not set")
-                                .font(.system(size: 17, weight: .regular))
-                                .foregroundColor(AppTheme.textSecondary)
-                        }
+                if viewModel.hasSelectedTime {
+                    HStack(spacing: 16) {
                         DatePicker(
                             "",
                             selection: $viewModel.selectedTime,
@@ -326,13 +322,10 @@ struct YouView: View {
                         .labelsHidden()
                         .tint(AppTheme.textPrimary)
                         .colorScheme(.dark)
-                        .opacity(viewModel.hasSelectedTime ? 1 : 0.011)
                         .onChange(of: viewModel.selectedTime) { _, newTime in
                             viewModel.birthTimeChanged(newTime)
                         }
-                    }
 
-                    if viewModel.hasSelectedTime {
                         Button {
                             viewModel.clearBirthTime()
                         } label: {
@@ -341,6 +334,16 @@ struct YouView: View {
                                 .foregroundColor(AppTheme.textSecondary)
                                 .underline()
                         }
+                    }
+                } else {
+                    Button {
+                        viewModel.hasSelectedTime = true
+                        viewModel.hasUnsavedChanges = true
+                    } label: {
+                        Text("Add")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                            .underline()
                     }
                 }
             }
@@ -547,14 +550,24 @@ struct YouView: View {
                 } else {
                     Button {
                         Task {
-                            try? await authService.sendEmailVerification()
-                            verificationEmailSent = true
+                            do {
+                                try await authService.sendEmailVerification()
+                                verificationEmailSent = true
+                                verificationEmailError = nil
+                            } catch {
+                                verificationEmailError = "Could not send email. Try again."
+                            }
                         }
                     } label: {
                         Text("Resend verification email")
                             .font(.system(size: 13, weight: .regular))
                             .foregroundColor(AppTheme.textSecondary)
                             .underline()
+                    }
+                    if let emailError = verificationEmailError {
+                        Text(emailError)
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundColor(Color(red: 0.9, green: 0.4, blue: 0.4))
                     }
                 }
             }

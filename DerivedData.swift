@@ -68,12 +68,13 @@ enum DerivedData {
 
     // MARK: - Lunar Birthday
 
-    /// Returns the birthday formatted as "Jan 20".
+    /// Returns the lunar birthday in the Chinese lunisolar calendar, e.g. "Month 1, Day 15".
     static func lunarBirthday(from date: Date?) -> String {
         guard let date else { return "—" }
 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "MMM d"
-        return formatter.string(from: date)
+        let lunar = Calendar(identifier: .chinese)
+        let components = lunar.dateComponents([.month, .day], from: date)
+        guard let month = components.month, let day = components.day else { return "—" }
+        return "Month \(month), Day \(day)"
     }
 }

@@ -81,7 +81,11 @@ final class YouViewModel: ObservableObject {
 
             if let fn = data["firstName"] as? String { firstName = fn }
             if let ln = data["lastName"] as? String { lastName = ln }
-            if let bl = data["birthLocation"] as? String { birthLocation = bl }
+            if let bl = data["birthLocation"] as? String, !bl.isEmpty {
+                birthLocation = bl
+            } else if let bc = data["birthCity"] as? String {
+                birthLocation = bc
+            }
 
             if let timestamp = data["birthDate"] as? Timestamp {
                 birthDate = timestamp.dateValue()
@@ -129,6 +133,10 @@ final class YouViewModel: ObservableObject {
         updateData["birthLocation"] = birthLocation.isEmpty
             ? FieldValue.delete()
             : birthLocation
+        updateData["birthCity"] = FieldValue.delete()
+        updateData["lunarBirthday"] = birthDate != nil
+            ? DerivedData.lunarBirthday(from: birthDate)
+            : FieldValue.delete()
 
         if let date = birthDate {
             updateData["birthDate"] = Timestamp(date: date)
@@ -218,7 +226,6 @@ final class YouViewModel: ObservableObject {
     /// Called from view when birth time picker changes
     func birthTimeChanged(_ time: Date) {
         guard !isPerformingLoad else { return }
-        guard birthTime != time else { return }
         hasSelectedTime = true
         birthTime = time
         hasUnsavedChanges = true
