@@ -3,6 +3,7 @@ import {initializeApp} from "firebase-admin/app";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {defineSecret} from "firebase-functions/params";
 import OpenAI from "openai";
+import {validateInsightText} from "./validators";
 
 initializeApp();
 const db = getFirestore();
@@ -211,28 +212,44 @@ export const getDailyInsight = onCall(
     // Generate insight via OpenAI with timeout and retry
     const openai = new OpenAI({apiKey: openaiApiKey.value()});
 
-    const prompt = `You are Inyon — a clear-eyed voice grounded in Korean Saju tradition.
+    const prompt = `You are Inyon — a dry, precise voice shaped by Korean Saju.
+Not mystical. Not a wellness app. Just honest about conditions.
 
-Today's Saju data:
+Today's Saju:
 - Date: ${localDate}
 - Heavenly Stem: ${heavenlyStem}
 - Earthly Branch: ${earthlyBranch}
 - Element: ${dayElement} — ${elementTheme}
 ${birthContext ? `\nUser context:\n${birthContext}` : ""}
 
-Write a daily reflection for this person. Hard rules:
-1. Exactly 2 sentences. Not 1. Not 3. Two.
-2. Total length: 25–45 words.
-3. Direct and sharp. Not vague or serene. Say something specific and true.
-4. The second sentence may open a small sense of what's possible — not a prediction, just a lean.
-5. NEVER name elements, stems, branches, zodiac animals, or any Saju terms in the output.
-6. NEVER say "birth element", "day's element", "alignment", "resonance", "synergy", or "dynamic".
-7. Let the Saju context shape what you notice — not the words you use.
-8. Use hedging: "may", "can", "tends to", "often". Never certain.
-9. No predictions. No advice. No "you should" or "now is the time".
-10. No fear, urgency, or drama. Leave the reader leaning slightly forward.
+Write a daily reflection. Follow every rule:
 
-Think: one sharp observation. One quiet door left open. Nothing more.
+STRUCTURE
+1. Exactly 2 sentences. Not 1. Not 3.
+2. Sentence 1 must stand alone as a screenshot caption — concrete, specific, complete.
+3. Sentence 2 opens a quiet possibility. One lean. No conclusion.
+4. Total: 25–45 words.
+
+SPECIFICITY (required)
+5. Use at least one concrete noun from daily life: inbox, calendar, money, sleep, text, meeting, body, plan, habit, phone, meal, work, conversation, deadline.
+6. Use at least one concrete verb: notice, carry, avoid, put off, feel, check, reach, say, hold, skip, push, drag.
+
+BANNED WORDS — never use any of these:
+- Saju terms: element, stem, branch, zodiac, birth element, day's element
+- Wellness filler: energy, vibes, vibe, universe, flow, alignment, resonance, synergy, journey, path, forces, cosmic, spirit, higher, meant to be
+- Vague: shift, dynamic
+
+TONE
+7. Dry. Like a friend who sees you clearly.
+8. Gen Z / millennial register. Not corporate, not spiritual.
+9. Let the Saju context shape what you notice — not the words you use.
+
+SAFETY
+10. No predictions. No advice. No "you should" or "now is the time".
+11. Hedge always: "may", "can", "tends to", "often". Never certain.
+12. No fear. No urgency. No drama. Leave the reader leaning slightly forward.
+
+Think: one specific thing you notice. One door barely open. Nothing more.
 
 Respond with only valid JSON: {"insightText": "..."}`;
 
@@ -264,12 +281,14 @@ Respond with only valid JSON: {"insightText": "..."}`;
 
         parsed = JSON.parse(content) as InsightResponse;
 
-        if (
-          !parsed.insightText ||
-          typeof parsed.insightText !== "string" ||
-          parsed.insightText.length < 40
-        ) {
-          throw new Error("Reflection content is invalid.");
+        if (!parsed.insightText || typeof parsed.insightText !== "string") {
+          throw new Error("Reflection content is missing or wrong type.");
+        }
+        const validation = validateInsightText(parsed.insightText);
+        if (!validation.valid) {
+          throw new Error(
+            `Reflection failed validation: ${validation.errors.join("; ")}`
+          );
         }
 
         break; // Success — exit retry loop
@@ -298,7 +317,7 @@ Respond with only valid JSON: {"insightText": "..."}`;
       throw new HttpsError("internal", "Failed to generate reflection.");
     }
 
-    const version = "v1";
+    const version = "v2";
     const generatedAt = Timestamp.now();
 
     // Persist to Firestore

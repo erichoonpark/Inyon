@@ -961,35 +961,53 @@ struct LoginView: View {
                 forgotPasswordContent
             } else if showEmailForm {
                 VStack(spacing: 16) {
-                    TextField("Email", text: $email)
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundColor(AppTheme.textPrimary)
-                        .tint(AppTheme.textPrimary)
-                        .textContentType(.emailAddress)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .padding(.vertical, 14)
-                        .padding(.horizontal, 16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
-                        )
-                        .disabled(isLoading)
-                        .accessibilityIdentifier("login.emailField")
+                    ZStack(alignment: .leading) {
+                        if email.isEmpty {
+                            Text("Email")
+                                .font(.system(size: 17, weight: .regular))
+                                .foregroundColor(AppTheme.textPrimary)
+                                .padding(.horizontal, 16)
+                                .allowsHitTesting(false)
+                        }
+                        TextField("", text: $email)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(AppTheme.textPrimary)
+                            .tint(AppTheme.textPrimary)
+                            .textContentType(.emailAddress)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, 16)
+                            .disabled(isLoading)
+                            .accessibilityIdentifier("login.emailField")
+                    }
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                    )
 
-                    SecureField("Password", text: $password)
-                        .font(.system(size: 17, weight: .regular))
-                        .foregroundColor(AppTheme.textPrimary)
-                        .tint(AppTheme.textPrimary)
-                        .textContentType(.password)
-                        .padding(.vertical, 14)
-                        .padding(.horizontal, 16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 10)
-                                .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
-                        )
-                        .disabled(isLoading)
-                        .accessibilityIdentifier("login.passwordField")
+                    ZStack(alignment: .leading) {
+                        if password.isEmpty {
+                            Text("Password")
+                                .font(.system(size: 17, weight: .regular))
+                                .foregroundColor(AppTheme.textPrimary)
+                                .padding(.horizontal, 16)
+                                .allowsHitTesting(false)
+                        }
+                        SecureField("", text: $password)
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(AppTheme.textPrimary)
+                            .tint(AppTheme.textPrimary)
+                            .textContentType(.password)
+                            .padding(.vertical, 14)
+                            .padding(.horizontal, 16)
+                            .disabled(isLoading)
+                            .accessibilityIdentifier("login.passwordField")
+                    }
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                    )
 
                     Button {
                         signIn()
@@ -1083,20 +1101,29 @@ struct LoginView: View {
                     .padding(.top, 8)
                 }
             } else {
-                TextField("Email", text: $email)
-                    .font(.system(size: 17, weight: .regular))
-                    .foregroundColor(AppTheme.textPrimary)
-                    .tint(AppTheme.textPrimary)
-                    .textContentType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .padding(.vertical, 14)
-                    .padding(.horizontal, 16)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
-                    )
-                    .disabled(isLoading)
+                ZStack(alignment: .leading) {
+                    if email.isEmpty {
+                        Text("Email")
+                            .font(.system(size: 17, weight: .regular))
+                            .foregroundColor(AppTheme.textPrimary)
+                            .padding(.horizontal, 16)
+                            .allowsHitTesting(false)
+                    }
+                    TextField("", text: $email)
+                        .font(.system(size: 17, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary)
+                        .tint(AppTheme.textPrimary)
+                        .textContentType(.emailAddress)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .padding(.vertical, 14)
+                        .padding(.horizontal, 16)
+                        .disabled(isLoading)
+                }
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10)
+                        .stroke(AppTheme.textPrimary.opacity(0.3), lineWidth: 1)
+                )
 
                 Button {
                     sendPasswordReset()
