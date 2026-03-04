@@ -27,11 +27,11 @@ export function validateInsightText(text: string): ValidationResult {
   const errors: string[] = [];
 
   const words = countWords(text);
-  if (words < 25) errors.push(`Too short: ${words} words (min 25)`);
-  if (words > 45) errors.push(`Too long: ${words} words (max 45)`);
+  if (words < 10) errors.push(`Too short: ${words} words (min 10)`);
+  if (words > 22) errors.push(`Too long: ${words} words (max 22)`);
 
   const sentences = countSentences(text);
-  if (sentences !== 2) errors.push(`Expected 2 sentences, got ${sentences}`);
+  if (sentences < 1 || sentences > 2) errors.push(`Expected 1–2 sentences, got ${sentences}`);
 
   const lower = text.toLowerCase();
   const found = BANNED_WORDS.filter((w) => lower.includes(w.toLowerCase()));

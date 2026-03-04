@@ -10,7 +10,7 @@ final class OnboardingDataTests: XCTestCase {
 
         XCTAssertNil(data.birthDate)
         XCTAssertNil(data.birthTime)
-        XCTAssertFalse(data.isBirthTimeUnknown)
+        XCTAssertFalse(data.birthTimeUnknown)
         XCTAssertEqual(data.birthCity, "")
         XCTAssertTrue(data.personalAnchors.isEmpty)
     }
@@ -70,11 +70,11 @@ final class OnboardingDataTests: XCTestCase {
         // Mirrors BirthContextView Continue button logic
         data.birthDate = hasSelectedDate ? selectedDate : nil
         data.birthTime = (knowsBirthTime && hasSelectedTime) ? selectedTime : nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
 
         XCTAssertEqual(data.birthDate, selectedDate)
         XCTAssertEqual(data.birthTime, selectedTime)
-        XCTAssertFalse(data.isBirthTimeUnknown)
+        XCTAssertFalse(data.birthTimeUnknown)
     }
 
     /// Simulates: user selects a date, taps "Not sure" for time, taps Continue
@@ -86,11 +86,11 @@ final class OnboardingDataTests: XCTestCase {
 
         data.birthDate = hasSelectedDate ? selectedDate : nil
         data.birthTime = (knowsBirthTime && false) ? Date() : nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
 
         XCTAssertEqual(data.birthDate, selectedDate)
         XCTAssertNil(data.birthTime)
-        XCTAssertTrue(data.isBirthTimeUnknown)
+        XCTAssertTrue(data.birthTimeUnknown)
     }
 
     /// Simulates: user selects a date only, skips time, taps Continue
@@ -103,11 +103,11 @@ final class OnboardingDataTests: XCTestCase {
 
         data.birthDate = hasSelectedDate ? selectedDate : nil
         data.birthTime = (knowsBirthTime && hasSelectedTime) ? Date() : nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
 
         XCTAssertEqual(data.birthDate, selectedDate)
         XCTAssertNil(data.birthTime)
-        XCTAssertFalse(data.isBirthTimeUnknown)
+        XCTAssertFalse(data.birthTimeUnknown)
     }
 
     /// Continue should be blocked when no date is selected
@@ -128,11 +128,11 @@ final class OnboardingDataTests: XCTestCase {
 
         data.birthDate = hasSelectedDate ? selectedDate : nil
         data.birthTime = (knowsBirthTime && true) ? Date() : nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
 
         XCTAssertNotNil(data.birthDate)
         XCTAssertNil(data.birthTime, "Birth time should be nil after tapping Not sure")
-        XCTAssertTrue(data.isBirthTimeUnknown)
+        XCTAssertTrue(data.birthTimeUnknown)
     }
 
     // MARK: - Birth Time Skip / Add Later Flow
@@ -146,10 +146,10 @@ final class OnboardingDataTests: XCTestCase {
 
         XCTAssertFalse(knowsBirthTime)
 
-        // On Continue, this maps to isBirthTimeUnknown
+        // On Continue, this maps to birthTimeUnknown
         var data = OnboardingData()
-        data.isBirthTimeUnknown = !knowsBirthTime
-        XCTAssertTrue(data.isBirthTimeUnknown)
+        data.birthTimeUnknown = !knowsBirthTime
+        XCTAssertTrue(data.birthTimeUnknown)
     }
 
     /// Tapping "Add later" re-enables time picker
@@ -180,10 +180,10 @@ final class OnboardingDataTests: XCTestCase {
         let hasSelectedTime = true
         data.birthDate = Date()
         data.birthTime = (knowsBirthTime && hasSelectedTime) ? selectedTime : nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
 
         XCTAssertEqual(data.birthTime, selectedTime)
-        XCTAssertFalse(data.isBirthTimeUnknown)
+        XCTAssertFalse(data.birthTimeUnknown)
     }
 
     /// Continue still works with skipped time and city set
@@ -194,12 +194,12 @@ final class OnboardingDataTests: XCTestCase {
 
         data.birthDate = hasSelectedDate ? Date() : nil
         data.birthTime = nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
         data.birthCity = "Seoul, South Korea"
 
         let canContinue = hasSelectedDate && !data.birthCity.isEmpty
         XCTAssertTrue(canContinue, "Skipping time should not block Continue")
-        XCTAssertTrue(data.isBirthTimeUnknown)
+        XCTAssertTrue(data.birthTimeUnknown)
     }
 
     // MARK: - Personal Anchor Multi-Select
@@ -386,18 +386,18 @@ final class FirestorePayloadTests: XCTestCase {
         let data = OnboardingData()
         let payload = data.toFirestoreData()
 
-        // Should always have createdAt, personalAnchors, and isBirthTimeUnknown
+        // Should always have createdAt, personalAnchors, and birthTimeUnknown
         XCTAssertNotNil(payload["createdAt"])
         XCTAssertNotNil(payload["personalAnchors"])
-        XCTAssertNotNil(payload["isBirthTimeUnknown"])
+        XCTAssertNotNil(payload["birthTimeUnknown"])
 
         // Should not have birthDate, birthTime, or birthCity when nil/empty
         XCTAssertNil(payload["birthDate"])
         XCTAssertNil(payload["birthTime"])
         XCTAssertNil(payload["birthLocation"])
 
-        // isBirthTimeUnknown should default to false
-        XCTAssertEqual(payload["isBirthTimeUnknown"] as? Bool, false)
+        // birthTimeUnknown should default to false
+        XCTAssertEqual(payload["birthTimeUnknown"] as? Bool, false)
 
         // Personal anchors should be empty array
         if let anchors = payload["personalAnchors"] as? [String] {
@@ -487,7 +487,7 @@ final class FirestorePayloadTests: XCTestCase {
         data.personalAnchors = [.direction]
         let payload = data.toFirestoreData()
 
-        let expectedKeys: Set<String> = ["createdAt", "birthDate", "birthTime", "personalAnchors", "isBirthTimeUnknown", "birthLocation"]
+        let expectedKeys: Set<String> = ["createdAt", "birthDate", "birthTime", "personalAnchors", "birthTimeUnknown", "birthLocation"]
         let actualKeys = Set(payload.keys)
 
         XCTAssertEqual(actualKeys, expectedKeys)
@@ -496,24 +496,24 @@ final class FirestorePayloadTests: XCTestCase {
     func testToFirestoreDataWithUnknownBirthTime() {
         var data = OnboardingData()
         data.birthDate = Date()
-        data.isBirthTimeUnknown = true
+        data.birthTimeUnknown = true
         let payload = data.toFirestoreData()
 
         XCTAssertNotNil(payload["birthDate"])
         XCTAssertNil(payload["birthTime"])
-        XCTAssertEqual(payload["isBirthTimeUnknown"] as? Bool, true)
+        XCTAssertEqual(payload["birthTimeUnknown"] as? Bool, true)
     }
 
     func testToFirestoreDataWithKnownBirthTime() {
         var data = OnboardingData()
         data.birthDate = Date()
         data.birthTime = Date()
-        data.isBirthTimeUnknown = false
+        data.birthTimeUnknown = false
         let payload = data.toFirestoreData()
 
         XCTAssertNotNil(payload["birthDate"])
         XCTAssertNotNil(payload["birthTime"])
-        XCTAssertEqual(payload["isBirthTimeUnknown"] as? Bool, false)
+        XCTAssertEqual(payload["birthTimeUnknown"] as? Bool, false)
     }
 
     func testToFirestoreDataWithBirthCity() {
@@ -597,7 +597,7 @@ final class BirthCityTests: XCTestCase {
 
         data.birthDate = hasSelectedDate ? Date() : nil
         data.birthTime = (knowsBirthTime && hasSelectedTime) ? Date() : nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
         data.birthCity = "Seoul, South Korea"
 
         let canContinue = hasSelectedDate && !data.birthCity.isEmpty
@@ -605,7 +605,7 @@ final class BirthCityTests: XCTestCase {
         XCTAssertTrue(canContinue)
         XCTAssertNotNil(data.birthDate)
         XCTAssertNotNil(data.birthTime)
-        XCTAssertFalse(data.isBirthTimeUnknown)
+        XCTAssertFalse(data.birthTimeUnknown)
         XCTAssertEqual(data.birthCity, "Seoul, South Korea")
     }
 
@@ -616,7 +616,7 @@ final class BirthCityTests: XCTestCase {
 
         data.birthDate = hasSelectedDate ? Date() : nil
         data.birthTime = nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
         data.birthCity = "Busan, South Korea"
 
         let canContinue = hasSelectedDate && !data.birthCity.isEmpty
@@ -624,7 +624,7 @@ final class BirthCityTests: XCTestCase {
         XCTAssertTrue(canContinue, "Continue should be enabled — time is optional")
         XCTAssertNotNil(data.birthDate)
         XCTAssertNil(data.birthTime)
-        XCTAssertTrue(data.isBirthTimeUnknown)
+        XCTAssertTrue(data.birthTimeUnknown)
     }
 
     // MARK: - City Change

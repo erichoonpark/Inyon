@@ -134,9 +134,7 @@ final class YouViewModel: ObservableObject {
             ? FieldValue.delete()
             : birthLocation
         updateData["birthCity"] = FieldValue.delete()
-        updateData["lunarBirthday"] = birthDate != nil
-            ? DerivedData.lunarBirthday(from: birthDate)
-            : FieldValue.delete()
+        updateData["lunarBirthday"] = FieldValue.delete()
 
         if let date = birthDate {
             updateData["birthDate"] = Timestamp(date: date)

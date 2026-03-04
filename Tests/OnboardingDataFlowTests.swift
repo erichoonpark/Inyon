@@ -54,11 +54,11 @@ final class OnboardingDataFlowTests: XCTestCase {
         // Mirrors BirthContextView Continue button logic
         data.birthDate = hasSelectedDate ? selectedDate : nil
         data.birthTime = (knowsBirthTime && true) ? Date() : nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
 
         XCTAssertNotNil(data.birthDate)
         XCTAssertNil(data.birthTime, "Time should be nil when user taps Not sure")
-        XCTAssertTrue(data.isBirthTimeUnknown)
+        XCTAssertTrue(data.birthTimeUnknown)
     }
 
     func test_birthContext_selectTimeThenNotSure_clearsTime() {
@@ -77,10 +77,10 @@ final class OnboardingDataFlowTests: XCTestCase {
         hasSelectedTime = false
         data.birthDate = selectedDate
         data.birthTime = (knowsBirthTime && hasSelectedTime) ? selectedTime : nil
-        data.isBirthTimeUnknown = !knowsBirthTime
+        data.birthTimeUnknown = !knowsBirthTime
 
         XCTAssertNil(data.birthTime, "Time should be cleared after tapping Not sure")
-        XCTAssertTrue(data.isBirthTimeUnknown)
+        XCTAssertTrue(data.birthTimeUnknown)
     }
 
     func test_birthContext_addLater_reEnablesTimePicker() {
@@ -151,7 +151,7 @@ final class OnboardingDataFlowTests: XCTestCase {
         // Simulate full flow
         data.birthDate = testDate
         data.birthTime = testTime
-        data.isBirthTimeUnknown = false
+        data.birthTimeUnknown = false
         data.birthCity = "Busan, South Korea"
         data.personalAnchors = [.rest, .work]
 
@@ -160,7 +160,7 @@ final class OnboardingDataFlowTests: XCTestCase {
         XCTAssertNotNil(payload["createdAt"])
         XCTAssertNotNil(payload["birthDate"])
         XCTAssertNotNil(payload["birthTime"])
-        XCTAssertEqual(payload["isBirthTimeUnknown"] as? Bool, false)
+        XCTAssertEqual(payload["birthTimeUnknown"] as? Bool, false)
         XCTAssertEqual(payload["birthLocation"] as? String, "Busan, South Korea")
 
         let anchors = payload["personalAnchors"] as? [String]
@@ -174,7 +174,7 @@ final class OnboardingDataFlowTests: XCTestCase {
         var data = OnboardingData()
         data.birthDate = Date()
         data.birthTime = nil
-        data.isBirthTimeUnknown = true
+        data.birthTimeUnknown = true
         data.birthCity = "Seoul, South Korea"
         data.personalAnchors = [.direction]
 
@@ -182,7 +182,7 @@ final class OnboardingDataFlowTests: XCTestCase {
 
         XCTAssertNotNil(payload["birthDate"])
         XCTAssertNil(payload["birthTime"], "Unknown time should not appear in payload")
-        XCTAssertEqual(payload["isBirthTimeUnknown"] as? Bool, true)
+        XCTAssertEqual(payload["birthTimeUnknown"] as? Bool, true)
         XCTAssertEqual(payload["birthLocation"] as? String, "Seoul, South Korea")
     }
 

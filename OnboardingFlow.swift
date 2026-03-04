@@ -10,7 +10,7 @@ struct OnboardingData {
     var email: String = ""
     var birthDate: Date?
     var birthTime: Date?
-    var isBirthTimeUnknown: Bool = false
+    var birthTimeUnknown: Bool = false
     var birthCity: String = ""
     var personalAnchors: Set<PersonalAnchor> = []
 
@@ -40,7 +40,7 @@ struct OnboardingData {
             dict["birthTime"] = Timestamp(date: birthTime)
         }
 
-        dict["isBirthTimeUnknown"] = isBirthTimeUnknown
+        dict["birthTimeUnknown"] = birthTimeUnknown
 
         if !birthCity.isEmpty {
             dict["birthLocation"] = birthCity
@@ -564,7 +564,7 @@ struct BirthContextView: View {
             Button {
                 data.birthDate = hasSelectedDate ? selectedDate : nil
                 data.birthTime = (knowsBirthTime && hasSelectedTime) ? selectedTime : nil
-                data.isBirthTimeUnknown = !knowsBirthTime
+                data.birthTimeUnknown = !knowsBirthTime
                 onContinue()
             } label: {
                 Text("Continue")

@@ -68,9 +68,9 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 32) {
             // Reflection text — lead with the actual content
             Text(insight.insightText)
-                .font(.system(size: 17, weight: .regular))
+                .font(.system(size: 20, weight: .regular))
                 .foregroundColor(AppTheme.textPrimary)
-                .lineSpacing(6)
+                .lineSpacing(8)
                 .fixedSize(horizontal: false, vertical: true)
 
             // Compact context card: element + stem/branch
@@ -279,14 +279,15 @@ struct FiveElementsStrip: View {
                     let isActive = element.0.lowercased() == activeElement?.lowercased()
                     VStack(spacing: 6) {
                         Image(systemName: element.1)
-                            .font(.system(size: 16))
-                            .foregroundColor(isActive ? AppTheme.textPrimary : AppTheme.textSecondary)
+                            .font(.system(size: isActive ? 22 : 16))
+                            .foregroundColor(AppTheme.textPrimary)
 
-                        Text(element.0)
-                            .font(.system(size: 10, weight: isActive ? .semibold : .medium))
-                            .foregroundColor(isActive ? AppTheme.textPrimary : AppTheme.textSecondary)
+                        Text(element.0.uppercased())
+                            .font(.system(size: 10, weight: isActive ? .semibold : .regular, design: .monospaced))
+                            .foregroundColor(AppTheme.textPrimary)
                     }
                     .frame(maxWidth: .infinity)
+                    .opacity(isActive ? 1.0 : 0.25)
                 }
             }
             .padding(.vertical, 16)

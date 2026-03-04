@@ -140,7 +140,7 @@ export const getDailyInsight = onCall(
     }
 
     // Sanitize timezone for use as Firestore doc ID (slashes are path separators)
-    const safeTimeZoneId = timeZoneId.replace(/\//g, "-");
+    const safeTimeZoneId = timeZoneId.replace(/\//g, "~");
     const docId = `${localDate}_${safeTimeZoneId}`;
     const docRef = db
       .collection("users")
@@ -176,8 +176,6 @@ export const getDailyInsight = onCall(
     const onboardingDoc = await db
       .collection("users")
       .doc(uid)
-      .collection("onboarding")
-      .doc("context")
       .get();
 
     let birthContext = "";
@@ -213,7 +211,7 @@ export const getDailyInsight = onCall(
     const openai = new OpenAI({apiKey: openaiApiKey.value()});
 
     const prompt = `You are Inyon — a dry, precise voice shaped by Korean Saju.
-Not mystical. Not a wellness app. Just honest about conditions.
+Not mystical. Not a wellness app. Just honest about what you notice.
 
 Today's Saju:
 - Date: ${localDate}
@@ -222,34 +220,36 @@ Today's Saju:
 - Element: ${dayElement} — ${elementTheme}
 ${birthContext ? `\nUser context:\n${birthContext}` : ""}
 
-Write a daily reflection. Follow every rule:
+Write one daily insight. Follow every rule:
 
 STRUCTURE
-1. Exactly 2 sentences. Not 1. Not 3.
-2. Sentence 1 must stand alone as a screenshot caption — concrete, specific, complete.
-3. Sentence 2 opens a quiet possibility. One lean. No conclusion.
-4. Total: 25–45 words.
+1. 1–2 sentences. Total: 10–22 words.
+2. Sentence 1 is a declarative observation — state what you notice, as if you've been watching. No hedge required. This is the line someone screenshots.
+3. Sentence 2 (optional): one quiet lean. A door barely open. Hedge allowed here.
 
-SPECIFICITY (required)
-5. Use at least one concrete noun from daily life: inbox, calendar, money, sleep, text, meeting, body, plan, habit, phone, meal, work, conversation, deadline.
-6. Use at least one concrete verb: notice, carry, avoid, put off, feel, check, reach, say, hold, skip, push, drag.
+TONE
+4. Dry. Like a friend who sees you clearly and doesn't soften it.
+5. Specific enough to feel slightly uncomfortable — not alarming, just close.
+6. Gen Z / millennial register. Not corporate, not spiritual.
+7. Let the Saju context shape what you notice — never name the Saju terms.
+
+EXAMPLES (aim for this quality)
+Good: "The plan you've been sitting on is starting to look like a wall."
+Good: "You've been carrying the conversation that hasn't happened yet."
+Good: "Your calendar has more room than your head thinks it does."
+Good: "There's an answer you already have but haven't said out loud."
+Bad: "Things may feel a bit uncertain right now." — too vague, no character
+Bad: "You might want to check in with yourself today." — sounds like a wellness app
 
 BANNED WORDS — never use any of these:
 - Saju terms: element, stem, branch, zodiac, birth element, day's element
 - Wellness filler: energy, vibes, vibe, universe, flow, alignment, resonance, synergy, journey, path, forces, cosmic, spirit, higher, meant to be
 - Vague: shift, dynamic
 
-TONE
-7. Dry. Like a friend who sees you clearly.
-8. Gen Z / millennial register. Not corporate, not spiritual.
-9. Let the Saju context shape what you notice — not the words you use.
-
 SAFETY
-10. No predictions. No advice. No "you should" or "now is the time".
-11. Hedge always: "may", "can", "tends to", "often". Never certain.
-12. No fear. No urgency. No drama. Leave the reader leaning slightly forward.
-
-Think: one specific thing you notice. One door barely open. Nothing more.
+8. No predictions about future outcomes. No advice. No "you should" or "now is the time".
+9. No fear. No urgency. No drama.
+10. Observations about current state are fine — they don't need hedging.
 
 Respond with only valid JSON: {"insightText": "..."}`;
 
@@ -266,7 +266,7 @@ Respond with only valid JSON: {"insightText": "..."}`;
             model: "gpt-4o-mini",
             messages: [{role: "user", content: prompt}],
             response_format: {type: "json_object"},
-            temperature: 0.7,
+            temperature: 0.85,
             max_tokens: 150,
           },
           {signal: controller.signal}

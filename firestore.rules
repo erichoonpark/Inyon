@@ -6,11 +6,6 @@ service cloud.firestore {
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
 
-      // Onboarding context
-      match /onboarding/{doc} {
-        allow read, write: if request.auth != null && request.auth.uid == userId;
-      }
-
       // Daily insights (read-only from client, written by Cloud Functions)
       match /dailyInsights/{insightId} {
         allow read: if request.auth != null && request.auth.uid == userId;
@@ -19,10 +14,10 @@ service cloud.firestore {
     }
 
     // Anonymous onboarding data (pre-auth, keyed by UUID session ID)
-    // Reads and deletes are unrestricted — needed for post-auth migration transaction.
+    // Reads require auth — migration runs post-auth so request.auth is always set.
     // Writes are capped at 15 fields to prevent large payload injection.
     match /onboarding/anonymous/users/{sessionId} {
-      allow read, delete: if true;
+      allow read, delete: if request.auth != null;
       allow write: if request.resource.data.size() <= 15;
     }
   }

@@ -26,7 +26,6 @@ private final class FirestoreOnboardingMigrationExecutor: OnboardingMigrationExe
         let anonymousRef = db.collection("onboarding").document("anonymous")
             .collection("users").document(anonymousSessionId)
         let userRef = db.collection("users").document(userId)
-            .collection("onboarding").document("context")
 
         return try await withCheckedThrowingContinuation { continuation in
             db.runTransaction({ transaction, errorPointer -> Any? in
@@ -92,7 +91,6 @@ final class OnboardingService: OnboardingServiceProtocol {
 
         if let uid = userId {
             documentRef = db.collection("users").document(uid)
-                .collection("onboarding").document("context")
         } else {
             documentRef = db.collection("onboarding").document("anonymous")
                 .collection("users").document(anonymousSessionId)
@@ -103,7 +101,6 @@ final class OnboardingService: OnboardingServiceProtocol {
 
     func loadOnboardingData(userId: String) async throws -> [String: Any]? {
         let docRef = db.collection("users").document(userId)
-            .collection("onboarding").document("context")
 
         let snapshot = try await docRef.getDocument()
         return snapshot.data()
@@ -111,7 +108,6 @@ final class OnboardingService: OnboardingServiceProtocol {
 
     func updateOnboardingData(userId: String, data: [String: Any]) async throws {
         let docRef = db.collection("users").document(userId)
-            .collection("onboarding").document("context")
 
         try await docRef.setData(data, merge: true)
     }
