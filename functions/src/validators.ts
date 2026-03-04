@@ -23,6 +23,23 @@ export function countSentences(text: string): number {
   return text.split(/[.!?]+(?:\s|$)/).filter((s) => s.trim().length > 0).length;
 }
 
+export function validateDynamicText(text: string): ValidationResult {
+  const errors: string[] = [];
+
+  const words = countWords(text);
+  if (words < 10) errors.push(`Too short: ${words} words (min 10)`);
+  if (words > 25) errors.push(`Too long: ${words} words (max 25)`);
+
+  const sentences = countSentences(text);
+  if (sentences < 1 || sentences > 2) errors.push(`Expected 1–2 sentences, got ${sentences}`);
+
+  const lower = text.toLowerCase();
+  const found = BANNED_WORDS.filter((w) => lower.includes(w.toLowerCase()));
+  if (found.length > 0) errors.push(`Banned words found: ${found.join(", ")}`);
+
+  return {valid: errors.length === 0, errors};
+}
+
 export function validateInsightText(text: string): ValidationResult {
   const errors: string[] = [];
 

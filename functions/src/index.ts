@@ -3,7 +3,7 @@ import {initializeApp} from "firebase-admin/app";
 import {getFirestore, Timestamp} from "firebase-admin/firestore";
 import {defineSecret} from "firebase-functions/params";
 import OpenAI from "openai";
-import {validateInsightText} from "./validators";
+import {validateInsightText, validateDynamicText} from "./validators";
 
 initializeApp();
 const db = getFirestore();
@@ -46,6 +46,22 @@ const ELEMENT_GENERATES: Record<string, string> = {
 // Controlling cycle: each element restrains the target
 const ELEMENT_CONTROLS: Record<string, string> = {
   Wood: "Earth", Earth: "Water", Water: "Fire", Fire: "Metal", Metal: "Wood",
+};
+
+// Five elements mapped to Earthly Branches
+const BRANCH_ELEMENTS: Record<number, string> = {
+  0: "Water",  // Ja
+  1: "Earth",  // Chuk
+  2: "Wood",   // In
+  3: "Wood",   // Myo
+  4: "Earth",  // Jin
+  5: "Fire",   // Sa
+  6: "Fire",   // O
+  7: "Earth",  // Mi
+  8: "Metal",  // Sin
+  9: "Metal",  // Yu
+  10: "Earth", // Sul
+  11: "Water", // Hae
 };
 
 // Zodiac animals aligned to Earthly Branch cycle (1900 = Rat)
@@ -99,6 +115,7 @@ function calculateDayStemBranch(dateStr: string): {
 
 interface InsightResponse {
   insightText: string;
+  dynamicText: string;
 }
 
 export const getDailyInsight = onCall(
@@ -160,6 +177,7 @@ export const getDailyInsight = onCall(
         heavenlyStem: data.heavenlyStem,
         earthlyBranch: data.earthlyBranch,
         insightText: data.insightText,
+        dynamicText: data.dynamicText ?? null,
         generatedAt: data.generatedAt?.toMillis() ?? Date.now(),
         version: data.version,
       };
@@ -171,6 +189,7 @@ export const getDailyInsight = onCall(
     const earthlyBranch = EARTHLY_BRANCHES[branchIndex];
     const dayElement = STEM_ELEMENTS[stemIndex];
     const elementTheme = ELEMENT_THEMES[dayElement];
+    const branchElement = BRANCH_ELEMENTS[branchIndex];
 
     // Load user birth context for personalization
     const onboardingDoc = await db
@@ -215,9 +234,8 @@ Not mystical. Not a wellness app. Just honest about what you notice.
 
 Today's Saju:
 - Date: ${localDate}
-- Heavenly Stem: ${heavenlyStem}
-- Earthly Branch: ${earthlyBranch}
-- Element: ${dayElement} — ${elementTheme}
+- Heavenly Stem (Environment): ${heavenlyStem} — ${dayElement} element (${elementTheme})
+- Earthly Branch (You): ${earthlyBranch} — ${branchElement} element
 ${birthContext ? `\nUser context:\n${birthContext}` : ""}
 
 Write one daily insight. Follow every rule:
@@ -251,7 +269,11 @@ SAFETY
 9. No fear. No urgency. No drama.
 10. Observations about current state are fine — they don't need hedging.
 
-Respond with only valid JSON: {"insightText": "..."}`;
+Also write a "dynamicText" field: 1–2 sentences (10–25 words) describing what today's Environment (Heavenly Stem) and You (Earthly Branch) each bring, and how they meet. Same tone rules — no jargon, no predictions, no advice. This is the line that makes the two symbols feel tangible to the user.
+
+Example dynamicText: "The sky carries a sharp, clarifying edge today. The ground beneath is soft — there's give if you lean in."
+
+Respond with only valid JSON: {"insightText": "...", "dynamicText": "..."}`;
 
     const maxRetries = 2;
     let parsed: InsightResponse | null = null;
@@ -288,6 +310,16 @@ Respond with only valid JSON: {"insightText": "..."}`;
         if (!validation.valid) {
           throw new Error(
             `Reflection failed validation: ${validation.errors.join("; ")}`
+          );
+        }
+
+        if (!parsed.dynamicText || typeof parsed.dynamicText !== "string") {
+          throw new Error("Dynamic text content is missing or wrong type.");
+        }
+        const dynamicValidation = validateDynamicText(parsed.dynamicText);
+        if (!dynamicValidation.valid) {
+          throw new Error(
+            `Dynamic text failed validation: ${dynamicValidation.errors.join("; ")}`
           );
         }
 
@@ -329,6 +361,7 @@ Respond with only valid JSON: {"insightText": "..."}`;
       heavenlyStem,
       earthlyBranch,
       insightText: parsed!.insightText,
+      dynamicText: parsed!.dynamicText,
       generatedAt,
       version,
       source: "generated",

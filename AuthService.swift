@@ -1,5 +1,6 @@
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 
 enum AuthServiceError: LocalizedError {
     case forcedUITestSignInFailure
@@ -19,6 +20,7 @@ enum AuthServiceError: LocalizedError {
 final class AuthService: ObservableObject, AuthServiceProtocol {
     @Published var currentUserId: String?
     @Published var isLoading = true
+    @Published private(set) var verified: Bool = false
 
     private var authStateHandle: AuthStateDidChangeListenerHandle?
     private let uiTestAuthMode: String?
@@ -36,12 +38,14 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
             } else {
                 currentUserId = nil
             }
+            verified = true
             isLoading = false
             return
         }
 
         authStateHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             self?.currentUserId = user?.uid
+            self?.verified = user?.isEmailVerified ?? false
             self?.isLoading = false
         }
     }
@@ -54,11 +58,6 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
 
     var isAuthenticated: Bool {
         currentUserId != nil
-    }
-
-    var isEmailVerified: Bool {
-        if uiTestAuthMode != nil { return true }
-        return Auth.auth().currentUser?.isEmailVerified ?? false
     }
 
     func createAccount(email: String, password: String) async throws -> String {
@@ -95,5 +94,12 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
 
     func reloadUser() async throws {
         try await Auth.auth().currentUser?.reload()
+        let nowVerified = Auth.auth().currentUser?.isEmailVerified ?? false
+        if !verified && nowVerified, let uid = currentUserId {
+            let db = Firestore.firestore()
+            try? await db.collection("users").document(uid)
+                .setData(["emailVerifiedAt": FieldValue.serverTimestamp()], merge: true)
+        }
+        verified = nowVerified
     }
 }

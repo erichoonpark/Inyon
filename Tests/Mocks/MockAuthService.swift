@@ -9,7 +9,7 @@ enum MockError: Error {
 final class MockAuthService: AuthServiceProtocol {
     var currentUserId: String?
     var isAuthenticated: Bool { currentUserId != nil }
-    var isEmailVerified: Bool = true
+    var verified: Bool = true
 
     // Call recording
     var createAccountCalls: [(email: String, password: String)] = []

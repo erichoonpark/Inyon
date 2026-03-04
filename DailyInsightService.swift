@@ -37,6 +37,8 @@ final class DailyInsightService: DailyInsightServiceProtocol {
             throw DailyInsightError.missingFields
         }
 
+        let dynamicText = dict["dynamicText"] as? String
+
         let generatedAt: Date
         if let timestamp = dict["generatedAt"] as? Double {
             generatedAt = Date(timeIntervalSince1970: timestamp / 1000)
@@ -52,6 +54,7 @@ final class DailyInsightService: DailyInsightServiceProtocol {
             heavenlyStem: heavenlyStem,
             earthlyBranch: earthlyBranch,
             insightText: insightText,
+            dynamicText: dynamicText,
             generatedAt: generatedAt,
             version: version
         )

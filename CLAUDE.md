@@ -13,7 +13,7 @@ Inyon offers short, daily reflections structured from Saju.
 The purpose is to help users notice **timing, balance, and conditions**.
 It does **not** predict outcomes or direct behavior.
 
-A successful session leaves the user feeling **steadier**, not informed or directed.
+A successful session leaves the user feeling **steadier**, not directed.
 
 ---
 
@@ -218,5 +218,19 @@ Ask before introducing:
 - New Firestore collections
 - Background jobs or schedulers
 - Paid compute or monetization logic
+
+---
+
+## 11. Post-Implementation Review (Required)
+
+After completing any feature or fix, before declaring done, always self-review:
+
+1. **Edge cases** — Can any new property be nil/missing in a way that crashes or silently breaks the UI? Does every new optional have a handled absent state?
+2. **UX gaps** — Does the new UI section have a loading placeholder? Is it invisible or confusing if data hasn't arrived yet?
+3. **Data flow** — If a new field was added server-side, are old cached responses handled gracefully on the client?
+4. **Deploy requirements** — Call out explicitly if changes require `firebase deploy` (functions, rules) before the user will see them live.
+5. **Test coverage** — If a new struct field or init was added, flag any test helpers that need updating before the test suite runs.
+
+Flag issues proactively — don't wait for the user to catch them.
 
 ---

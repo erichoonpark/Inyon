@@ -8,6 +8,7 @@ struct DailyInsight: Codable {
     let heavenlyStem: String
     let earthlyBranch: String
     let insightText: String
+    let dynamicText: String?
     let generatedAt: Date
     let version: String
 }

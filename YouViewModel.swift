@@ -23,7 +23,7 @@ final class YouViewModel: ObservableObject {
 
     @Published var birthDate: Date?
     @Published var birthTime: Date?
-    @Published var selectedDate = Date()
+    @Published var selectedDate = Calendar.current.date(byAdding: .year, value: -25, to: Date()) ?? Date()
     @Published var selectedTime = Date()
     @Published var hasSelectedDate = false
     @Published var hasSelectedTime = false
@@ -226,6 +226,13 @@ final class YouViewModel: ObservableObject {
         guard !isPerformingLoad else { return }
         hasSelectedTime = true
         birthTime = time
+        hasUnsavedChanges = true
+    }
+
+    /// Called when the user taps "Clear" on birth date
+    func clearBirthDate() {
+        hasSelectedDate = false
+        birthDate = nil
         hasUnsavedChanges = true
     }
 

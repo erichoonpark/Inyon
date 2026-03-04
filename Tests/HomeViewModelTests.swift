@@ -16,6 +16,7 @@ final class HomeViewModelTests: XCTestCase {
             heavenlyStem: "Gab",
             earthlyBranch: "Ja",
             insightText: "Today carries a quiet tone. Conditions may favor reflection.",
+            dynamicText: nil,
             generatedAt: Date(),
             version: "v1"
         )

@@ -46,7 +46,7 @@ struct YouView: View {
                     .foregroundColor(AppTheme.textPrimary)
 
                 // Email verification banner
-                if !authService.isEmailVerified && !verificationBannerDismissed {
+                if !authService.verified && !verificationBannerDismissed {
                     emailVerificationBanner
                 }
 
@@ -278,25 +278,39 @@ struct YouView: View {
                     .font(.system(size: 15, weight: .regular))
                     .foregroundColor(AppTheme.textSecondary)
 
-                ZStack(alignment: .leading) {
-                    if !viewModel.hasSelectedDate {
-                        Text("Not set")
-                            .font(.system(size: 17, weight: .regular))
-                            .foregroundColor(AppTheme.textSecondary)
+                if viewModel.hasSelectedDate {
+                    HStack(spacing: 16) {
+                        DatePicker(
+                            "",
+                            selection: $viewModel.selectedDate,
+                            in: ...Date(),
+                            displayedComponents: .date
+                        )
+                        .datePickerStyle(.compact)
+                        .labelsHidden()
+                        .tint(AppTheme.textPrimary)
+                        .colorScheme(.dark)
+                        .onChange(of: viewModel.selectedDate) { _, newDate in
+                            viewModel.birthDateChanged(newDate)
+                        }
+
+                        Button {
+                            viewModel.clearBirthDate()
+                        } label: {
+                            Text("Clear")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(AppTheme.textSecondary)
+                                .underline()
+                        }
                     }
-                    DatePicker(
-                        "",
-                        selection: $viewModel.selectedDate,
-                        in: ...Date(),
-                        displayedComponents: .date
-                    )
-                    .datePickerStyle(.compact)
-                    .labelsHidden()
-                    .tint(AppTheme.textPrimary)
-                    .colorScheme(.dark)
-                    .opacity(viewModel.hasSelectedDate ? 1 : 0.011)
-                    .onChange(of: viewModel.selectedDate) { _, newDate in
-                        viewModel.birthDateChanged(newDate)
+                } else {
+                    Button {
+                        viewModel.birthDateChanged(viewModel.selectedDate)
+                    } label: {
+                        Text("Add")
+                            .font(.system(size: 15, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                            .underline()
                     }
                 }
             }
@@ -337,8 +351,7 @@ struct YouView: View {
                     }
                 } else {
                     Button {
-                        viewModel.hasSelectedTime = true
-                        viewModel.hasUnsavedChanges = true
+                        viewModel.birthTimeChanged(viewModel.selectedTime)
                     } label: {
                         Text("Add")
                             .font(.system(size: 15, weight: .regular))

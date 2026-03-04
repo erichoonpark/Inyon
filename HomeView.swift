@@ -135,6 +135,22 @@ struct HomeView: View {
                 )
             }
 
+            // Environment × You interaction
+            if let dynamicText = insight.dynamicText {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("ENVIRONMENT × YOU")
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .tracking(1.5)
+                        .foregroundColor(AppTheme.textSecondary)
+
+                    Text(dynamicText)
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textPrimary.opacity(0.75))
+                        .lineSpacing(6)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
             // Five Elements strip
             FiveElementsStrip(activeElement: insight.dayElement)
         }
