@@ -1,6 +1,13 @@
 import SwiftUI
 import MapKit
+import FirebaseAuth
 import FirebaseFirestore
+import AuthenticationServices
+import CryptoKit
+
+// MARK: - Auth Feature Flag
+/// Set to false to hide all email/password UI once social auth migration is complete.
+let enableEmailPasswordAuthFallback = true
 
 // MARK: - Onboarding Data Model
 
@@ -848,16 +855,34 @@ struct AccountCreationView: View {
                 .opacity(isVisible ? 1 : 0)
             } else {
                 VStack(spacing: 12) {
-                    Button {
-                        showEmailForm = true
-                    } label: {
-                        Text("Continue with Email")
+                    AppleSignInButton(label: .signUp) { idToken, rawNonce, fullName in
+                        handleAppleSignIn(idToken: idToken, rawNonce: rawNonce, fullName: fullName)
+                    }
+                    .frame(height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .disabled(isLoading)
+                    .accessibilityIdentifier("account.continueWithApple")
+
+                    Button { handleGoogleSignIn() } label: {
+                        Text("Continue with Google")
                             .font(.system(size: 17, weight: .medium))
                             .foregroundColor(AppTheme.earth)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 18)
                             .background(AppTheme.textPrimary)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    .disabled(isLoading)
+                    .accessibilityIdentifier("account.continueWithGoogle")
+
+                    if enableEmailPasswordAuthFallback {
+                        Button { showEmailForm = true } label: {
+                            Text("Use email instead")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(AppTheme.textSecondary)
+                                .underline()
+                        }
+                        .accessibilityIdentifier("account.useEmailInstead")
                     }
                 }
                 .padding(.horizontal, 24)
@@ -886,6 +911,47 @@ struct AccountCreationView: View {
                 try? await authService.sendEmailVerification()
                 data.email = email
                 onComplete(uid)
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+
+    private func handleGoogleSignIn() {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                try await authService.signInWithGoogle()
+                if let uid = authService.currentUserId {
+                    if let displayName = Auth.auth().currentUser?.displayName {
+                        let parts = displayName.split(separator: " ", maxSplits: 1)
+                        data.firstName = parts.first.map(String.init) ?? ""
+                        data.lastName = parts.dropFirst().first.map(String.init) ?? ""
+                    }
+                    data.email = Auth.auth().currentUser?.email ?? ""
+                    onComplete(uid)
+                }
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+
+    private func handleAppleSignIn(idToken: String, rawNonce: String, fullName: PersonNameComponents?) {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                try await authService.signInWithApple(idToken: idToken, rawNonce: rawNonce, fullName: fullName)
+                if let uid = authService.currentUserId {
+                    data.firstName = fullName?.givenName ?? ""
+                    data.lastName = fullName?.familyName ?? ""
+                    data.email = Auth.auth().currentUser?.email ?? ""
+                    onComplete(uid)
+                }
             } catch {
                 errorMessage = error.localizedDescription
             }
@@ -1048,10 +1114,16 @@ struct LoginView: View {
                 .opacity(isVisible ? 1 : 0)
             } else {
                 VStack(spacing: 12) {
-                    Button {
-                        showEmailForm = true
-                    } label: {
-                        Text("Continue with Email")
+                    AppleSignInButton(label: .signIn) { idToken, rawNonce, fullName in
+                        handleAppleSignIn(idToken: idToken, rawNonce: rawNonce, fullName: fullName)
+                    }
+                    .frame(height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .disabled(isLoading)
+                    .accessibilityIdentifier("login.continueWithApple")
+
+                    Button { handleGoogleSignIn() } label: {
+                        Text("Continue with Google")
                             .font(.system(size: 17, weight: .medium))
                             .foregroundColor(AppTheme.earth)
                             .frame(maxWidth: .infinity)
@@ -1059,7 +1131,18 @@ struct LoginView: View {
                             .background(AppTheme.textPrimary)
                             .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    .accessibilityIdentifier("login.continueWithEmailButton")
+                    .disabled(isLoading)
+                    .accessibilityIdentifier("login.continueWithGoogle")
+
+                    if enableEmailPasswordAuthFallback {
+                        Button { showEmailForm = true } label: {
+                            Text("Use email instead")
+                                .font(.system(size: 15, weight: .regular))
+                                .foregroundColor(AppTheme.textSecondary)
+                                .underline()
+                        }
+                        .accessibilityIdentifier("login.useEmailInstead")
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.bottom, 48)
@@ -1170,6 +1253,34 @@ struct LoginView: View {
         }
     }
 
+    private func handleGoogleSignIn() {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                try await authService.signInWithGoogle()
+                onComplete()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+
+    private func handleAppleSignIn(idToken: String, rawNonce: String, fullName: PersonNameComponents?) {
+        isLoading = true
+        errorMessage = nil
+        Task {
+            do {
+                try await authService.signInWithApple(idToken: idToken, rawNonce: rawNonce, fullName: fullName)
+                onComplete()
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+
     private func sendPasswordReset() {
         guard !email.isEmpty else { return }
         isLoading = true
@@ -1184,6 +1295,48 @@ struct LoginView: View {
             isLoading = false
         }
     }
+}
+
+// MARK: - Apple Sign-In Helper
+
+private struct AppleSignInButton: View {
+    let label: SignInWithAppleButton.Label
+    let onCompletion: (String, String, PersonNameComponents?) -> Void
+    @State private var currentNonce: String?
+
+    var body: some View {
+        SignInWithAppleButton(label, onRequest: { request in
+            let nonce = randomNonceString()
+            currentNonce = nonce
+            request.requestedScopes = [.fullName, .email]
+            request.nonce = sha256(nonce)
+        }, onCompletion: { result in
+            switch result {
+            case .success(let auth):
+                guard let appleCredential = auth.credential as? ASAuthorizationAppleIDCredential,
+                      let idTokenData = appleCredential.identityToken,
+                      let idToken = String(data: idTokenData, encoding: .utf8),
+                      let nonce = currentNonce else { return }
+                onCompletion(idToken, nonce, appleCredential.fullName)
+            case .failure:
+                break  // user cancelled or system error — nothing to do
+            }
+        })
+        .signInWithAppleButtonStyle(.white)
+    }
+}
+
+private func randomNonceString(length: Int = 32) -> String {
+    var randomBytes = [UInt8](repeating: 0, count: length)
+    _ = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
+    let charset = Array("0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._")
+    return String(randomBytes.map { charset[Int($0) % charset.count] })
+}
+
+private func sha256(_ input: String) -> String {
+    let data = Data(input.utf8)
+    let hash = SHA256.hash(data: data)
+    return hash.compactMap { String(format: "%02x", $0) }.joined()
 }
 
 // MARK: - Preview

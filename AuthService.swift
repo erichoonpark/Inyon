@@ -1,6 +1,25 @@
 import Foundation
+import UIKit
 import FirebaseAuth
 import FirebaseFirestore
+import GoogleSignIn
+
+enum SocialAuthError: LocalizedError {
+    case missingClientID
+    case missingToken
+    case missingPresenter
+    case accountExistsWithDifferentCredential
+
+    var errorDescription: String? {
+        switch self {
+        case .missingClientID: return "Google Sign-In is not configured."
+        case .missingToken: return "Sign-in failed. Please try again."
+        case .missingPresenter: return "Unable to present sign-in. Please try again."
+        case .accountExistsWithDifferentCredential:
+            return "An account already exists with this email. Try a different sign-in method."
+        }
+    }
+}
 
 enum AuthServiceError: LocalizedError {
     case forcedUITestSignInFailure
@@ -101,5 +120,48 @@ final class AuthService: ObservableObject, AuthServiceProtocol {
                 .setData(["emailVerifiedAt": FieldValue.serverTimestamp()], merge: true)
         }
         verified = nowVerified
+    }
+
+    func signInWithGoogle() async throws {
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootVC = windowScene.windows.first?.rootViewController else {
+            throw SocialAuthError.missingPresenter
+        }
+        let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootVC)
+        guard let idToken = result.user.idToken?.tokenString else {
+            throw SocialAuthError.missingToken
+        }
+        let credential = GoogleAuthProvider.credential(
+            withIDToken: idToken,
+            accessToken: result.user.accessToken.tokenString
+        )
+        do {
+            let authResult = try await Auth.auth().signIn(with: credential)
+            currentUserId = authResult.user.uid
+            verified = authResult.user.isEmailVerified
+        } catch let error as NSError {
+            if error.code == AuthErrorCode.accountExistsWithDifferentCredential.rawValue {
+                throw SocialAuthError.accountExistsWithDifferentCredential
+            }
+            throw error
+        }
+    }
+
+    func signInWithApple(idToken: String, rawNonce: String, fullName: PersonNameComponents?) async throws {
+        let credential = OAuthProvider.appleCredential(
+            withIDToken: idToken,
+            rawNonce: rawNonce,
+            fullName: fullName
+        )
+        do {
+            let authResult = try await Auth.auth().signIn(with: credential)
+            currentUserId = authResult.user.uid
+            verified = authResult.user.isEmailVerified
+        } catch let error as NSError {
+            if error.code == AuthErrorCode.accountExistsWithDifferentCredential.rawValue {
+                throw SocialAuthError.accountExistsWithDifferentCredential
+            }
+            throw error
+        }
     }
 }

@@ -18,6 +18,8 @@ final class MockAuthService: AuthServiceProtocol {
     var sendPasswordResetCalls: [String] = []
     var sendEmailVerificationCallCount = 0
     var reloadUserCallCount = 0
+    var signInWithGoogleCallCount = 0
+    var signInWithAppleCalls: [(idToken: String, rawNonce: String)] = []
 
     // Controllable results
     var createAccountResult: Result<String, Error> = .success("mock-uid")
@@ -25,6 +27,8 @@ final class MockAuthService: AuthServiceProtocol {
     var signOutResult: Result<Void, Error> = .success(())
     var sendPasswordResetResult: Result<Void, Error> = .success(())
     var sendEmailVerificationResult: Result<Void, Error> = .success(())
+    var signInWithGoogleResult: Result<Void, Error> = .success(())
+    var signInWithAppleResult: Result<Void, Error> = .success(())
 
     /// When false, createAccount returns the uid but does NOT update currentUserId,
     /// simulating the real AuthService race where the auth state listener hasn't fired yet.
@@ -81,5 +85,21 @@ final class MockAuthService: AuthServiceProtocol {
 
     func reloadUser() async throws {
         reloadUserCallCount += 1
+    }
+
+    func signInWithGoogle() async throws {
+        signInWithGoogleCallCount += 1
+        switch signInWithGoogleResult {
+        case .success: currentUserId = "mock-uid"
+        case .failure(let error): throw error
+        }
+    }
+
+    func signInWithApple(idToken: String, rawNonce: String, fullName: PersonNameComponents?) async throws {
+        signInWithAppleCalls.append((idToken, rawNonce))
+        switch signInWithAppleResult {
+        case .success: currentUserId = "mock-uid"
+        case .failure(let error): throw error
+        }
     }
 }
