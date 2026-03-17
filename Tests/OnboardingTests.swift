@@ -487,7 +487,7 @@ final class FirestorePayloadTests: XCTestCase {
         data.personalAnchors = [.direction]
         let payload = data.toFirestoreData()
 
-        let expectedKeys: Set<String> = ["createdAt", "birthDate", "birthTime", "personalAnchors", "birthTimeUnknown", "birthLocation"]
+        let expectedKeys: Set<String> = ["createdAt", "birthDate", "birthTime", "personalAnchors", "birthTimeUnknown", "birthLocation", "insightTonePreference"]
         let actualKeys = Set(payload.keys)
 
         XCTAssertEqual(actualKeys, expectedKeys)
@@ -529,6 +529,62 @@ final class FirestorePayloadTests: XCTestCase {
         let payload = data.toFirestoreData()
 
         XCTAssertNil(payload["birthLocation"], "Empty birthCity should not appear in payload")
+    }
+
+    func testTonePreferenceDefaultsToSharp() {
+        let data = OnboardingData()
+        let payload = data.toFirestoreData()
+
+        XCTAssertEqual(payload["insightTonePreference"] as? String, "sharp")
+    }
+
+    func testTonePreferenceSharpInPayload() {
+        var data = OnboardingData()
+        data.tonePreference = .sharp
+        let payload = data.toFirestoreData()
+
+        XCTAssertEqual(payload["insightTonePreference"] as? String, "sharp")
+    }
+}
+
+// MARK: - InsightTonePreference Tests
+
+final class InsightTonePreferenceTests: XCTestCase {
+
+    func testCalmRawValue() {
+        XCTAssertEqual(InsightTonePreference.calm.rawValue, "calm")
+    }
+
+    func testSharpRawValue() {
+        XCTAssertEqual(InsightTonePreference.sharp.rawValue, "sharp")
+    }
+
+    func testDecodeCalmFromString() {
+        XCTAssertEqual(InsightTonePreference(rawValue: "calm"), .calm)
+    }
+
+    func testDecodeSharpFromString() {
+        XCTAssertEqual(InsightTonePreference(rawValue: "sharp"), .sharp)
+    }
+
+    func testDecodeUnknownReturnsNil() {
+        XCTAssertNil(InsightTonePreference(rawValue: "unknown"))
+    }
+
+    func testDefaultFallback() {
+        let result = InsightTonePreference(rawValue: "unknown") ?? InsightTonePreference.default
+        XCTAssertEqual(result, .sharp)
+    }
+
+    func testCodableRoundTrip() throws {
+        let original = InsightTonePreference.sharp
+        let data = try JSONEncoder().encode(original)
+        let decoded = try JSONDecoder().decode(InsightTonePreference.self, from: data)
+        XCTAssertEqual(original, decoded)
+    }
+
+    func testAllCasesCount() {
+        XCTAssertEqual(InsightTonePreference.allCases.count, 2)
     }
 }
 

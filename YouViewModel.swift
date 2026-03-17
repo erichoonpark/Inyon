@@ -28,6 +28,7 @@ final class YouViewModel: ObservableObject {
     @Published var hasSelectedDate = false
     @Published var hasSelectedTime = false
     @Published var personalAnchors: Set<PersonalAnchor> = []
+    @Published var tonePreference: InsightTonePreference = .sharp
 
     // MARK: - Notifications
 
@@ -103,6 +104,12 @@ final class YouViewModel: ObservableObject {
                 personalAnchors = Set(anchorsArray.compactMap { PersonalAnchor(rawValue: $0) })
             }
 
+            if let toneRaw = data["insightTonePreference"] as? String {
+                tonePreference = InsightTonePreference(rawValue: toneRaw) ?? .sharp
+            }
+            // Sync to UserDefaults so HomeViewModel can read tone without async
+            UserDefaults.standard.set(tonePreference.rawValue, forKey: "inyon.tonePreference.v1")
+
             if let notifEnabled = data["notificationsEnabled"] as? Bool {
                 notificationsEnabled = notifEnabled
             }
@@ -119,12 +126,18 @@ final class YouViewModel: ObservableObject {
     // MARK: - Save
 
     func saveData() async {
+        guard !firstName.trimmingCharacters(in: .whitespaces).isEmpty,
+              !lastName.trimmingCharacters(in: .whitespaces).isEmpty else {
+            saveError = "First and last name are required."
+            return
+        }
         guard let uid = authService?.currentUserId else { return }
 
         var updateData: [String: Any] = [
             "firstName": firstName,
             "lastName": lastName,
             "personalAnchors": personalAnchors.map { $0.rawValue },
+            "insightTonePreference": tonePreference.rawValue,
             "notificationsEnabled": notificationsEnabled,
             "preferredNotificationTime": Timestamp(date: preferredNotificationTime),
             "updatedAt": FieldValue.serverTimestamp()
@@ -152,6 +165,8 @@ final class YouViewModel: ObservableObject {
         saveError = nil
         do {
             try await onboardingService.updateOnboardingData(userId: uid, data: updateData)
+            // Keep UserDefaults in sync so HomeViewModel can read tone without an async call
+            UserDefaults.standard.set(tonePreference.rawValue, forKey: "inyon.tonePreference.v1")
             hasUnsavedChanges = false
             showSaveConfirmation = true
             Task {

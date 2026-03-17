@@ -46,18 +46,28 @@ targets:
         product: GoogleSignIn
       - package: GoogleSignIn
         product: GoogleSignInSwift
+    info:
+      path: Inyon/Info.plist
+      properties:
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+          UISceneConfigurations: {}
+        UIApplicationSupportsIndirectInputEvents: true
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations~iphone:
+          - UIInterfaceOrientationPortrait
+        CFBundleURLTypes:
+          - CFBundleTypeRole: None
+            CFBundleURLSchemes:
+              - $(REVERSED_CLIENT_ID)
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.inyon.app
       CODE_SIGN_ENTITLEMENTS: Inyon.entitlements
-      INFOPLIST_GENERATION_MODE: GeneratedFile
       MARKETING_VERSION: "1.0"
       CURRENT_PROJECT_VERSION: "1"
-      GENERATE_INFOPLIST_FILE: YES
-      INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
-      INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
-      INFOPLIST_KEY_UILaunchScreen_Generation: YES
-      INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
       SWIFT_EMIT_LOC_STRINGS: YES
+      REVERSED_CLIENT_ID: com.googleusercontent.apps.1013956847577-1480bpsi90bhdfm7air3in968l6duj35
+      DEVELOPMENT_TEAM: P36FA794LZ
 
   InyonTests:
     type: bundle.unit-test

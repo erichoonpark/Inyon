@@ -30,6 +30,7 @@ struct SectionCardView<Content: View>: View {
     let summary: String
     let learnMoreBullets: [String]
     let additionalContent: Content?
+    @State private var isExpanded = true
 
     init(
         iconName: String,
@@ -46,40 +47,62 @@ struct SectionCardView<Content: View>: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            // Header
-            HStack(spacing: 12) {
-                Image(systemName: iconName)
-                    .font(.title3)
-                    .foregroundStyle(GuideStyle.accentGreen)
-                    .accessibilityHidden(true)
+        VStack(alignment: .leading, spacing: 0) {
+            // Header — always visible, tap to expand/collapse
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) { isExpanded.toggle() }
+            } label: {
+                HStack(spacing: 12) {
+                    Image(systemName: iconName)
+                        .font(.title3)
+                        .foregroundStyle(GuideStyle.accentGreen)
+                        .accessibilityHidden(true)
 
-                Text(title)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(AppTheme.textPrimary)
+                    Text(title)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(AppTheme.textPrimary)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.down")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundStyle(AppTheme.textSecondary)
+                        .rotationEffect(.degrees(isExpanded ? 0 : -90))
+                        .animation(.easeInOut(duration: 0.2), value: isExpanded)
+                }
+                .padding(GuideStyle.cardPadding)
+                .contentShape(Rectangle())
             }
-            .accessibilityElement(children: .combine)
+            .buttonStyle(.plain)
             .accessibilityLabel(title)
+            .accessibilityHint(isExpanded ? "Double tap to collapse" : "Double tap to expand")
 
-            // Summary
-            Text(summary)
-                .font(.body)
-                .foregroundStyle(AppTheme.textSecondary)
-                .lineSpacing(4)
-                .fixedSize(horizontal: false, vertical: true)
+            // Collapsible body
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 16) {
+                    // Summary
+                    Text(summary)
+                        .font(.body)
+                        .foregroundStyle(AppTheme.textSecondary)
+                        .lineSpacing(4)
+                        .fixedSize(horizontal: false, vertical: true)
 
-            // Additional content slot
-            if Content.self != EmptyView.self {
-                additionalContent
-            }
+                    // Additional content slot
+                    if Content.self != EmptyView.self {
+                        additionalContent
+                    }
 
-            // Learn more disclosure
-            if !learnMoreBullets.isEmpty {
-                LearnMoreDisclosure(bullets: learnMoreBullets)
+                    // Learn more disclosure
+                    if !learnMoreBullets.isEmpty {
+                        LearnMoreDisclosure(bullets: learnMoreBullets)
+                    }
+                }
+                .padding(.horizontal, GuideStyle.cardPadding)
+                .padding(.bottom, GuideStyle.cardPadding)
+                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .padding(GuideStyle.cardPadding)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(GuideStyle.cardBackground)
         .clipShape(RoundedRectangle(cornerRadius: GuideStyle.cardRadius))

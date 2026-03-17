@@ -42,6 +42,21 @@ struct RootTabView: View {
                     .allowsHitTesting(selectedTab == .you)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .gesture(
+                DragGesture(minimumDistance: 30, coordinateSpace: .local)
+                    .onEnded { value in
+                        let h = value.translation.width
+                        let v = value.translation.height
+                        guard abs(h) > abs(v) else { return }
+                        let tabs = Tab.allCases
+                        guard let idx = tabs.firstIndex(of: selectedTab) else { return }
+                        if h < -50, idx < tabs.count - 1 {
+                            withAnimation(.easeInOut(duration: 0.25)) { selectedTab = tabs[idx + 1] }
+                        } else if h > 50, idx > 0 {
+                            withAnimation(.easeInOut(duration: 0.25)) { selectedTab = tabs[idx - 1] }
+                        }
+                    }
+            )
 
             CustomBottomNav(selectedTab: $selectedTab)
         }
@@ -70,8 +85,8 @@ struct CustomBottomNav: View {
                             Text(tab.rawValue)
                                 .font(.system(size: 13, weight: .medium, design: .monospaced))
                                 .tracking(1.2)
-                                .foregroundColor(AppTheme.textOnRedPrimary)
-                                .opacity(selectedTab == tab ? 1.0 : 0.55)
+                                .foregroundColor(Color.white)
+                                .opacity(selectedTab == tab ? 1.0 : 0.35)
 
                             ZStack {
                                 // Reserve underline space ALWAYS
@@ -81,7 +96,7 @@ struct CustomBottomNav: View {
 
                                 if selectedTab == tab {
                                     Rectangle()
-                                        .fill(AppTheme.textOnRedPrimary)
+                                        .fill(Color.white)
                                         .frame(width: 18, height: 1)
                                         .matchedGeometryEffect(
                                             id: "underline",
@@ -90,23 +105,23 @@ struct CustomBottomNav: View {
                                 }
                             }
                         }
-                        .frame(width: itemWidth, height: 42)
+                        .frame(width: itemWidth, height: 48)
                         .contentShape(Rectangle())
                     }
                 }
             }
             .background(
-                AppTheme.earthRed
+                Color.black
                     .ignoresSafeArea(edges: .bottom)
             )
             .overlay(
                 Rectangle()
                     .frame(height: 0.5)
-                    .foregroundColor(AppTheme.dividerOnRed),
+                    .foregroundColor(Color.white.opacity(0.12)),
                 alignment: .top
             )
         }
-        .frame(height: 42)
+        .frame(height: 48)
     }
 }
 

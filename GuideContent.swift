@@ -79,7 +79,7 @@ enum GuideContent {
         ),
         ElementItem(
             name: "Earth",
-            iconName: "square.on.square",
+            iconName: "mountain.2",
             shortDesc: "Stability, nourishment, grounding",
             detailBullets: [
                 "Earth energy tends to anchor and support.",

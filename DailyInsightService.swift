@@ -2,16 +2,28 @@ import Foundation
 import FirebaseFunctions
 
 protocol DailyInsightServiceProtocol {
-    func fetchDailyInsight(timeZoneId: String, localDate: String) async throws -> DailyInsight
+    func fetchDailyInsight(
+        timeZoneId: String,
+        localDate: String,
+        tonePreference: InsightTonePreference
+    ) async throws -> DailyInsight
 }
 
 final class DailyInsightService: DailyInsightServiceProtocol {
     private let functions = Functions.functions()
 
-    func fetchDailyInsight(timeZoneId: String, localDate: String) async throws -> DailyInsight {
+    func fetchDailyInsight(
+        timeZoneId: String,
+        localDate: String,
+        tonePreference: InsightTonePreference
+    ) async throws -> DailyInsight {
         let data: [String: Any] = [
             "timeZoneId": timeZoneId,
-            "localDate": localDate
+            "localDate": localDate,
+            // TODO: The getDailyInsight Cloud Function should read this field and adjust
+            // the writing style of insightText/dynamicText accordingly.
+            // Calm: softer, more spacious. Sharp: more concise, direct, slightly more piercing.
+            "tonePreference": tonePreference.rawValue
         ]
 
         let result = try await functions.httpsCallable("getDailyInsight").call(data)

@@ -17,6 +17,7 @@ final class AppState: ObservableObject {
     func clearUser() {
         currentUser = nil
         isLoadingUser = false
+        UserDefaults.standard.removeObject(forKey: "inyon.cachedInsight.v1")
     }
 
     func loadUser(id: String) async {

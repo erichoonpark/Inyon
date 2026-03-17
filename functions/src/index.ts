@@ -127,7 +127,8 @@ export const getDailyInsight = onCall(
     }
 
     const uid = request.auth.uid;
-    const {timeZoneId, localDate} = request.data;
+    const {timeZoneId, localDate, tonePreference = "calm"} = request.data;
+    const tone: "calm" | "sharp" = tonePreference === "sharp" ? "sharp" : "calm";
 
     if (!timeZoneId || !localDate) {
       throw new HttpsError(
@@ -158,7 +159,7 @@ export const getDailyInsight = onCall(
 
     // Sanitize timezone for use as Firestore doc ID (slashes are path separators)
     const safeTimeZoneId = timeZoneId.replace(/\//g, "~");
-    const docId = `${localDate}_${safeTimeZoneId}`;
+    const docId = `${localDate}_${safeTimeZoneId}_${tone}`;
     const docRef = db
       .collection("users")
       .doc(uid)
@@ -268,6 +269,8 @@ SAFETY
 8. No predictions about future outcomes. No advice. No "you should" or "now is the time".
 9. No fear. No urgency. No drama.
 10. Observations about current state are fine — they don't need hedging.
+
+TONE REGISTER: ${tone === "sharp" ? "Sharp — more direct and piercing. Fewer words. Closer to the bone. Less softening. Still safe, not harsh." : "Calm — softer and more spacious. Allow a gentle hedge in sentence 1 if it fits naturally. Leave a little room."}
 
 Also write a "dynamicText" field: 1–2 sentences (10–25 words) describing what today's Environment (Heavenly Stem) and You (Earthly Branch) each bring, and how they meet. Same tone rules — no jargon, no predictions, no advice. This is the line that makes the two symbols feel tangible to the user.
 

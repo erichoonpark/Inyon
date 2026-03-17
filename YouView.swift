@@ -50,12 +50,7 @@ struct YouView: View {
                     emailVerificationBanner
                 }
 
-                if viewModel.isLoading {
-                    ProgressView()
-                        .tint(AppTheme.textSecondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 40)
-                } else {
+                Group {
                     // Cultural Context (read-only)
                     derivedContextSection
 
@@ -68,29 +63,37 @@ struct YouView: View {
                     // Birth Context (editable)
                     editableSection
 
+                    // Insight Tone
+                    toneSection
+
                     // Save Button / Confirmation
-                    Group {
-                        if viewModel.hasUnsavedChanges {
-                            saveButton
-                        } else if viewModel.showSaveConfirmation {
-                            HStack(spacing: 8) {
-                                Image(systemName: "checkmark")
-                                    .font(.system(size: 14, weight: .medium))
-                                Text("Saved")
-                                    .font(.system(size: 15, weight: .regular))
+                    if !viewModel.isLoading {
+                        Group {
+                            if viewModel.hasUnsavedChanges {
+                                saveButton
+                            } else if viewModel.showSaveConfirmation {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "checkmark")
+                                        .font(.system(size: 14, weight: .medium))
+                                    Text("Saved")
+                                        .font(.system(size: 15, weight: .regular))
+                                }
+                                .foregroundColor(AppTheme.textSecondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 18)
+                                .transition(.opacity)
                             }
-                            .foregroundColor(AppTheme.textSecondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .transition(.opacity)
                         }
+                        .animation(.easeInOut(duration: 0.25), value: viewModel.hasUnsavedChanges)
+                        .animation(.easeInOut(duration: 0.25), value: viewModel.showSaveConfirmation)
                     }
-                    .animation(.easeInOut(duration: 0.25), value: viewModel.hasUnsavedChanges)
-                    .animation(.easeInOut(duration: 0.25), value: viewModel.showSaveConfirmation)
 
                     // Log Out
                     logoutSection
                 }
+                .redacted(reason: viewModel.isLoading ? .placeholder : [])
+                .allowsHitTesting(!viewModel.isLoading)
+                .animation(.easeIn(duration: 0.25), value: viewModel.isLoading)
             }
             .padding(20)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -231,6 +234,7 @@ struct YouView: View {
                     .onTapGesture {
                         viewModel.birthLocation = ""
                         cityQuery = ""
+                        cityCompleter.results = []
                         viewModel.fieldChanged()
                         focusedField = .birthLocation
                     }
@@ -313,6 +317,18 @@ struct YouView: View {
                             .underline()
                     }
                 }
+
+                if viewModel.hasSelectedDate {
+                    HStack {
+                        Text("Lunar birthday")
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                        Spacer()
+                        Text(DerivedData.lunarBirthday(from: viewModel.birthDate))
+                            .font(.system(size: 13, weight: .regular))
+                            .foregroundColor(AppTheme.textSecondary)
+                    }
+                }
             }
 
             Rectangle()
@@ -367,9 +383,14 @@ struct YouView: View {
 
             // Personal Anchors
             VStack(alignment: .leading, spacing: 12) {
-                Text("Personal Anchors")
-                    .font(.system(size: 15, weight: .regular))
-                    .foregroundColor(AppTheme.textSecondary)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Personal Anchors")
+                        .font(.system(size: 15, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary)
+                    Text("Shapes how your daily reflection is framed.")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary.opacity(0.7))
+                }
 
                 FlowLayout(spacing: 10) {
                     ForEach(PersonalAnchor.allCases) { anchor in
@@ -598,6 +619,58 @@ struct YouView: View {
             RoundedRectangle(cornerRadius: 10)
                 .stroke(AppTheme.divider, lineWidth: 1)
         )
+    }
+
+    // MARK: - Insight Tone Section
+
+    private var toneSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("INSIGHT TONE")
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .tracking(1.5)
+                    .foregroundColor(AppTheme.textSecondary)
+                Text("This changes how your insights are written, not what they are based on.")
+                    .font(.system(size: 13, weight: .regular))
+                    .foregroundColor(AppTheme.textSecondary.opacity(0.7))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            HStack(spacing: 10) {
+                ForEach(InsightTonePreference.allCases) { tone in
+                    Button {
+                        viewModel.tonePreference = tone
+                        viewModel.fieldChanged()
+                    } label: {
+                        let selected = viewModel.tonePreference == tone
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(tone.displayName)
+                                .font(.system(size: 15, weight: .medium))
+                                .foregroundColor(selected ? AppTheme.textPrimary : AppTheme.textSecondary)
+                            Text(tone.helpText)
+                                .font(.system(size: 12, weight: .regular))
+                                .foregroundColor(selected ? AppTheme.textSecondary : AppTheme.textSecondary.opacity(0.55))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(selected ? AppTheme.surface : Color.clear)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(
+                                    selected ? AppTheme.textPrimary.opacity(0.3) : AppTheme.divider,
+                                    lineWidth: 1
+                                )
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .padding(16)
+        .background(AppTheme.surface)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 
     // MARK: - Log Out Section

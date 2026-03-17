@@ -20,11 +20,13 @@ struct OnboardingData {
     var birthTimeUnknown: Bool = false
     var birthCity: String = ""
     var personalAnchors: Set<PersonalAnchor> = []
+    var tonePreference: InsightTonePreference = .sharp
 
     func toFirestoreData() -> [String: Any] {
         var dict: [String: Any] = [
             "createdAt": FieldValue.serverTimestamp(),
-            "personalAnchors": personalAnchors.map { $0.rawValue }
+            "personalAnchors": personalAnchors.map { $0.rawValue },
+            "insightTonePreference": tonePreference.rawValue
         ]
 
         if !firstName.isEmpty {
@@ -107,6 +109,24 @@ struct OnboardingFlow: View {
         ZStack {
             AppTheme.earth
                 .ignoresSafeArea()
+
+            // Progress dots (steps 1–3, hidden on arrival and returning-user login)
+            if currentStep != .arrival && !isReturningUser {
+                VStack {
+                    HStack(spacing: 8) {
+                        ForEach(1...3, id: \.self) { step in
+                            Circle()
+                                .fill(currentStep.rawValue >= step
+                                      ? AppTheme.textPrimary
+                                      : AppTheme.textSecondary.opacity(0.3))
+                                .frame(width: 6, height: 6)
+                        }
+                    }
+                    .padding(.top, 16)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity)
+            }
 
             Group {
                 switch currentStep {
@@ -604,6 +624,7 @@ struct PersonalAnchorView: View {
     var onSkip: () -> Void
 
     @State private var selectedAnchors: Set<PersonalAnchor> = []
+    @State private var selectedTone: InsightTonePreference = .sharp
     @State private var isVisible = false
 
     var body: some View {
@@ -631,6 +652,12 @@ struct PersonalAnchorView: View {
                     .font(.system(size: 24, weight: .medium))
                     .foregroundColor(AppTheme.textPrimary)
                     .lineSpacing(4)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Your selections help shape how your daily reflection is framed.")
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(AppTheme.textSecondary)
+                    .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
 
                 VStack(spacing: 0) {
@@ -670,6 +697,61 @@ struct PersonalAnchorView: View {
                         }
                     }
                 }
+
+                // Tone preference
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("INSIGHT TONE")
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
+                        .tracking(1.5)
+                        .foregroundColor(AppTheme.textSecondary)
+
+                    HStack(spacing: 10) {
+                        ForEach(InsightTonePreference.allCases) { tone in
+                            Button {
+                                selectedTone = tone
+                            } label: {
+                                HStack {
+                                    Text(tone.displayName)
+                                        .font(.system(size: 17, weight: .regular))
+                                        .foregroundColor(
+                                            selectedTone == tone
+                                                ? AppTheme.textPrimary
+                                                : AppTheme.textSecondary
+                                        )
+                                    Spacer()
+                                    if selectedTone == tone {
+                                        Image(systemName: "checkmark")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(AppTheme.textPrimary)
+                                    }
+                                }
+                                .padding(.vertical, 14)
+                                .padding(.horizontal, 16)
+                                .background(
+                                    selectedTone == tone
+                                        ? AppTheme.textPrimary.opacity(0.06)
+                                        : Color.clear
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .stroke(
+                                            selectedTone == tone
+                                                ? AppTheme.textPrimary.opacity(0.3)
+                                                : AppTheme.divider,
+                                            lineWidth: 1
+                                        )
+                                )
+                                .contentShape(Rectangle())
+                            }
+                            .frame(maxWidth: .infinity)
+                        }
+                    }
+
+                    Text("You can change this later in You.")
+                        .font(.system(size: 13, weight: .regular))
+                        .foregroundColor(AppTheme.textSecondary.opacity(0.6))
+                }
             }
             .padding(.horizontal, 24)
             .opacity(isVisible ? 1 : 0)
@@ -679,6 +761,7 @@ struct PersonalAnchorView: View {
             VStack(spacing: 12) {
                 Button {
                     data.personalAnchors = selectedAnchors
+                    data.tonePreference = selectedTone
                     onContinue()
                 } label: {
                     Text("Continue")
@@ -864,13 +947,16 @@ struct AccountCreationView: View {
                     .accessibilityIdentifier("account.continueWithApple")
 
                     Button { handleGoogleSignIn() } label: {
-                        Text("Continue with Google")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundColor(AppTheme.earth)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .background(AppTheme.textPrimary)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                        HStack(spacing: 8) {
+                            GoogleGIcon()
+                            Text("Continue with Google")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundColor(AppTheme.earth)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(AppTheme.textPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .disabled(isLoading)
                     .accessibilityIdentifier("account.continueWithGoogle")
@@ -1123,13 +1209,16 @@ struct LoginView: View {
                     .accessibilityIdentifier("login.continueWithApple")
 
                     Button { handleGoogleSignIn() } label: {
-                        Text("Continue with Google")
-                            .font(.system(size: 17, weight: .medium))
-                            .foregroundColor(AppTheme.earth)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 18)
-                            .background(AppTheme.textPrimary)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                        HStack(spacing: 8) {
+                            GoogleGIcon()
+                            Text("Continue with Google")
+                                .font(.system(size: 17, weight: .medium))
+                                .foregroundColor(AppTheme.earth)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 18)
+                        .background(AppTheme.textPrimary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
                     .disabled(isLoading)
                     .accessibilityIdentifier("login.continueWithGoogle")
@@ -1294,6 +1383,16 @@ struct LoginView: View {
             }
             isLoading = false
         }
+    }
+}
+
+// MARK: - Google G Icon
+
+private struct GoogleGIcon: View {
+    var body: some View {
+        Text("G")
+            .font(.system(size: 16, weight: .semibold))
+            .foregroundColor(Color(red: 0.259, green: 0.522, blue: 0.957))
     }
 }
 

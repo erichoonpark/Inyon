@@ -4,6 +4,7 @@ struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject private var authService: AuthService
     private let today = Date()
+    @State private var renderedShareCard: ShareableCard?
 
     var body: some View {
         ScrollView {
@@ -60,6 +61,18 @@ struct HomeView: View {
         .task {
             viewModel.loadTodayInsight()
         }
+        .task(id: viewModel.currentInsight?.insightText) {
+            guard let insight = viewModel.currentInsight else { return }
+            if let img = try? ShareCardRenderer().render(input: ShareCardInput.from(insight)).0 {
+                renderedShareCard = ShareableCard(image: img)
+            }
+        }
+        .task(id: viewModel.lastKnownInsight?.insightText) {
+            guard renderedShareCard == nil, let insight = viewModel.lastKnownInsight else { return }
+            if let img = try? ShareCardRenderer().render(input: ShareCardInput.from(insight)).0 {
+                renderedShareCard = ShareableCard(image: img)
+            }
+        }
     }
 
     // MARK: - Insight Content
@@ -73,9 +86,18 @@ struct HomeView: View {
                 .lineSpacing(8)
                 .fixedSize(horizontal: false, vertical: true)
 
+            // Dynamic bridge — why this lands for you today (no label)
+            if let dynamicText = insight.dynamicText, !dynamicText.isEmpty {
+                Text(dynamicText)
+                    .font(.system(size: 15, weight: .regular))
+                    .foregroundColor(AppTheme.textPrimary.opacity(0.6))
+                    .lineSpacing(5)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             // Compact context card: element + stem/branch
             VStack(alignment: .leading, spacing: 12) {
-                Text("TODAY'S CONTEXT")
+                Text("CONDITIONS")
                     .font(.system(size: 11, weight: .medium, design: .monospaced))
                     .tracking(1.5)
                     .foregroundColor(AppTheme.textSecondary)
@@ -106,20 +128,20 @@ struct HomeView: View {
 
                     VStack(alignment: .leading, spacing: 8) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("ENVIRONMENT")
+                            Text("THE DAY")
                                 .font(.system(size: 9, weight: .medium, design: .monospaced))
                                 .tracking(0.8)
                                 .foregroundColor(AppTheme.textSecondary.opacity(0.7))
-                            Text(insight.heavenlyStem)
+                            Text(simplifiedStemBranch(insight.heavenlyStem))
                                 .font(.system(size: 13, weight: .medium))
                                 .foregroundColor(AppTheme.textPrimary)
                         }
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("YOU")
+                            Text("YOUR NATURE")
                                 .font(.system(size: 9, weight: .medium, design: .monospaced))
                                 .tracking(0.8)
                                 .foregroundColor(AppTheme.textSecondary.opacity(0.7))
-                            Text(insight.earthlyBranch)
+                            Text(simplifiedStemBranch(insight.earthlyBranch))
                                 .font(.system(size: 13, weight: .regular))
                                 .foregroundColor(AppTheme.textSecondary)
                         }
@@ -135,24 +157,28 @@ struct HomeView: View {
                 )
             }
 
-            // Environment × You interaction
-            if let dynamicText = insight.dynamicText {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("ENVIRONMENT × YOU")
-                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .tracking(1.5)
-                        .foregroundColor(AppTheme.textSecondary)
-
-                    Text(dynamicText)
-                        .font(.system(size: 15, weight: .regular))
-                        .foregroundColor(AppTheme.textPrimary.opacity(0.75))
-                        .lineSpacing(6)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-
             // Five Elements strip
             FiveElementsStrip(activeElement: insight.dayElement)
+
+            // Share — ambient icon, no label, no border
+            if let card = renderedShareCard {
+                HStack {
+                    Spacer()
+                    ShareLink(
+                        item: card,
+                        preview: SharePreview(
+                            "Today's reflection from Inyon",
+                            image: Image(uiImage: card.image)
+                        )
+                    ) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.system(size: 15, weight: .light))
+                            .foregroundColor(AppTheme.textSecondary)
+                            .opacity(0.5)
+                    }
+                }
+                .padding(.top, 8)
+            }
         }
     }
 
@@ -197,7 +223,7 @@ struct HomeView: View {
                     )
             }
         }
-        .redacted(reason: .placeholder)
+        .shimmer()
     }
 
     private func placeholderBar(width: CGFloat) -> some View {
@@ -258,6 +284,15 @@ struct HomeView: View {
 
     // MARK: - Helpers
 
+    /// Strips Korean parenthetical from stem/branch strings.
+    /// e.g. "Gab (甲)" → "Gab"
+    private func simplifiedStemBranch(_ raw: String) -> String {
+        if let idx = raw.firstIndex(of: "(") {
+            return String(raw[..<idx]).trimmingCharacters(in: .whitespaces)
+        }
+        return raw
+    }
+
     private func elementIcon(for element: String) -> String {
         switch element.lowercased() {
         case "wood": return "leaf"
@@ -314,6 +349,43 @@ struct FiveElementsStrip: View {
                     .stroke(AppTheme.divider, lineWidth: 1)
             )
         }
+    }
+}
+
+// MARK: - Shimmer
+
+private struct ShimmerModifier: ViewModifier {
+    @State private var phase: CGFloat = -1
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                GeometryReader { geo in
+                    LinearGradient(
+                        colors: [
+                            Color.clear,
+                            AppTheme.textPrimary.opacity(0.06),
+                            Color.clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .frame(width: geo.size.width * 2)
+                    .offset(x: phase * geo.size.width * 2)
+                }
+                .clipped()
+            )
+            .onAppear {
+                withAnimation(.linear(duration: 1.6).repeatForever(autoreverses: false)) {
+                    phase = 1
+                }
+            }
+    }
+}
+
+private extension View {
+    func shimmer() -> some View {
+        modifier(ShimmerModifier())
     }
 }
 

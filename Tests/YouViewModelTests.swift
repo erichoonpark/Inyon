@@ -232,6 +232,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = nil
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
 
         await vm.saveData()
 
@@ -243,6 +245,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-42"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
 
         await vm.saveData()
 
@@ -269,6 +273,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-1"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.birthLocation = "Seoul, South Korea"
 
         await vm.saveData()
@@ -282,6 +288,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-1"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.birthLocation = ""
 
         await vm.saveData()
@@ -297,6 +305,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
         let refDate = Date(timeIntervalSince1970: 946684800)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.birthDate = refDate
 
         await vm.saveData()
@@ -312,6 +322,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-1"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.birthDate = nil
 
         await vm.saveData()
@@ -327,6 +339,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
         let refTime = Date(timeIntervalSince1970: 946684800)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.birthTime = refTime
 
         await vm.saveData()
@@ -342,6 +356,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-1"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.birthTime = nil
 
         await vm.saveData()
@@ -356,6 +372,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-1"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.personalAnchors = [.direction, .love]
 
         await vm.saveData()
@@ -373,6 +391,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-1"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.hasUnsavedChanges = true
 
         await vm.saveData()
@@ -385,6 +405,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-1"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.saveError = "Previous error"
 
         await vm.saveData()
@@ -398,6 +420,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         let onboarding = MockOnboardingService()
         onboarding.updateResult = .failure(MockError.forced)
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
 
         await vm.saveData()
 
@@ -411,6 +435,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         let onboarding = MockOnboardingService()
         onboarding.updateResult = .failure(MockError.forced)
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
         vm.hasUnsavedChanges = true
 
         await vm.saveData()
@@ -424,7 +450,9 @@ final class YouViewModel_SaveTests: XCTestCase {
         let onboarding = MockOnboardingService()
         onboarding.updateResult = .failure(MockError.forced)
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
-        vm.hasUnsavedChanges = true  // Simulate pending changes before first save attempt
+        vm.firstName = "Test"
+        vm.lastName = "User"
+        vm.hasUnsavedChanges = true
 
         // First attempt fails
         await vm.saveData()
@@ -444,6 +472,8 @@ final class YouViewModel_SaveTests: XCTestCase {
         auth.currentUserId = "user-1"
         let onboarding = MockOnboardingService()
         let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
 
         await vm.saveData()
 
@@ -566,6 +596,55 @@ final class YouViewModel_LogoutTests: XCTestCase {
 
         XCTAssertNotNil(vm.logoutError)
         XCTAssertEqual(vm.logoutError, "Something went wrong. Please try again.")
+    }
+}
+
+// MARK: - Tone Preference Tests
+
+@MainActor
+final class YouViewModel_TonePreferenceTests: XCTestCase {
+
+    func test_loadData_loadsTonePreferenceFromData() async {
+        let auth = MockAuthService()
+        auth.currentUserId = "user-1"
+        let onboarding = MockOnboardingService()
+        onboarding.loadResult = .success([
+            "firstName": "A",
+            "lastName": "B",
+            "insightTonePreference": "sharp"
+        ])
+        let vm = makeViewModel(auth: auth, onboarding: onboarding)
+
+        await vm.loadData()
+
+        XCTAssertEqual(vm.tonePreference, .sharp)
+    }
+
+    func test_loadData_missingTonePreferenceDefaultsToSharp() async {
+        let auth = MockAuthService()
+        auth.currentUserId = "user-1"
+        let onboarding = MockOnboardingService()
+        onboarding.loadResult = .success(["firstName": "A", "lastName": "B"])
+        let vm = makeViewModel(auth: auth, onboarding: onboarding)
+
+        await vm.loadData()
+
+        XCTAssertEqual(vm.tonePreference, .sharp)
+    }
+
+    func test_saveData_includesTonePreference() async {
+        let auth = MockAuthService()
+        auth.currentUserId = "user-1"
+        let onboarding = MockOnboardingService()
+        let vm = makeViewModel(auth: auth, onboarding: onboarding)
+        vm.firstName = "Test"
+        vm.lastName = "User"
+        vm.tonePreference = .sharp
+
+        await vm.saveData()
+
+        let data = onboarding.updatedData.first!.data
+        XCTAssertEqual(data["insightTonePreference"] as? String, "sharp")
     }
 }
 
